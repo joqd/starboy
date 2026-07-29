@@ -19,6 +19,8 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                             alt="Starboy"
                             width={657}
                             height={841}
+                            loading="eager"
+                            draggable={false}
                             className="hidden w-64 object-contain select-none md:w-100 lg:w-120 dark:block"
                         />
 
@@ -27,6 +29,8 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                             alt="Starboy"
                             width={657}
                             height={841}
+                            loading="eager"
+                            draggable={false}
                             className="w-64 object-contain select-none md:w-100 lg:w-120 dark:hidden"
                         />
                     </div>
