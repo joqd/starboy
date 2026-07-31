@@ -12,7 +12,7 @@ import {
     animate,
 } from "motion/react"
 import type { MotionValue, PanInfo } from "motion/react"
-import { useScrollVelocityFactor } from "./use-scroll-velocity"
+import { useScrollVelocityFactor } from "@/lib/use-scroll-velocity"
 import type { ScrollVelocityGalleryProps, ScrollVelocityItem } from "@/types/gallery"
 
 // Card size and per-step 3D translation: a card sits this many px away in
