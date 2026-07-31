@@ -3,16 +3,14 @@
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "./ui/button"
-import { LogIn } from "lucide-react"
 import { ShoppingBag } from "lucide-react"
+import { LoginDialog } from "./login-dialog"
 
 function MenuItems() {
     return (
         <div className="flex space-x-2">
+            <LoginDialog />
             <Button variant="outline" size="icon">
-                <LogIn className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
-			<Button variant="outline" size="icon">
                 <ShoppingBag className="h-[1.2rem] w-[1.2rem]" />
             </Button>
             <ModeToggle />
