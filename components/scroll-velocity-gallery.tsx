@@ -146,7 +146,7 @@ export default function ScrollVelocityGallery({
                 style={{ perspective: 2000, perspectiveOrigin: "10% 10%" }}
             >
                 <motion.div
-                    className="relative flex cursor-grab items-center justify-center active:cursor-grabbing"
+                    className="relative flex cursor-grab items-center justify-center"
                     style={{
                         x: groupX,
                         y: groupY,
@@ -203,7 +203,7 @@ function ScrollHint() {
     return (
         <div
             aria-hidden="true"
-            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 font-mono text-[10px] tracking-[0.05em] text-white uppercase"
+            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 font-mono text-[10px] tracking-wider text-white uppercase"
         >
             scroll to surf
         </div>
@@ -267,7 +267,7 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps
                 transformStyle: "preserve-3d",
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
-				outline: "1px solid transparent",
+                outline: "1px solid transparent",
             }}
             onHoverStart={() => {
                 animate(hoverY, -30, {

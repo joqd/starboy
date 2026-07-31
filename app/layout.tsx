@@ -26,7 +26,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                             height={841}
                             loading="eager"
                             draggable={false}
-                            className="hidden object-contain select-none w-120 dark:block"
+                            className="hidden w-120 object-contain select-none dark:block"
                         />
 
                         <Image
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                             height={841}
                             loading="eager"
                             draggable={false}
-                            className="object-contain select-none w-120 dark:hidden"
+                            className="w-120 object-contain select-none dark:hidden"
                         />
                     </div>
                 </ThemeProvider>
