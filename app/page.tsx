@@ -14,8 +14,8 @@ import type { ScrollVelocityItem } from "@/types/gallery"
 const TEST_PRODUCTS: ScrollVelocityItem[] = [
     {
         id: "1",
-        name: "Wool Overcoat",
-        meta: "€890",
+        name: "تیشرت طرح Deftones",
+        meta: "1.2 میلیون تومان",
         image: "https://examples.motion.dev/photos/heritage/8.jpg",
         href: "/products/wool-overcoat",
     },
@@ -121,7 +121,7 @@ const TEST_PRODUCTS: ScrollVelocityItem[] = [
 
 export default function Home() {
     return (
-        <main>
+        <main dir="rtl">
             <ScrollVelocityGallery
                 items={TEST_PRODUCTS}
                 heading="استاربوی"

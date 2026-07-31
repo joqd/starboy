@@ -18,8 +18,8 @@ import type { ScrollVelocityGalleryProps, ScrollVelocityItem } from "@/types/gal
 // Card size and per-step 3D translation: a card sits this many px away in
 // x/y/z from its neighbor. rotateY is fixed and identical on every card —
 // the "receding line" look comes purely from the translate step, not from
-// per-card rotation. x, z, and the base rotateY stay static per card (see
-// Plane below); only y and rotateZ carry a small per-card ripple.
+// per-card rotation. x, z, and rotateY stay completely static per card (see
+// Plane below); only y carries the shared sine-wave ripple.
 const PLANE_W = 320
 const PLANE_H = 384
 const STEP = { x: 260, y: -90, z: -288 }
@@ -45,15 +45,25 @@ const PX_PER_STEP = STEP.x
 const POSITION_STIFFNESS = 60
 const POSITION_DAMPING = 20
 
-// Per-card ripple: each card's own Y position and rotation get a small
-// extra offset of sin(phase - globalIndex * WAVE_PHASE_STEP) * envelope.
-// Because every card samples the *same* phase/envelope but at a different
-// point in the sine cycle (offset by its own index), adjacent cards land
-// on different parts of the wave at any given instant — some up, some
-// down — instead of the whole stack moving as one rigid block.
-const WAVE_PHASE_STEP = 0.45
-const WAVE_MAX_Y_PX = 0
-const WAVE_MAX_ROTATE_DEG = 0
+// Per-card ripple: each card's own Y position gets a small extra offset of
+// sin(phase - globalIndex * WAVE_PHASE_STEP) * envelope. Because every card
+// samples the *same* phase/envelope but at a different point in the sine
+// cycle (offset by its own index), adjacent cards land on different parts
+// of the wave at any given instant — some up, some down — so the row reads
+// as one continuous sine curve, not a rigid block and not per-card jitter.
+// Only Y moves this way; x/z/rotateY stay fixed per card, so nothing shakes,
+// twists, or drifts sideways — the motion is strictly vertical.
+//
+// WAVE_PHASE_STEP is the wave's spatial frequency: it's the phase (in
+// radians) between one card and the next. A full sine cycle spans
+// 2*PI / WAVE_PHASE_STEP cards, so this is picked so ~6 cards — roughly a
+// screen's worth at the gallery's card spacing — show one complete cycle.
+const WAVE_PHASE_STEP = (2 * Math.PI) / 6
+// The wave's height at waveIntensity = 1 (the component's default). Every
+// card shares the same wavePhase/waveEnvelope, so raising this just makes
+// the one shared sine curve taller; it never moves any single card on its
+// own.
+const WAVE_MAX_Y_PX = 36
 
 function clamp(value: number, min: number, max: number) {
     return Math.min(max, Math.max(min, value))
@@ -64,6 +74,11 @@ export default function ScrollVelocityGallery({
     heading = "HERITAGE",
     subheading = "FW25/26 COLLECTION",
     className = "",
+    // 0 = flat, no wave at all. 1 = the tuned default (WAVE_MAX_Y_PX
+    // as-is). Values above 1 exaggerate it. This only scales the shared
+    // vertical ripple amplitude below — it never changes the scroll/drag/
+    // spring behavior that drives the group's position.
+    waveIntensity = 2.5,
 }: ScrollVelocityGalleryProps) {
     const n = items.length
 
@@ -100,7 +115,8 @@ export default function ScrollVelocityGallery({
     // True velocity of the input itself (px/s), independent of whether the
     // page scrolls — this is what makes the wave's intensity track how
     // fast/forcefully the user is actually scrolling or dragging.
-    const velocityFactor = useScrollVelocityFactor(inputPx)
+    const velocityFactor = useScrollVelocityFactor(smoothS)
+    const targetEnvelope = useTransform(velocityFactor, (v) => Math.min(Math.abs(v), 1))
 
     // Group-level position: every card's own transform is static (see
     // Plane below); only this shared container moves.
@@ -112,8 +128,11 @@ export default function ScrollVelocityGallery({
     // scrolling/dragging — each card scales its own ripple by this, so the
     // whole wave grows with a fast input and settles back to flat as
     // velocity dies down.
-    const waveEnvelope = useTransform(velocityFactor, (v) => Math.min(Math.abs(v), 1))
-
+    const waveEnvelope = useSpring(targetEnvelope, {
+        stiffness: 80,
+        damping: 25,
+        mass: 0.8,
+    })
     // LOOPS copies of the product list on each side of the "real" one, each
     // slot carrying a globalIndex used both for its 3D position and its
     // ever-increasing index badge — this is what makes the strip read as
@@ -163,8 +182,9 @@ export default function ScrollVelocityGallery({
                             item={item}
                             globalIndex={globalIndex}
                             label={label}
-                            wavePhase={sTarget}
+                            wavePhase={smoothS}
                             waveEnvelope={waveEnvelope}
+                            waveIntensity={waveIntensity}
                         />
                     ))}
                 </motion.div>
@@ -219,25 +239,26 @@ interface PlaneProps {
     label: number
     wavePhase: MotionValue<number>
     waveEnvelope: MotionValue<number>
+    waveIntensity: number
 }
 
-function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps) {
+function Plane({ item, globalIndex, label, wavePhase, waveEnvelope, waveIntensity }: PlaneProps) {
     const [hovered, setHovered] = useState(false)
     const Wrapper = item.href ? motion.a : motion.div
 
     // This card's own point on the shared wave — offset from every other
     // card's by globalIndex * WAVE_PHASE_STEP, so at any instant different
     // cards sit at different points in the sine cycle (some rising, some
-    // falling) instead of all moving together.
+    // falling) instead of all moving together or all shaking in place.
+    // This is the only motion a card gets beyond its static base position:
+    // vertical only, no rotation, no horizontal drift.
     const rippleY = useTransform(
         [wavePhase, waveEnvelope],
         ([phase, envelope]: number[]) =>
-            Math.sin(phase - globalIndex * WAVE_PHASE_STEP) * envelope * WAVE_MAX_Y_PX
-    )
-    const rippleRotate = useTransform(
-        [wavePhase, waveEnvelope],
-        ([phase, envelope]: number[]) =>
-            Math.sin(phase - globalIndex * WAVE_PHASE_STEP) * envelope * WAVE_MAX_ROTATE_DEG
+            Math.sin(phase - globalIndex * WAVE_PHASE_STEP) *
+            envelope *
+            WAVE_MAX_Y_PX *
+            waveIntensity
     )
     const y = useTransform(rippleY, (offset) => globalIndex * STEP.y + offset)
 
@@ -255,22 +276,20 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps
             style={{
                 width: PLANE_W,
                 height: PLANE_H,
-                // x/z and the base rotateY stay static per card; only y
-                // and rotateZ carry the small, continuously-varying
-                // ripple, which is what makes this a wave rather than
-                // either "everything static" or "everything moving as one
-                // rigid block". The clip/rasterization note that used to
-                // live here still applies to x/z/rotateY — see the inner
-                // clipping div below for why that split matters.
+                // x/z and rotateY stay static per card; only y carries the
+                // continuously-varying sine offset. That's the whole wave —
+                // no rotation, no horizontal movement, so nothing "shakes";
+                // it's a single clean vertical sine curve across the row.
+                // The clip/rasterization note that used to live here still
+                // applies to x/z/rotateY — see the inner clipping div below
+                // for why that split matters.
                 x: globalIndex * STEP.x,
                 y: finalY,
                 z: globalIndex * STEP.z,
                 rotateY: ROTATE_Y,
-                rotateZ: rippleRotate,
                 transformStyle: "preserve-3d",
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
-                // outline: "1px solid transparent",
             }}
             onHoverStart={() => {
                 animate(hoverY, -30, {
@@ -325,26 +344,25 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps
             */}
             <AnimatePresence>
                 {hovered && (
-                    <motion.div
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -8 }}
-                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                        className="pointer-events-none absolute hidden whitespace-nowrap xl:block"
-                        style={{
-                            left: PLANE_W + 100,
-                            top: "50%",
-                            y: "-50%",
-                            rotateY: -ROTATE_Y,
-                            rotateZ: rippleRotate,
-                            transformStyle: "preserve-3d",
-                        }}
-                    >
-                        <div className="">
-                            <p className="text-sm font-medium tracking-wide">{item.name}</p>
+                    <div className="text-ne mx-4 my-2 text-lg text-neutral-50">
+                        <motion.div
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8 }}
+                            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                            className="pointer-events-none absolute hidden whitespace-nowrap xl:block"
+                            style={{
+                                textShadow: `
+									0 1px 2px rgba(0,0,0,.9),
+									0 0 8px rgba(0,0,0,.8),
+									0 0 16px rgba(0,0,0,.5)
+								`,
+                            }}
+                        >
+                            <p className="font-medium tracking-wide">{item.name}</p>
                             {item.meta && <p className="mt-0.5 text-xs">{item.meta}</p>}
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </Wrapper>

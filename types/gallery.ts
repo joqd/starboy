@@ -18,4 +18,5 @@ export interface ScrollVelocityGalleryProps {
     /** Second line of the heading, e.g. "FW25/26 COLLECTION" */
     subheading?: string
     className?: string
+	waveIntensity?: number
 }
