@@ -2,6 +2,8 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { HeroImage } from "@/components/hero-image"
+import FloatingMenu from "@/components/floating-menu"
+import { AmbientGlow } from "@/components/ambient-glow"
 import localFont from "next/font/local"
 
 const YekanBakh = localFont({
@@ -22,8 +24,16 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
             className={cn("antialiased", "font-sans", YekanBakh.className)}
         >
             <body className="relative h-screen w-screen overflow-hidden">
-                <ThemeProvider attribute="class">
-                    <div>{children}</div>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <FloatingMenu />
+					<AmbientGlow />
+
+                    {children}
 
                     <div className="absolute bottom-0 left-0 hidden xl:block">
                         <HeroImage />

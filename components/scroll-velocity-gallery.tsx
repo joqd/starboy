@@ -155,7 +155,7 @@ export default function ScrollVelocityGallery({
 
     return (
         <section
-            className={`relative h-screen w-full overflow-hidden ${className}`}
+            className={`relative h-screen w-full overflow-hidden  ${className}`}
             onWheel={handleWheel}
         >
             <SectionHeading heading={heading} subheading={subheading} count={n} />
@@ -207,14 +207,14 @@ function SectionHeading({
     return (
         <div
             dir="rtl"
-            className="pointer-events-none absolute top-[max(90px,3vw)] left-[3vw] z-20 space-y-5 select-none"
+            className="pointer-events-none absolute top-[max(90px,3vw)] left-[3vw] z-20 hidden space-y-5 select-none lg:block"
         >
             <div className="ml-[4vw] text-[clamp(32px,5vw,64px)] leading-[0.9] font-bold tracking-[-0.02em]">
                 {heading}
             </div>
             <div className="text-[clamp(24px,4vw,48px)] leading-[0.9] font-normal tracking-[-0.02em]">
                 {subheading}
-                <sup className="hidden tracking-normal/70 relative top-[0.65em] ml-1 align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
+                <sup className="tracking-normal/70 relative top-[0.65em] ml-1 hidden align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
                     ({count})
                 </sup>
             </div>
@@ -226,7 +226,7 @@ function ScrollHint() {
     return (
         <div
             aria-hidden="true"
-            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 text-[10px] tracking-wider uppercase"
+            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 text-[10px] tracking-wider uppercase lg:hidden"
         >
             اسکرول کنید
         </div>
