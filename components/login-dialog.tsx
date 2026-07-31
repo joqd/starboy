@@ -11,7 +11,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { LogIn, ArrowRight } from "lucide-react"
+import { User } from "lucide-react"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -46,7 +46,7 @@ export function LoginDialog() {
 
         try {
             // TODO: replace with your endpoint
-            await fetch("/api/auth/request-code", {
+            await fetch("http://127.0.0.1:8000/api/auth/login", {
                 method: "POST",
                 body: JSON.stringify({
                     phone,
@@ -111,7 +111,7 @@ export function LoginDialog() {
             <DialogTrigger
                 render={
                     <Button variant="outline" size="icon">
-                        <LogIn className="h-[1.2rem] w-[1.2rem]" />
+                        <User className="h-[1.2rem] w-[1.2rem]" />
                     </Button>
                 }
             />
@@ -123,7 +123,7 @@ export function LoginDialog() {
                             <DialogTitle className="text-lg font-bold">ورود به حساب</DialogTitle>
 
                             <DialogDescription>
-                                برای ورود یا ثبت نام، شماره موبایل خود را وارد کنید.
+                                برای ورود یا ثبت نام، شماره موبایل خود را وارد کنید
                             </DialogDescription>
                         </DialogHeader>
 
@@ -135,6 +135,7 @@ export function LoginDialog() {
                                     id="phone"
                                     type="tel"
                                     dir="ltr"
+                                    className="font-inter"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     placeholder="09123456789"
@@ -162,8 +163,9 @@ export function LoginDialog() {
                             </DialogTitle>
 
                             <DialogDescription>
-                                کد ارسال شده به شماره <span className="font-bold">{phone}</span> را
-                                وارد کنید.
+                                کد ارسال شده به شماره{" "}
+                                <span className="font-inter font-semibold">{phone}</span> را وارد
+                                کنید
                             </DialogDescription>
                         </DialogHeader>
 
@@ -177,8 +179,9 @@ export function LoginDialog() {
                                     dir="ltr"
                                     maxLength={6}
                                     value={code}
+                                    className="font-inter"
                                     onChange={(e) => setCode(e.target.value)}
-                                    placeholder="123456"
+                                    placeholder="12345"
                                 />
                             </Field>
                         </FieldGroup>

@@ -5,10 +5,18 @@ import { HeroImage } from "@/components/hero-image"
 import FloatingMenu from "@/components/floating-menu"
 import { AmbientGlow } from "@/components/ambient-glow"
 import localFont from "next/font/local"
+import { Inter } from "next/font/google"
 
 const YekanBakh = localFont({
     src: "./assets/fonts/YekanBakh-Regular.woff2",
     variable: "--font-yekanbakh",
+    display: "swap",
+})
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const inter = Inter({
+    subsets: ["latin"],
+    variable: "--font-inter",
     display: "swap",
 })
 
@@ -23,7 +31,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
             suppressHydrationWarning
             className={cn("antialiased", "font-sans", YekanBakh.className)}
         >
-            <body className="relative h-screen w-screen overflow-hidden">
+            <body className={`${inter.variable} relative h-screen w-screen overflow-hidden`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="dark"
@@ -31,7 +39,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                     disableTransitionOnChange
                 >
                     <FloatingMenu />
-					<AmbientGlow />
+                    <AmbientGlow />
 
                     {children}
 

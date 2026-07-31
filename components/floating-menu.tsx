@@ -27,7 +27,7 @@ export default function FloatingMenu() {
 
                     <Separator className={"mx-3"} orientation="vertical" />
 
-                    <div className="text-[10px]">اسکرول کنید</div>
+                    <div className="text-[10px] colored">اسکرول کنید</div>
                 </div>
             </div>
 
@@ -37,7 +37,7 @@ export default function FloatingMenu() {
                         <MenuItems />
                     </div>
 
-                    <div className="text-xl font-bold">استاربوی</div>
+                    <div className="text-2xl font-bold colored">استاربوی</div>
                 </div>
             </div>
         </>
