@@ -8,6 +8,7 @@ import {
     AnimatePresence,
     useTransform,
     useMotionValue,
+    useMotionValueEvent,
     useSpring,
     animate,
 } from "motion/react"
@@ -27,13 +28,25 @@ const ROTATE_Y = -50
 const BASE_Y = 100
 
 // How many extra copies of the product list to render on each side of the
-// "real" one, so input can push past a loop boundary with no visible gap.
+// "real" one. This is a fixed-size RENDER WINDOW, not a travel limit: as the
+// user keeps scrolling past a full cycle, the window recenters (see
+// `centerLoop` below) instead of clamping, so scrolling is unbounded while
+// the number of mounted <Plane> nodes stays constant at (2*LOOPS+1)*n
+// forever, however long the user scrolls.
 const LOOPS = 1
 
 // How many px of wheel/drag input correspond to one product-index step.
 // Using STEP.x keeps a roughly 1:1 feel between physical input and the
 // resulting on-screen travel.
 const PX_PER_STEP = STEP.x
+
+// Small multiplier applied to raw wheel/drag input before it reaches the
+// spring. The wave's depth is driven by input velocity (see waveEnvelope
+// below), so nudging this up makes the same physical scroll/swipe register
+// as slightly faster, more forceful input — which reads as a deeper wave —
+// without touching the wave math itself. Kept close to 1 on purpose; this
+// is a feel adjustment, not a redesign.
+const SCROLL_SPEED_MULTIPLIER = 1.15
 
 // Underdamped springs — deliberately below critical damping (critical here
 // is ~2*sqrt(stiffness*mass)), so the group doesn't just ease toward its
@@ -65,10 +78,6 @@ const WAVE_PHASE_STEP = (2 * Math.PI) / 6
 // own.
 const WAVE_MAX_Y_PX = 36
 
-function clamp(value: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, value))
-}
-
 export default function ScrollVelocityGallery({
     items,
     heading = "HERITAGE",
@@ -83,24 +92,22 @@ export default function ScrollVelocityGallery({
     const n = items.length
 
     // Total input, in px, from wheel + drag combined — this is the single
-    // source of truth for "how far through the list are we", and it's
-    // clamped at the source so it can never wander outside what the
-    // buffered loop copies can cover.
+    // source of truth for "how far through the list are we". It is now
+    // intentionally UNBOUNDED: nothing clamps it, so the user can scroll or
+    // drag forever in either direction. What used to keep this safe (the
+    // min/max clamp) is replaced by `centerLoop` below, which keeps the
+    // *rendered* window bounded instead of the input itself.
     const inputPx = useMotionValue(0)
-    const minPx = (-LOOPS * n + 1) * PX_PER_STEP
-    const maxPx = ((LOOPS + 1) * n - 2) * PX_PER_STEP
 
     // Direction convention: scrolling/dragging DOWN or LEFT moves forward
     // (the slider goes "down"); scrolling/dragging UP or RIGHT moves
     // backward (the slider goes "up"). Both wheel and drag combine their
     // vertical and horizontal components into one signed forward amount.
     const handleWheel = (e: WheelEvent) => {
-        const forward = e.deltaY - e.deltaX
-        inputPx.set(clamp(inputPx.get() + forward, minPx, maxPx))
+        inputPx.set(inputPx.get() + (e.deltaY - e.deltaX) * SCROLL_SPEED_MULTIPLIER)
     }
     const handlePan = (_: unknown, info: PanInfo) => {
-        const forward = info.delta.y - info.delta.x
-        inputPx.set(clamp(inputPx.get() + forward, minPx, maxPx))
+        inputPx.set(inputPx.get() + (info.delta.y - info.delta.x) * SCROLL_SPEED_MULTIPLIER)
     }
 
     const sTarget = useTransform(inputPx, (px) => px / PX_PER_STEP)
@@ -110,6 +117,22 @@ export default function ScrollVelocityGallery({
         stiffness: POSITION_STIFFNESS,
         damping: POSITION_DAMPING,
         mass: 1,
+    })
+
+    // Which "loop" of the product list is currently centered under the
+    // camera, e.g. 0 while browsing the first pass through the list, 1
+    // once the user has scrolled a full extra cycle forward, -1 a full
+    // cycle backward, etc. `slots` below only ever mounts LOOPS copies on
+    // either side of this value, so however far centerLoop drifts over a
+    // long session, the mounted <Plane> count never grows past
+    // (2*LOOPS+1)*n. This is a React state update — not a per-frame motion
+    // value — so it only re-renders roughly once per full cycle scrolled
+    // (once every n index-steps), not on every scroll tick.
+    const [centerLoop, setCenterLoop] = useState(0)
+    useMotionValueEvent(smoothS, "change", (latest) => {
+        if (n === 0) return
+        const nearest = Math.round(latest / n)
+        if (nearest !== centerLoop) setCenterLoop(nearest)
     })
 
     // True velocity of the input itself (px/s), independent of whether the
@@ -133,23 +156,21 @@ export default function ScrollVelocityGallery({
         damping: 25,
         mass: 0.8,
     })
-    // LOOPS copies of the product list on each side of the "real" one, each
-    // slot carrying a globalIndex used both for its 3D position and its
-    // ever-increasing index badge — this is what makes the strip read as
-    // infinite rather than as a list that repeats and resets.
+    // LOOPS copies of the product list on each side of centerLoop, each
+    // slot carrying a globalIndex used for its 3D position. As centerLoop
+    // drifts with continued scrolling, this window slides along with it —
+    // old, now-far-away copies are dropped and new ones are mounted in
+    // their place — which is what makes the strip infinite instead of a
+    // fixed-length strip that dead-stops at either end.
     const slots = useMemo(() => {
-        const out: { item: ScrollVelocityItem; globalIndex: number; label: number }[] = []
-        for (let loop = -LOOPS; loop <= LOOPS; loop++) {
+        const out: { item: ScrollVelocityItem; globalIndex: number }[] = []
+        for (let loop = centerLoop - LOOPS; loop <= centerLoop + LOOPS; loop++) {
             for (let i = 0; i < n; i++) {
-                out.push({
-                    item: items[i],
-                    globalIndex: loop * n + i,
-                    label: (loop + LOOPS) * n + i,
-                })
+                out.push({ item: items[i], globalIndex: loop * n + i })
             }
         }
         return out
-    }, [items, n])
+    }, [items, n, centerLoop])
 
     if (n === 0) return null
 
@@ -176,12 +197,11 @@ export default function ScrollVelocityGallery({
                     role="list"
                     aria-label={`${heading} ${subheading}`}
                 >
-                    {slots.map(({ item, globalIndex, label }, key) => (
+                    {slots.map(({ item, globalIndex }, key) => (
                         <Plane
                             key={`${item.id}-${key}`}
                             item={item}
                             globalIndex={globalIndex}
-                            label={label}
                             wavePhase={smoothS}
                             waveEnvelope={waveEnvelope}
                             waveIntensity={waveIntensity}
@@ -209,10 +229,10 @@ function SectionHeading({
             dir="rtl"
             className="pointer-events-none absolute top-[max(90px,3vw)] left-[3vw] z-20 hidden space-y-5 select-none lg:block"
         >
-            <div className="ml-[4vw] text-[clamp(32px,5vw,64px)] leading-[0.9] font-bold tracking-[-0.02em] colored">
+            <div className="colored ml-[4vw] text-[clamp(32px,5vw,64px)] leading-[0.9] font-bold tracking-[-0.02em]">
                 {heading}
             </div>
-            <div className="text-[clamp(24px,4vw,48px)] leading-[0.9] font-normal tracking-[-0.02em] colored">
+            <div className="colored text-[clamp(24px,4vw,48px)] leading-[0.9] font-normal tracking-[-0.02em]">
                 {subheading}
                 <sup className="tracking-normal/70 relative top-[0.65em] ml-1 hidden align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
                     ({count})
@@ -236,13 +256,12 @@ function ScrollHint() {
 interface PlaneProps {
     item: ScrollVelocityItem
     globalIndex: number
-    label: number
     wavePhase: MotionValue<number>
     waveEnvelope: MotionValue<number>
     waveIntensity: number
 }
 
-function Plane({ item, globalIndex, label, wavePhase, waveEnvelope, waveIntensity }: PlaneProps) {
+function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: PlaneProps) {
     const [hovered, setHovered] = useState(false)
     const Wrapper = item.href ? motion.a : motion.div
 
@@ -252,20 +271,23 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope, waveIntensit
     // falling) instead of all moving together or all shaking in place.
     // This is the only motion a card gets beyond its static base position:
     // vertical only, no rotation, no horizontal drift.
-    const rippleY = useTransform(
-        [wavePhase, waveEnvelope],
-        ([phase, envelope]: number[]) =>
-            Math.sin(phase - globalIndex * WAVE_PHASE_STEP) *
-            envelope *
-            WAVE_MAX_Y_PX *
-            waveIntensity
-    )
-    const y = useTransform(rippleY, (offset) => globalIndex * STEP.y + offset)
-
+    //
+    // Base position, wave ripple, and hover offset are combined into one
+    // useTransform instead of three chained ones (rippleY -> y -> finalY).
+    // Motion values recompute their whole dependency chain on every frame
+    // for every mounted card, so with (2*LOOPS+1)*n cards on screen,
+    // collapsing 3 transforms into 1 removes two full subscription/update
+    // passes per card per frame — same visual result, a third of the work.
     const hoverY = useMotionValue(0)
     const finalY = useTransform(
-        [y, hoverY],
-        ([baseY, hoverOffset]) => Number(baseY) + Number(hoverOffset)
+        [wavePhase, waveEnvelope, hoverY],
+        ([phase, envelope, hoverOffset]: number[]) =>
+            globalIndex * STEP.y +
+            Math.sin(phase - globalIndex * WAVE_PHASE_STEP) *
+                envelope *
+                WAVE_MAX_Y_PX *
+                waveIntensity +
+            hoverOffset
     )
 
     return (
@@ -328,14 +350,10 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope, waveIntensit
                     fill
                     sizes="320px"
                     draggable={false}
-                    className="object-cover select-none rounded-sm"
+                    className="rounded-3xl object-cover select-none"
                     loading="lazy"
                 />
             </div>
-
-            <span className="absolute -top-6 left-0 font-mono text-[10px] tracking-wider">
-                {String(label).padStart(2, "0")}
-            </span>
 
             {/*
               Hover label: sits outside the card to its right (not inside/
@@ -344,7 +362,7 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope, waveIntensit
             */}
             <AnimatePresence>
                 {hovered && (
-                    <div className="text-ne mx-4 my-2 text-lg text-neutral-50">
+                    <div className="mx-4 my-2 text-lg text-neutral-50">
                         <motion.div
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}

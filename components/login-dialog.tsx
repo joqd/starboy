@@ -46,7 +46,7 @@ export function LoginDialog() {
 
         try {
             // TODO: replace with your endpoint
-            await fetch("http://127.0.0.1:8000/api/auth/login", {
+            await fetch("http://127.0.0.1:8000/api/auth/login/", {
                 method: "POST",
                 body: JSON.stringify({
                     phone,
