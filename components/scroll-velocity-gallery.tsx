@@ -185,15 +185,18 @@ function SectionHeading({
     count: number
 }) {
     return (
-        <div className="pointer-events-none absolute top-[max(90px,3vw)] left-[3vw] z-20 select-none">
-            <div className="ml-[4vw] text-[clamp(32px,5vw,64px)] leading-[0.9] font-normal tracking-[-0.02em] text-white">
+        <div
+            dir="rtl"
+            className="pointer-events-none absolute top-[max(90px,3vw)] left-[3vw] z-20 space-y-5 select-none"
+        >
+            <div className="ml-[4vw] text-[clamp(32px,5vw,64px)] leading-[0.9] font-bold tracking-[-0.02em]">
                 {heading}
             </div>
-            <div className="text-[clamp(32px,5vw,64px)] leading-[0.9] font-normal tracking-[-0.02em] text-white">
+            <div className="text-[clamp(24px,4vw,48px)] leading-[0.9] font-normal tracking-[-0.02em]">
                 {subheading}
-                <sup className="relative top-[0.65em] ml-1 align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold tracking-normal text-white/70">
+                {/* <sup className="tracking-normal/70 relative top-[0.65em] ml-1 align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
                     ({count})
-                </sup>
+                </sup> */}
             </div>
         </div>
     )
@@ -203,9 +206,9 @@ function ScrollHint() {
     return (
         <div
             aria-hidden="true"
-            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 font-mono text-[10px] tracking-wider text-white uppercase"
+            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 text-[10px] tracking-wider uppercase"
         >
-            scroll to surf
+            اسکرول کنید
         </div>
     )
 }
@@ -267,7 +270,7 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps
                 transformStyle: "preserve-3d",
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
-                outline: "1px solid transparent",
+                // outline: "1px solid transparent",
             }}
             onHoverStart={() => {
                 animate(hoverY, -30, {
@@ -311,7 +314,7 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps
                 />
             </div>
 
-            <span className="absolute -top-6 left-0 font-mono text-[10px] tracking-wider text-white">
+            <span className="absolute -top-6 left-0 font-mono text-[10px] tracking-wider">
                 {String(label).padStart(2, "0")}
             </span>
 
@@ -327,16 +330,20 @@ function Plane({ item, globalIndex, label, wavePhase, waveEnvelope }: PlaneProps
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -8 }}
                         transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                        className="pointer-events-none absolute whitespace-nowrap"
+                        className="pointer-events-none absolute hidden whitespace-nowrap xl:block"
                         style={{
-                            left: PLANE_W + 20,
+                            left: PLANE_W + 100,
                             top: "50%",
                             y: "-50%",
                             rotateY: -ROTATE_Y,
+                            rotateZ: rippleRotate,
+                            transformStyle: "preserve-3d",
                         }}
                     >
-                        <p className="text-sm font-medium tracking-wide text-white">{item.name}</p>
-                        {item.meta && <p className="mt-0.5 text-xs text-white/60">{item.meta}</p>}
+                        <div className="">
+                            <p className="text-sm font-medium tracking-wide">{item.name}</p>
+                            {item.meta && <p className="mt-0.5 text-xs">{item.meta}</p>}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

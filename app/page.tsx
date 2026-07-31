@@ -124,8 +124,8 @@ export default function Home() {
         <main>
             <ScrollVelocityGallery
                 items={TEST_PRODUCTS}
-                heading="STARBOY"
-                subheading="COLLECTION"
+                heading="استاربوی"
+                subheading="از صدا تا استایل"
                 className="z-50"
             />
         </main>
