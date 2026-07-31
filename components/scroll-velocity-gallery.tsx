@@ -23,7 +23,7 @@ import type { ScrollVelocityGalleryProps, ScrollVelocityItem } from "@/types/gal
 const PLANE_W = 320
 const PLANE_H = 384
 const STEP = { x: 260, y: -90, z: -288 }
-const ROTATE_Y = -45
+const ROTATE_Y = -50
 const BASE_Y = 100
 
 // How many extra copies of the product list to render on each side of the
@@ -214,9 +214,9 @@ function SectionHeading({
             </div>
             <div className="text-[clamp(24px,4vw,48px)] leading-[0.9] font-normal tracking-[-0.02em]">
                 {subheading}
-                {/* <sup className="tracking-normal/70 relative top-[0.65em] ml-1 align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
+                <sup className="hidden tracking-normal/70 relative top-[0.65em] ml-1 align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
                     ({count})
-                </sup> */}
+                </sup>
             </div>
         </div>
     )
