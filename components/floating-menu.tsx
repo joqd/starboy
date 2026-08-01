@@ -37,7 +37,7 @@ export default function FloatingMenu() {
                         <MenuItems />
                     </div>
 
-                    <div className="colored text-2xl font-inter font-bold">STARBOY</div>
+                    <div className="colored font-inter text-2xl font-bold">STARBOY</div>
                 </div>
             </div>
         </>

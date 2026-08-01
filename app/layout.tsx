@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { HeroImage } from "@/components/hero-image"
 import FloatingMenu from "@/components/floating-menu"
+import { Toaster } from "@/components/ui/toast"
 import { AmbientGlow } from "@/components/ambient-glow"
 import localFont from "next/font/local"
 import { Inter } from "next/font/google"
@@ -42,6 +43,8 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                     <AmbientGlow />
 
                     {children}
+
+                    <Toaster />
 
                     <div className="absolute bottom-0 left-0 hidden xl:block">
                         <HeroImage />

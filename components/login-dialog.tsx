@@ -23,6 +23,7 @@ import { LogOut, User, UserPen } from "lucide-react"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { toast } from "@/components/ui/toast"
 import {
     fetchCurrentUser,
     logout as logoutRequest,
@@ -111,6 +112,11 @@ export function LoginDialog() {
             setStep("phone")
             setPhone("")
             setCode("")
+
+            toast.add({
+                type: "success",
+                description: "ورود با موفقیت انجام شد",
+            })
         } catch (err) {
             setError(err instanceof ApiError ? err.message : "کد وارد شده صحیح نیست.")
         } finally {
@@ -143,6 +149,10 @@ export function LoginDialog() {
             // drop the client-side user state below.
         } finally {
             setUser(null)
+            toast.add({
+                type: "success",
+                description: "از حساب خود خارج شدید",
+            })
         }
     }
 

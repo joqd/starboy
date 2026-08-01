@@ -12,7 +12,7 @@ export interface AuthUser {
     id: number
     phone: string
     full_name: string
-	avatar: string
+    avatar: string
 }
 
 /** Send a one-time password to `phone`. Required before `/auth/verify/`. */
