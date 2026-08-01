@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -11,51 +11,83 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { User } from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { LogOut, User, UserPen } from "lucide-react"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+    fetchCurrentUser,
+    logout as logoutRequest,
+    requestLoginOtp,
+    verifyLoginOtp,
+    type AuthUser,
+} from "@/lib/api/auth"
+import { ApiError } from "@/lib/api/client"
+
+const PHONE_REGEX = /^09\d{9}$/
+const OTP_LENGTH = 5
+
+type Step = "phone" | "otp"
 
 export function LoginDialog() {
-    const [step, setStep] = useState<"phone" | "otp">("phone")
+    // ---- session state -------------------------------------------------
+    const [user, setUser] = useState<AuthUser | null>(null)
+    const [checkingSession, setCheckingSession] = useState(true)
+
+    // ---- dialog / form state --------------------------------------------
+    const [open, setOpen] = useState(false)
+    const [step, setStep] = useState<Step>("phone")
     const [phone, setPhone] = useState("")
     const [code, setCode] = useState("")
     const [error, setError] = useState("")
-    const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
-    const validatePhone = () => {
-        const regex = /^09\d{9}$/
+    // Check for an existing session (sessionid cookie) once on mount.
+    useEffect(() => {
+        let cancelled = false
 
-        if (!regex.test(phone)) {
+        fetchCurrentUser()
+            .then((currentUser) => {
+                if (!cancelled) setUser(currentUser)
+            })
+            .catch(() => {
+                if (!cancelled) setUser(null)
+            })
+            .finally(() => {
+                if (!cancelled) setCheckingSession(false)
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const validatePhone = () => {
+        if (!PHONE_REGEX.test(phone)) {
             setError("شماره موبایل وارد شده صحیح نیست.")
             return false
         }
-
         return true
     }
 
     const requestCode = async () => {
         setError("")
-
-        if (!validatePhone()) {
-            return
-        }
+        if (!validatePhone()) return
 
         setLoading(true)
-
         try {
-            // TODO: replace with your endpoint
-            await fetch("http://127.0.0.1:8000/api/auth/login/", {
-                method: "POST",
-                body: JSON.stringify({
-                    phone,
-                }),
-            })
-
+            await requestLoginOtp(phone)
             setStep("otp")
-        } catch {
-            setError("خطایی رخ داد. دوباره تلاش کنید.")
+        } catch (err) {
+            setError(err instanceof ApiError ? err.message : "خطایی رخ داد. دوباره تلاش کنید.")
         } finally {
             setLoading(false)
         }
@@ -64,53 +96,98 @@ export function LoginDialog() {
     const verifyCode = async () => {
         setError("")
 
-        if (code.length !== 5) {
-            setError("کد تایید باید ۵ رقم باشد.")
+        if (code.length !== OTP_LENGTH) {
+            setError(`کد تایید باید ${OTP_LENGTH} رقم باشد.`)
             return
         }
 
         setLoading(true)
-
         try {
-            // TODO: replace with your endpoint
-            await fetch("/api/auth/verify-code", {
-                method: "POST",
-                body: JSON.stringify({
-                    phone,
-                    code,
-                }),
-            })
+            await verifyLoginOtp(phone, code)
+            const currentUser = await fetchCurrentUser()
 
+            setUser(currentUser)
             setOpen(false)
             setStep("phone")
+            setPhone("")
             setCode("")
-        } catch {
-            setError("کد وارد شده صحیح نیست.")
+        } catch (err) {
+            setError(err instanceof ApiError ? err.message : "کد وارد شده صحیح نیست.")
         } finally {
             setLoading(false)
         }
     }
 
-    const reset = () => {
-        setStep("phone")
+    // Lets the user go back and fix a mistyped phone number without losing
+    // the fact that they were mid-verification.
+    const editPhone = () => {
+        setStep("otp" === step ? "phone" : step)
         setCode("")
         setError("")
     }
 
-    return (
-        <Dialog
-            open={open}
-            onOpenChange={(value) => {
-                setOpen(value)
+    // NOTE: we deliberately do NOT reset step/phone/code here. If the user
+    // accidentally dismisses the dialog while on the OTP step, reopening it
+    // (e.g. via the login button) should resume right where they left off.
+    const handleOpenChange = (value: boolean) => {
+        setOpen(value)
+        if (value) setError("")
+    }
 
-                if (!value) {
-                    reset()
-                }
-            }}
-        >
+    const handleLogout = async () => {
+        try {
+            await logoutRequest()
+        } catch {
+            // Even if the request fails (e.g. session already expired
+            // server-side), there's nothing meaningful to do locally except
+            // drop the client-side user state below.
+        } finally {
+            setUser(null)
+        }
+    }
+
+    // ---- authenticated: avatar + menu -----------------------------------
+    if (!checkingSession && user) {
+        const initials = (user.full_name?.trim() || user.phone).slice(0, 2)
+
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger
+                    render={
+                        <Button variant="outline" size="icon" className="rounded-full">
+                            <Avatar className="h-[1.8rem] w-[1.8rem]">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback className="text-xs font-bold">
+                                    {initials}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    }
+                />
+
+                <DropdownMenuContent className={"w-48"} dir="rtl" align="end">
+                    <DropdownMenuItem className={"cursor-pointer"} disabled>
+                        <UserPen className="ml-2 h-4 w-4" />
+                        ویرایش اطلاعات
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem className={"cursor-pointer"} onClick={handleLogout}>
+                        <LogOut className="ml-2 h-4 w-4" />
+                        خروج از حساب
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        )
+    }
+
+    // ---- unauthenticated / still checking: login button + dialog --------
+    return (
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger
                 render={
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" disabled={checkingSession}>
                         <User className="h-[1.2rem] w-[1.2rem]" />
                     </Button>
                 }
@@ -135,9 +212,11 @@ export function LoginDialog() {
                                     id="phone"
                                     type="tel"
                                     dir="ltr"
+                                    autoFocus
                                     className="font-inter"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && requestCode()}
                                     placeholder="09123456789"
                                 />
                             </Field>
@@ -177,10 +256,12 @@ export function LoginDialog() {
                                     id="code"
                                     type="tel"
                                     dir="ltr"
-                                    maxLength={6}
+                                    autoFocus
+                                    maxLength={OTP_LENGTH}
                                     value={code}
                                     className="font-inter"
-                                    onChange={(e) => setCode(e.target.value)}
+                                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                                    onKeyDown={(e) => e.key === "Enter" && verifyCode()}
                                     placeholder="12345"
                                 />
                             </Field>
@@ -188,13 +269,22 @@ export function LoginDialog() {
 
                         {error && <p className="text-sm text-red-500">{error}</p>}
 
-                        <DialogFooter>
+                        <DialogFooter className="flex-col gap-2 sm:flex-col">
                             <Button
                                 className="w-full font-bold"
                                 onClick={verifyCode}
                                 disabled={loading}
                             >
                                 {loading ? "در حال بررسی..." : "تایید و ورود"}
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                className="w-full font-normal"
+                                onClick={editPhone}
+                                disabled={loading}
+                            >
+                                ویرایش شماره موبایل
                             </Button>
                         </DialogFooter>
                     </>
