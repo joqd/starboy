@@ -27,17 +27,17 @@ export default function FloatingMenu() {
 
                     <Separator className={"mx-3"} orientation="vertical" />
 
-                    <div className="text-[10px] colored">اسکرول کنید</div>
+                    <div className="colored text-[10px]">اسکرول کنید</div>
                 </div>
             </div>
 
-            <div className="fixed top-0 left-0 z-9999 w-full lg:hidden">
-                <div className="flex items-center justify-between px-5 py-2.5">
+            <div dir="rtl" className="fixed top-0 left-0 z-9999 w-full lg:hidden">
+                <div className="flex items-center justify-between px-5 py-3">
                     <div>
                         <MenuItems />
                     </div>
 
-                    <div className="text-2xl font-bold colored">استاربوی</div>
+                    <div className="colored text-2xl font-inter font-bold">STARBOY</div>
                 </div>
             </div>
         </>

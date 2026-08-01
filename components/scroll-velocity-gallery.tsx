@@ -80,8 +80,8 @@ const WAVE_MAX_Y_PX = 36
 
 export default function ScrollVelocityGallery({
     items,
-    heading = "HERITAGE",
-    subheading = "FW25/26 COLLECTION",
+    heading = "STARBOY",
+    subheading = "COMING SOON",
     className = "",
     // 0 = flat, no wave at all. 1 = the tuned default (WAVE_MAX_Y_PX
     // as-is). Values above 1 exaggerate it. This only scales the shared
@@ -218,6 +218,7 @@ export default function ScrollVelocityGallery({
 function SectionHeading({
     heading,
     subheading,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     count,
 }: {
     heading: string
@@ -226,18 +227,13 @@ function SectionHeading({
 }) {
     return (
         <div
-            dir="rtl"
-            className="pointer-events-none absolute top-[max(90px,3vw)] left-[3vw] z-20 hidden space-y-5 select-none lg:block"
+            dir="ltr"
+            className="absolute top-[max(90px,3vw)] left-[3vw] hidden select-none lg:block"
         >
-            <div className="colored ml-[4vw] text-[clamp(32px,5vw,64px)] leading-[0.9] font-bold tracking-[-0.02em]">
+            <div className="colored text-[64px] leading-[0.9] font-bold tracking-tight">
                 {heading}
             </div>
-            <div className="colored text-[clamp(24px,4vw,48px)] leading-[0.9] font-normal tracking-[-0.02em]">
-                {subheading}
-                <sup className="tracking-normal/70 relative top-[0.65em] ml-1 hidden align-top text-[clamp(10px,0.4em,0.4em)] leading-none font-semibold">
-                    ({count})
-                </sup>
-            </div>
+            <div className="colored text-[48px] leading-[0.9] tracking-tight">{subheading}</div>
         </div>
     )
 }

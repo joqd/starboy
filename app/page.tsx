@@ -124,8 +124,8 @@ export default function Home() {
         <main dir="rtl">
             <ScrollVelocityGallery
                 items={TEST_PRODUCTS}
-                heading="استاربوی"
-                subheading="از صدا تا استایل"
+                // heading=""
+                // subheading=""
                 className="z-50"
             />
         </main>
