@@ -29,8 +29,8 @@ import {
     logout as logoutRequest,
     requestLoginOtp,
     verifyLoginOtp,
-    type AuthUser,
 } from "@/lib/api/auth"
+import type { User as UserType } from "@/types/user"
 import { ApiError } from "@/lib/api/client"
 
 const PHONE_REGEX = /^09\d{9}$/
@@ -40,7 +40,7 @@ type Step = "phone" | "otp"
 
 export function LoginDialog() {
     // ---- session state -------------------------------------------------
-    const [user, setUser] = useState<AuthUser | null>(null)
+    const [user, setUser] = useState<UserType | null>(null)
     const [checkingSession, setCheckingSession] = useState(true)
 
     // ---- dialog / form state --------------------------------------------

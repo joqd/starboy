@@ -12,9 +12,12 @@ import {
     useSpring,
     animate,
 } from "motion/react"
+import { Lock } from "lucide-react"
 import type { MotionValue, PanInfo } from "motion/react"
 import { useScrollVelocityFactor } from "@/lib/use-scroll-velocity"
-import type { ScrollVelocityGalleryProps, ScrollVelocityItem } from "@/types/gallery"
+import type { ScrollVelocityGalleryProps } from "@/types/gallery"
+import type { ProductListItem } from "@/types/product"
+import { cn, formatPrice } from "@/lib/utils"
 
 // Card size and per-step 3D translation: a card sits this many px away in
 // x/y/z from its neighbor. rotateY is fixed and identical on every card —
@@ -163,7 +166,7 @@ export default function ScrollVelocityGallery({
     // their place — which is what makes the strip infinite instead of a
     // fixed-length strip that dead-stops at either end.
     const slots = useMemo(() => {
-        const out: { item: ScrollVelocityItem; globalIndex: number }[] = []
+        const out: { item: ProductListItem; globalIndex: number }[] = []
         for (let loop = centerLoop - LOOPS; loop <= centerLoop + LOOPS; loop++) {
             for (let i = 0; i < n; i++) {
                 out.push({ item: items[i], globalIndex: loop * n + i })
@@ -250,7 +253,7 @@ function ScrollHint() {
 }
 
 interface PlaneProps {
-    item: ScrollVelocityItem
+    item: ProductListItem
     globalIndex: number
     wavePhase: MotionValue<number>
     waveEnvelope: MotionValue<number>
@@ -259,7 +262,7 @@ interface PlaneProps {
 
 function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: PlaneProps) {
     const [hovered, setHovered] = useState(false)
-    const Wrapper = item.href ? motion.a : motion.div
+    const Wrapper = item.slug ? motion.a : motion.div
 
     // This card's own point on the shared wave — offset from every other
     // card's by globalIndex * WAVE_PHASE_STEP, so at any instant different
@@ -286,9 +289,11 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
             hoverOffset
     )
 
+    const hasStock = item.variants?.some((variant) => variant.stock > 0)
+
     return (
         <Wrapper
-            {...(item.href ? { href: item.href } : {})}
+            {...(item.slug ? { href: `/p/${item.slug}` } : {})}
             role="listitem"
             className="absolute"
             style={{
@@ -310,7 +315,7 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                 WebkitBackfaceVisibility: "hidden",
             }}
             onHoverStart={() => {
-                animate(hoverY, -30, {
+                animate(hoverY, -40, {
                     type: "spring",
                     stiffness: 450,
                     damping: 22,
@@ -337,18 +342,26 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
               Chromium. Splitting them keeps the clipped rectangle crisp.
             */}
             <div
-                className="absolute inset-0 overflow-hidden"
+                className="absolute inset-0 overflow-hidden rounded-3xl"
                 style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
             >
                 <Image
-                    src={item.image}
-                    alt={item.name}
+                    src={item.images[0]?.image}
+                    alt={item.title}
                     fill
                     sizes="320px"
                     draggable={false}
-                    className="rounded-3xl object-cover select-none"
+                    className={cn(
+                        "object-cover transition duration-150 select-none border border-neutral-400/30",
+                        !hasStock && hovered && "blur-sm grayscale",
+                        hovered ? "brightness-100" : "brightness-80"
+                    )}
                     loading="lazy"
                 />
+
+                {!hasStock && hovered && (
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] transition duration-150" />
+                )}
             </div>
 
             {/*
@@ -358,25 +371,47 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
             */}
             <AnimatePresence>
                 {hovered && (
-                    <div className="mx-4 my-2 text-lg text-neutral-50">
-                        <motion.div
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -8 }}
-                            transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                            className="pointer-events-none absolute hidden whitespace-nowrap xl:block"
-                            style={{
-                                textShadow: `
-									0 1px 2px rgba(0,0,0,.9),
-									0 0 8px rgba(0,0,0,.8),
-									0 0 16px rgba(0,0,0,.5)
-								`,
-                            }}
-                        >
-                            <p className="font-medium tracking-wide">{item.name}</p>
-                            {item.meta && <p className="mt-0.5 text-xs">{item.meta}</p>}
-                        </motion.div>
-                    </div>
+                    <>
+                        {!hasStock ? (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                                className="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center xl:flex"
+                            >
+                                <div
+                                    className="flex flex-col items-center gap-2 text-neutral-50"
+                                    style={{
+                                        textShadow: `
+                                0 1px 2px rgba(0,0,0,.9),
+                                0 0 8px rgba(0,0,0,.8),
+                                0 0 16px rgba(0,0,0,.5)
+                            `,
+                                    }}
+                                >
+                                    <Lock className="h-12 w-12" strokeWidth={1.8} />
+                                    <p className="text-lg font-medium tracking-wide">ناموجود</p>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -8 }}
+                                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                                className="pointer-events-none absolute z-0 hidden w-full rounded-t-2xl px-5 py-1.5 font-bold whitespace-nowrap text-neutral-50 backdrop-blur-xl xl:block"
+                            >
+                                <p className="text-md">{item.title}</p>
+
+                                {item.variants?.[0] && (
+                                    <p className="mt-0.5 text-sm">
+                                        <span>{formatPrice(item.variants[0].price)}</span> تومان
+                                    </p>
+                                )}
+                            </motion.div>
+                        )}
+                    </>
                 )}
             </AnimatePresence>
         </Wrapper>
