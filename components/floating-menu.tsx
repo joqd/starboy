@@ -22,10 +22,9 @@ function MenuItems() {
 
 export default function FloatingMenu() {
     const pathname = usePathname()
-    const isProductPage = pathname.startsWith("/p/")
 
     return (
-        <div className={cn(isProductPage && "dark text-foreground")}>
+        <div>
             <div className="fixed right-6 bottom-6 z-9999 hidden lg:block">
                 <div className="flex items-center">
                     <MenuItems />

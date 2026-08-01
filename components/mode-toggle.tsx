@@ -9,10 +9,6 @@ export function ModeToggle() {
     const { setTheme } = useTheme()
     const pathname = usePathname()
 
-    if (pathname.startsWith("/p/")) {
-        return null
-    }
-
     return (
         <div>
             <Button

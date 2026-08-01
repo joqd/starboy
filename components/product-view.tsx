@@ -4,17 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
-import {
-    ArrowRight,
-    ChevronLeft,
-    ChevronRight,
-    Heart,
-    Lock,
-    Minus,
-    Plus,
-    X,
-    ZoomIn,
-} from "lucide-react"
+import { ArrowRight, ChevronLeft, ChevronRight, Lock, Minus, Plus, X, ZoomIn } from "lucide-react"
 import { cn, formatPrice } from "@/lib/utils"
 import type { ProductDetail } from "@/types/product"
 
@@ -60,34 +50,33 @@ export default function ProductView({ product }: Props) {
     return (
         <div
             dir="rtl"
-            className="relative h-screen w-full overflow-hidden bg-black text-neutral-50"
+            className="relative flex h-screen w-full flex-col overflow-hidden lg:flex-row"
         >
-            {/* گالری تمام‌صفحه که به‌عنوان پس‌زمینه عمل می‌کند */}
-            <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedImage} />
+            <div className="relative order-1 h-[46vh] w-full shrink-0 lg:order-2 lg:h-full lg:flex-1">
+                <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedImage} />
+            </div>
 
-            {/* کارت شناور اطلاعات محصول */}
             <div
                 className={cn(
-                    "absolute z-20 flex max-h-[88vh] w-[92vw] max-w-sm flex-col gap-3 overflow-hidden rounded-3xl border border-neutral-400/20 bg-black/55 p-4 backdrop-blur-xl",
-                    "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-                    "lg:top-6 lg:right-6 lg:left-auto lg:translate-x-0 lg:translate-y-0"
+                    "order-2 flex min-h-0 flex-1 flex-col lg:order-1",
+                    "border lg:h-full lg:w-105 lg:flex-none lg:justify-center lg:border-l xl:w-115"
                 )}
             >
-                <Link
-                    href="/"
-                    className="flex w-fit items-center gap-1.5 rounded-full border border-neutral-400/30 px-2.5 py-1 text-[11px] text-neutral-400 transition hover:border-neutral-50 hover:text-neutral-50"
-                >
-                    <ArrowRight className="h-3 w-3" />
-                    بازگشت
-                </Link>
+                <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 lg:flex-none lg:px-8 lg:py-10">
+                    <Link
+                        href="/"
+                        className="flex w-fit items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground"
+                    >
+                        <ArrowRight className="h-3 w-3" />
+                        بازگشت
+                    </Link>
 
-                <div className="flex min-h-0 flex-col gap-3 overflow-y-auto pr-0.5">
                     {product.collections.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                             {product.collections.map((c) => (
                                 <span
                                     key={c.id}
-                                    className="rounded-full border border-neutral-400/30 px-2 py-0.5 text-[9px] tracking-wide text-neutral-400 uppercase"
+                                    className="rounded-full border border-border/70 bg-muted/70 px-2.5 py-0.5 text-[9px] font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     {c.title}
                                 </span>
@@ -96,26 +85,24 @@ export default function ProductView({ product }: Props) {
                     )}
 
                     <div>
-                        <h1 className="colored text-[22px] leading-[0.95] font-bold tracking-tight uppercase">
+                        <h1 className="text-[28px] leading-[1.05] font-bold tracking-tight text-primary uppercase lg:text-[32px]">
                             {product.title}
                         </h1>
                         {product.short_description && (
-                            <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-400">
+                            <p className="mt-3 text-[13px] leading-relaxed">
                                 {product.short_description}
                             </p>
                         )}
                     </div>
 
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-base font-bold">
-                            {formatPrice(displayPrice)} تومان
-                        </span>
+                    <div className="flex items-baseline gap-2.5">
+                        <span className="text-xl font-bold">{formatPrice(displayPrice)} تومان</span>
                         {comparePrice && comparePrice > displayPrice && (
                             <>
-                                <span className="text-[11px] text-neutral-500 line-through">
+                                <span className="text-[12px] line-through">
                                     {formatPrice(comparePrice)}
                                 </span>
-                                <span className="rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-500">
+                                <span className="rounded-full px-2 py-0.5 text-[10px] font-medium">
                                     {discountPercent}٪-
                                 </span>
                             </>
@@ -124,10 +111,10 @@ export default function ProductView({ product }: Props) {
 
                     {sortedVariants.length > 0 && (
                         <div>
-                            <p className="mb-1.5 text-[9px] tracking-wide text-neutral-400 uppercase">
+                            <p className="mb-2 text-[10px] font-medium tracking-wide uppercase">
                                 سایز
                             </p>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="flex flex-wrap gap-2">
                                 {sortedVariants.map((variant) => {
                                     const disabled = !variant.is_active || variant.stock <= 0
                                     const active = variant.id === selectedVariantId
@@ -137,12 +124,12 @@ export default function ProductView({ product }: Props) {
                                             disabled={disabled}
                                             onClick={() => setSelectedVariantId(variant.id)}
                                             className={cn(
-                                                "relative flex h-10 w-9 items-center justify-center rounded-lg border text-[11px] transition",
+                                                "font-inter relative flex h-11 min-w-11 items-center justify-center rounded-xl border px-2 text-xs font-semibold transition active:scale-[0.96]",
                                                 active
-                                                    ? "border-neutral-50 bg-neutral-50 text-black"
-                                                    : "border-neutral-400/30 text-neutral-50 hover:border-neutral-50",
+                                                    ? "bg-primary text-background dark:text-pink-100"
+                                                    : "border-border bg-background text-foreground",
                                                 disabled &&
-                                                    "cursor-not-allowed border-neutral-400/20 text-neutral-600 line-through opacity-50 hover:border-neutral-400/20"
+                                                    "cursor-not-allowed border-border/60 bg-muted/60 text-muted-foreground line-through opacity-60"
                                             )}
                                         >
                                             {variant.size_name}
@@ -153,65 +140,50 @@ export default function ProductView({ product }: Props) {
                         </div>
                     )}
 
-                    <div className="flex items-center gap-1.5">
-                        <div className="flex items-center rounded-full border border-neutral-400/30">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-11 items-center rounded-xl border border-border bg-background">
                             <button
                                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                className="flex h-8 w-8 items-center justify-center text-neutral-400 hover:text-neutral-50"
+                                className="flex h-full w-9 items-center justify-center text-muted-foreground active:scale-90"
                                 aria-label="کاهش تعداد"
                             >
-                                <Minus className="h-3 w-3" />
+                                <Minus className="h-3.5 w-3.5" />
                             </button>
-                            <span className="w-4 text-center text-[11px]">{quantity}</span>
+                            <span className="w-5 font-inter text-center text-[12px] font-bold text-foreground tabular-nums">
+                                {quantity}
+                            </span>
                             <button
                                 onClick={() => setQuantity((q) => q + 1)}
-                                className="flex h-8 w-8 items-center justify-center text-neutral-400 hover:text-neutral-50"
+                                className="flex h-full w-9 items-center justify-center text-muted-foreground active:scale-90"
                                 aria-label="افزایش تعداد"
                             >
-                                <Plus className="h-3 w-3" />
+                                <Plus className="h-3.5 w-3.5" />
                             </button>
                         </div>
 
                         <button
                             disabled={!canAddToCart}
                             className={cn(
-                                "flex h-8 flex-1 items-center justify-center gap-1.5 rounded-full text-[11px] font-medium transition",
+                                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border px-4 text-[13px] font-bold transition active:scale-[0.98]",
                                 canAddToCart
-                                    ? "bg-neutral-50 text-black hover:bg-white"
-                                    : "cursor-not-allowed bg-neutral-800 text-neutral-500"
+                                    ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+                                    : "cursor-not-allowed border-border bg-muted text-muted-foreground hover:bg-muted"
                             )}
                         >
                             {canAddToCart ? (
                                 "افزودن به سبد خرید"
                             ) : (
                                 <>
-                                    <Lock className="h-3 w-3" strokeWidth={1.8} />
+                                    <Lock className="h-3.5 w-3.5" strokeWidth={1.8} />
                                     ناموجود
                                 </>
                             )}
                         </button>
-
-                        <button
-                            onClick={() => setWishlisted((w) => !w)}
-                            aria-label="افزودن به علاقه‌مندی‌ها"
-                            className={cn(
-                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition",
-                                wishlisted
-                                    ? "border-red-500 text-red-500"
-                                    : "border-neutral-400/30 text-neutral-400 hover:text-neutral-50"
-                            )}
-                        >
-                            <Heart
-                                className="h-3.5 w-3.5"
-                                fill={wishlisted ? "currentColor" : "none"}
-                                strokeWidth={1.8}
-                            />
-                        </button>
                     </div>
 
                     {product.description && (
-                        <div className="border-t border-neutral-400/20 pt-2.5">
-                            <p className="text-[11px] leading-5 whitespace-pre-line text-neutral-400">
+                        <div className="border-t pt-4">
+                            <p className="text-[12.5px] leading-6 whitespace-pre-line">
                                 {product.description}
                             </p>
                         </div>
@@ -224,10 +196,6 @@ export default function ProductView({ product }: Props) {
     )
 }
 
-/**
- * گالری تمام‌صفحه با drag/سوایپ برای جابه‌جایی و دکمه‌ی بزرگ‌نمایی برای دیدن
- * تصویر در سایز کامل (Lightbox). بدون هیچ افکت پارالاکس/تیلتی روی خود تصویر.
- */
 function Gallery({
     images,
     hasStock,
@@ -237,141 +205,143 @@ function Gallery({
     hasStock: boolean
     onZoom: (src: string) => void
 }) {
-    const [active, setActive] = useState(0)
+    const [[active, direction], setActive] = useState<[number, number]>([0, 0])
     const hasMultiple = images.length > 1
 
-    const goTo = (i: number) => setActive(((i % images.length) + images.length) % images.length)
+    const goTo = (i: number, dir: number) => {
+        const next = ((i % images.length) + images.length) % images.length
+        if (next === active) return
+        setActive([next, dir])
+    }
+
+    const SWIPE_OFFSET_THRESHOLD = 42
+    const SWIPE_VELOCITY_THRESHOLD = 380
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
         if (!hasMultiple) return
-        if (info.offset.x < -60) goTo(active + 1)
-        else if (info.offset.x > 60) goTo(active - 1)
+        const { offset, velocity } = info
+        if (offset.x < -SWIPE_OFFSET_THRESHOLD || velocity.x < -SWIPE_VELOCITY_THRESHOLD) {
+            goTo(active + 1, 1)
+        } else if (offset.x > SWIPE_OFFSET_THRESHOLD || velocity.x > SWIPE_VELOCITY_THRESHOLD) {
+            goTo(active - 1, -1)
+        }
     }
 
     const current = images[active]
 
-    return (
-        <div className="absolute inset-0">
-            {/* لایه‌ی محیطی: همان تصویر ولی بزرگ‌نمایی‌شده و بلاردار. چون از
-                قبل تار است، هیچ افت کیفیتی در آن دیده نمی‌شود و فقط اتمسفر
-                رنگی پس‌زمینه را می‌سازد؛ عکس واقعی و شارپ در قاب زیر است. */}
-            {current?.image && (
-                <div className="absolute inset-0 overflow-hidden">
-                    <Image
-                        src={current.image}
-                        alt=""
-                        aria-hidden
-                        fill
-                        sizes="100vw"
-                        quality={40}
-                        className="scale-125 object-cover blur-3xl brightness-[0.45] saturate-150"
-                    />
-                </div>
-            )}
-            <div className="absolute inset-0 bg-black/25" />
+    const slideVariants = {
+        enter: (dir: number) => ({
+            opacity: 0,
+            scale: 1.02,
+            x: dir >= 0 ? "3%" : "-3%",
+        }),
+        center: { opacity: 1, scale: 1, x: "0%" },
+        exit: (dir: number) => ({
+            opacity: 0,
+            scale: 0.98,
+            x: dir >= 0 ? "-3%" : "3%",
+        }),
+    }
 
-            {/* قاب اصلی: عکس در اندازه‌ی محدود و واقعی رندر می‌شود، بدون
-                کشیده‌شدن روی کل صفحه، پس شارپ و باکیفیت می‌ماند */}
-            <div className="absolute inset-0 flex items-center justify-center p-6 lg:p-12">
+    return (
+        <div className="absolute inset-0 overflow-hidden">
+            <AnimatePresence custom={direction} mode="popLayout" initial={false}>
                 <motion.div
-                    className="relative aspect-[4/5] h-full max-h-[78vh] w-auto max-w-full overflow-hidden rounded-3xl border border-neutral-400/20 shadow-2xl shadow-black/60"
+                    key={current?.id ?? active}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     drag={hasMultiple ? "x" : false}
                     dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.15}
+                    dragElastic={0.035}
+                    dragTransition={{ bounceStiffness: 800, bounceDamping: 48 }}
                     onDragEnd={handleDragEnd}
+                    className="absolute inset-0"
                 >
-                    <AnimatePresence mode="wait" initial={false}>
-                        <motion.div
-                            key={current?.id ?? active}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.18 }}
-                            className="absolute inset-0"
-                        >
-                            {current?.image && (
-                                <Image
-                                    src={current.image}
-                                    alt={current.alt_text || "تصویر محصول"}
-                                    fill
-                                    sizes="(min-width: 1024px) 640px, 92vw"
-                                    quality={95}
-                                    draggable={false}
-                                    priority={active === 0}
-                                    className={cn(
-                                        "object-cover select-none",
-                                        !hasStock && "blur-sm brightness-75 grayscale"
-                                    )}
-                                />
-                            )}
-                        </motion.div>
-                    </AnimatePresence>
-
                     {current?.image && (
-                        <button
-                            onClick={() => onZoom(current.image)}
-                            aria-label="نمایش تصویر در سایز کامل"
-                            className="absolute top-3 left-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-neutral-200 backdrop-blur-md transition hover:bg-black/60"
-                        >
-                            <ZoomIn className="h-4 w-4" />
-                        </button>
-                    )}
-
-                    {!hasStock && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <div
-                                className="flex flex-col items-center gap-1.5 text-neutral-50"
-                                style={{
-                                    textShadow: `0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8), 0 0 16px rgba(0,0,0,.5)`,
-                                }}
-                            >
-                                <Lock className="h-8 w-8" strokeWidth={1.8} />
-                                <p className="text-sm font-medium tracking-wide">ناموجود</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {hasMultiple && (
-                        <>
-                            <button
-                                onClick={() => goTo(active - 1)}
-                                aria-label="تصویر قبلی"
-                                className="absolute top-1/2 right-3 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-neutral-200 backdrop-blur-md transition hover:bg-black/60"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                            <button
-                                onClick={() => goTo(active + 1)}
-                                aria-label="تصویر بعدی"
-                                className="absolute top-1/2 left-3 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-neutral-200 backdrop-blur-md transition hover:bg-black/60"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-
-                            <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
-                                {images.map((img, i) => (
-                                    <button
-                                        key={img.id}
-                                        onClick={() => goTo(i)}
-                                        aria-label={`تصویر ${i + 1}`}
-                                        className={cn(
-                                            "h-1 rounded-full transition-all",
-                                            i === active
-                                                ? "w-5 bg-neutral-50"
-                                                : "w-1 bg-neutral-50/40"
-                                        )}
-                                    />
-                                ))}
-                            </div>
-                        </>
+                        <Image
+                            src={current.image}
+                            alt={current.alt_text || "تصویر محصول"}
+                            fill
+                            sizes="(min-width: 1024px) 60vw, 100vw"
+                            quality={95}
+                            draggable={false}
+                            priority={active === 0}
+                            className={cn(
+                                "object-cover select-none",
+                                !hasStock && "blur-sm brightness-75 grayscale"
+                            )}
+                        />
                     )}
                 </motion.div>
-            </div>
+            </AnimatePresence>
+
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-black/35 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-black/45 to-transparent" />
+
+            {current?.image && (
+                <button
+                    onClick={() => onZoom(current.image)}
+                    aria-label="نمایش تصویر در سایز کامل"
+                    className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-50 backdrop-blur-md transition hover:opacity-100 active:scale-90"
+                >
+                    <ZoomIn className="h-4 w-4" />
+                </button>
+            )}
+
+            {!hasStock && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div
+                        className="flex flex-col items-center gap-1.5"
+                        style={{
+                            textShadow: `0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8), 0 0 16px rgba(0,0,0,.5)`,
+                        }}
+                    >
+                        <Lock className="h-8 w-8" strokeWidth={1.8} />
+                        <p className="text-sm font-medium tracking-wide">ناموجود</p>
+                    </div>
+                </div>
+            )}
+
+            {hasMultiple && (
+                <>
+                    <button
+                        onClick={() => goTo(active - 1, -1)}
+                        aria-label="تصویر قبلی"
+                        className="absolute top-1/2 right-4 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-50 backdrop-blur-md transition hover:opacity-100 active:scale-90"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </button>
+                    <button
+                        onClick={() => goTo(active + 1, 1)}
+                        aria-label="تصویر بعدی"
+                        className="absolute top-1/2 left-4 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-50 backdrop-blur-md transition hover:opacity-100 active:scale-90"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </button>
+
+                    <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                        {images.map((img, i) => (
+                            <button
+                                key={img.id}
+                                onClick={() => goTo(i, i > active ? 1 : -1)}
+                                aria-label={`تصویر ${i + 1}`}
+                                className={cn(
+                                    "h-1 rounded-full transition-all duration-200",
+                                    i === active ? "w-6 bg-primary" : "w-1.5 bg-background/70"
+                                )}
+                            />
+                        ))}
+                    </div>
+                </>
+            )}
         </div>
     )
 }
 
-/** نمایش تصویر در سایز کامل با قابلیت بستن با کلیک بیرون یا دکمه‌ی X */
 function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
     return (
         <AnimatePresence>
@@ -381,12 +351,12 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
                 >
                     <button
                         onClick={onClose}
                         aria-label="بستن"
-                        className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-neutral-400/30 text-neutral-200 transition hover:border-neutral-50 hover:text-neutral-50"
+                        className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground transition hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
                     >
                         <X className="h-4 w-4" />
                     </button>

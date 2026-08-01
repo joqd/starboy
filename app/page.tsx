@@ -6,7 +6,7 @@ export default async function Home() {
     const latestProducts = await getLatestProducts()
 
     return (
-        <main>
+        <main dir="rtl">
             <ScrollVelocityGallery items={latestProducts.results} className="z-50" />
             <div className="absolute bottom-0 left-0 hidden xl:block">
                 <HeroImage />
