@@ -1,12 +1,10 @@
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import { HeroImage } from "@/components/hero-image"
-import FloatingMenu from "@/components/floating-menu"
-import { Toaster } from "@/components/ui/toast"
 import { AmbientGlow } from "@/components/ambient-glow"
 import localFont from "next/font/local"
 import { Inter } from "next/font/google"
+import FloatingMenu from "@/components/floating-menu"
 
 const YekanBakh = localFont({
     src: "./assets/fonts/YekanBakh-Regular.woff2",
@@ -39,16 +37,10 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <FloatingMenu />
                     <AmbientGlow />
+                    <FloatingMenu />
 
                     {children}
-
-                    <Toaster />
-
-                    <div className="absolute bottom-0 left-0 hidden xl:block">
-                        <HeroImage />
-                    </div>
                 </ThemeProvider>
             </body>
         </html>

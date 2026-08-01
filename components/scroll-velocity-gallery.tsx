@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { useMemo, useState } from "react"
 import type { WheelEvent } from "react"
 import {
@@ -262,7 +263,7 @@ interface PlaneProps {
 
 function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: PlaneProps) {
     const [hovered, setHovered] = useState(false)
-    const Wrapper = item.slug ? motion.a : motion.div
+    const Wrapper = motion.div
 
     // This card's own point on the shared wave — offset from every other
     // card's by globalIndex * WAVE_PHASE_STEP, so at any instant different
@@ -293,7 +294,7 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
 
     return (
         <Wrapper
-            {...(item.slug ? { href: `/p/${item.slug}` } : {})}
+            // {...(item.slug && hasStock ? { href: `/p/${item.slug}` } : { href: `/#` })}
             role="listitem"
             className="absolute"
             style={{
@@ -345,19 +346,21 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                 className="absolute inset-0 overflow-hidden rounded-3xl"
                 style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
             >
-                <Image
-                    src={item.images[0]?.image}
-                    alt={item.title}
-                    fill
-                    sizes="320px"
-                    draggable={false}
-                    className={cn(
-                        "object-cover transition duration-150 select-none border border-neutral-400/30",
-                        !hasStock && hovered && "blur-sm grayscale",
-                        hovered ? "brightness-100" : "brightness-80"
-                    )}
-                    loading="lazy"
-                />
+                <Link href={`p/${item.slug}`} className="relative block h-full w-full">
+                    <Image
+                        src={item.images[0]?.image}
+                        alt={item.title}
+                        fill
+                        sizes="320px"
+                        draggable={false}
+                        className={cn(
+                            "border border-neutral-400/30 object-cover transition duration-150 select-none",
+                            !hasStock && hovered && "blur-sm grayscale",
+                            hovered ? "brightness-100" : "brightness-80"
+                        )}
+                        loading="lazy"
+                    />
+                </Link>
 
                 {!hasStock && hovered && (
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] transition duration-150" />

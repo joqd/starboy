@@ -36,3 +36,32 @@ export type ProductVariant = {
     stock: number
     is_active: boolean
 }
+
+export type ProductStatus = "draft" | "published" | "archived"
+
+export interface ProductCollection {
+    id: number
+    title: string
+    slug: string
+    short_description: string
+    image: string
+    is_active: boolean
+    parent: number | null
+}
+
+export interface ProductDetail {
+    id: number
+    title: string
+    slug: string
+    short_description: string
+    description: string
+    status: ProductStatus
+    published_at: string
+    featured: boolean
+    collections: ProductCollection[]
+    images: ProductImage[]
+    variants: ProductVariant[]
+    is_in_wishlist: boolean
+    created_at: string
+    updated_at: string
+}

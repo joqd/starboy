@@ -145,5 +145,9 @@ input:focus-visible {
 }
 
 .colored {
-	@apply text-rose-900 dark:text-rose-100;
+    @apply text-rose-900 dark:text-rose-100;
+}
+
+.ghost {
+    @apply hover:bg-transparent;
 }
