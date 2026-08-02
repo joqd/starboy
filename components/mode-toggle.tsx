@@ -12,7 +12,7 @@ export function ModeToggle() {
     return (
         <div>
             <Button
-                className="hidden cursor-pointer dark:flex ghost"
+                className="ghost hidden cursor-pointer dark:flex"
                 onClick={() => setTheme("light")}
                 variant="ghost"
                 size="icon"
@@ -21,7 +21,7 @@ export function ModeToggle() {
             </Button>
 
             <Button
-                className="cursor-pointer dark:hidden ghost"
+                className="ghost cursor-pointer dark:hidden"
                 onClick={() => setTheme("dark")}
                 variant="ghost"
                 size="icon"

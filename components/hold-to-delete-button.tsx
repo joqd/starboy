@@ -81,7 +81,7 @@ export default function HoldToDeleteButton({
             }}
             className={cn(
                 "relative h-12 w-44 overflow-hidden rounded-xl select-none",
-                "font-bold bg-white text-black",
+                "bg-white font-bold text-black",
                 "touch-none [-webkit-user-select:none]",
                 "transition-opacity disabled:cursor-not-allowed disabled:opacity-90",
                 "focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none",

@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import type { WheelEvent } from "react"
+import StarboyLogo from "./starboyLogo"
 import {
     motion,
     AnimatePresence,
@@ -84,8 +85,6 @@ const WAVE_MAX_Y_PX = 36
 
 export default function ScrollVelocityGallery({
     items,
-    heading = "STARBOY",
-    subheading = "COMING SOON",
     className = "",
     // 0 = flat, no wave at all. 1 = the tuned default (WAVE_MAX_Y_PX
     // as-is). Values above 1 exaggerate it. This only scales the shared
@@ -183,7 +182,7 @@ export default function ScrollVelocityGallery({
             className={`relative h-screen w-full overflow-hidden ${className}`}
             onWheel={handleWheel}
         >
-            <SectionHeading heading={heading} subheading={subheading} count={n} />
+            <SectionHeading />
 
             <div
                 className="relative flex h-full w-full items-center justify-center"
@@ -199,7 +198,6 @@ export default function ScrollVelocityGallery({
                     }}
                     onPan={handlePan}
                     role="list"
-                    aria-label={`${heading} ${subheading}`}
                 >
                     {slots.map(({ item, globalIndex }, key) => (
                         <Plane
@@ -219,25 +217,13 @@ export default function ScrollVelocityGallery({
     )
 }
 
-function SectionHeading({
-    heading,
-    subheading,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    count,
-}: {
-    heading: string
-    subheading: string
-    count: number
-}) {
+function SectionHeading() {
     return (
         <div
             dir="ltr"
             className="absolute top-[max(90px,3vw)] left-[3vw] hidden select-none lg:block"
         >
-            <div className="colored text-[64px] leading-[0.9] font-bold tracking-tight">
-                {heading}
-            </div>
-            <div className="colored text-[48px] leading-[0.9] tracking-tight">{subheading}</div>
+            <StarboyLogo />
         </div>
     )
 }

@@ -6,7 +6,7 @@ import { Button } from "./ui/button"
 import { ShoppingBag } from "lucide-react"
 import { LoginDialog } from "./login-dialog"
 import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import StarboyLogo from "./starboyLogo"
 
 function MenuItems() {
     return (
@@ -44,7 +44,7 @@ export default function FloatingMenu() {
                         <MenuItems />
                     </div>
 
-                    <div className="colored font-inter text-2xl font-bold">STARBOY</div>
+                    <StarboyLogo className="w-30 fill-primary" />
                 </div>
             </div>
         </div>
