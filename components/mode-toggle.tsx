@@ -11,23 +11,16 @@ export function ModeToggle() {
 
     return (
         <div>
-            <Button
+            <div
                 className="ghost hidden cursor-pointer dark:flex"
                 onClick={() => setTheme("light")}
-                variant="ghost"
-                size="icon"
             >
                 <Sun className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
+            </div>
 
-            <Button
-                className="ghost cursor-pointer dark:hidden"
-                onClick={() => setTheme("dark")}
-                variant="ghost"
-                size="icon"
-            >
+            <div className="ghost cursor-pointer dark:hidden" onClick={() => setTheme("dark")}>
                 <Moon className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
+            </div>
         </div>
     )
 }

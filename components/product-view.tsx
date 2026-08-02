@@ -1,12 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import { ArrowRight, ChevronLeft, ChevronRight, Lock, Minus, Plus, X, ZoomIn } from "lucide-react"
 import { cn, formatPrice } from "@/lib/utils"
 import type { ProductDetail } from "@/types/product"
+import { Button } from "./ui/button"
+import { Separator } from "./ui/separator"
+import { ButtonGroup } from "@/components/ui/button-group"
 
 type Props = {
     product: ProductDetail
@@ -34,7 +37,7 @@ export default function ProductView({ product }: Props) {
     )
     const [quantity, setQuantity] = useState(1)
     const [wishlisted, setWishlisted] = useState(product.is_in_wishlist)
-    const [zoomedImage, setZoomedImage] = useState<string | null>(null)
+    const [zoomedIndex, setZoomedIndex] = useState<number | null>(null)
 
     const selectedVariant = sortedVariants.find((v) => v.id === selectedVariantId) ?? null
     const productHasStock = sortedVariants.some((v) => v.stock > 0 && v.is_active)
@@ -53,7 +56,7 @@ export default function ProductView({ product }: Props) {
             className="relative flex h-screen w-full flex-col overflow-hidden lg:flex-row"
         >
             <div className="relative order-1 h-[46vh] w-full shrink-0 lg:order-2 lg:h-full lg:flex-1">
-                <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedImage} />
+                <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedIndex} />
             </div>
 
             <div
@@ -111,63 +114,70 @@ export default function ProductView({ product }: Props) {
 
                     {sortedVariants.length > 0 && (
                         <div>
-                            <p className="mb-2 text-[10px] font-medium tracking-wide uppercase">
-                                سایز
-                            </p>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="mb-2.5 flex space-x-2 text-xs font-medium tracking-wide uppercase">
+                                <div>سایز</div>
+								<Separator orientation="vertical" />
+                                <div>راهنمای سایز</div>
+                            </div>
+
+                            <ButtonGroup>
                                 {sortedVariants.map((variant) => {
                                     const disabled = !variant.is_active || variant.stock <= 0
                                     const active = variant.id === selectedVariantId
                                     return (
-                                        <button
+                                        <Button
                                             key={variant.id}
                                             disabled={disabled}
+                                            size={"icon"}
+                                            variant={"secondary"}
                                             onClick={() => setSelectedVariantId(variant.id)}
                                             className={cn(
-                                                "font-inter relative flex h-11 min-w-11 items-center justify-center rounded-xl border px-2 text-xs font-semibold transition active:scale-[0.96]",
+                                                "font-inter relative flex items-center justify-center border text-xs font-semibold transition active:scale-[0.96]",
                                                 active
-                                                    ? "bg-primary text-background dark:text-pink-100"
-                                                    : "border-border bg-background text-foreground",
+                                                    ? "bg-primary hover:bg-primary text-background dark:text-pink-100"
+                                                    : "bg-background text-foreground hover:bg-background",
                                                 disabled &&
                                                     "cursor-not-allowed border-border/60 bg-muted/60 text-muted-foreground line-through opacity-60"
                                             )}
                                         >
                                             {variant.size_name}
-                                        </button>
+                                        </Button>
                                     )
                                 })}
-                            </div>
+                            </ButtonGroup>
                         </div>
                     )}
 
                     <div className="flex items-center gap-2">
-                        <div className="flex h-11 items-center rounded-xl border border-border bg-background">
-                            <button
+                        <div className="flex items-center rounded-lg border border-border bg-background">
+                            <Button
+                                variant={"ghost"}
                                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                className="flex h-full w-9 items-center justify-center text-muted-foreground active:scale-90"
+                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90"
                                 aria-label="کاهش تعداد"
                             >
                                 <Minus className="h-3.5 w-3.5" />
-                            </button>
+                            </Button>
                             <span className="font-inter w-5 text-center text-[12px] font-bold text-foreground tabular-nums">
                                 {quantity}
                             </span>
-                            <button
+                            <Button
+                                variant={"ghost"}
                                 onClick={() => setQuantity((q) => q + 1)}
-                                className="flex h-full w-9 items-center justify-center text-muted-foreground active:scale-90"
+                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90"
                                 aria-label="افزایش تعداد"
                             >
                                 <Plus className="h-3.5 w-3.5" />
-                            </button>
+                            </Button>
                         </div>
 
-                        <button
+                        <Button
                             disabled={!canAddToCart}
                             className={cn(
-                                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border px-4 text-[13px] font-bold transition active:scale-[0.98]",
+                                "flex flex-1 items-center justify-center border px-4 font-bold transition active:scale-[0.98]",
                                 canAddToCart
-                                    ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
-                                    : "cursor-not-allowed border-border bg-muted text-muted-foreground hover:bg-muted"
+                                    ? ""
+                                    : "cursor-not-allowed bg-muted text-muted-foreground"
                             )}
                         >
                             {canAddToCart ? (
@@ -178,7 +188,7 @@ export default function ProductView({ product }: Props) {
                                     ناموجود
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </div>
 
                     {product.description && (
@@ -191,9 +201,20 @@ export default function ProductView({ product }: Props) {
                 </div>
             </div>
 
-            <Lightbox src={zoomedImage} onClose={() => setZoomedImage(null)} />
+            <Lightbox
+                images={images}
+                index={zoomedIndex}
+                onClose={() => setZoomedIndex(null)}
+                onNavigate={setZoomedIndex}
+            />
         </div>
     )
+}
+
+function getTileSpan(count: number, i: number) {
+    if (count === 3 && i === 0) return "col-span-1 row-span-2"
+    if (count >= 5 && i === 0) return "col-span-2 row-span-2"
+    return "col-span-1 row-span-1"
 }
 
 function Gallery({
@@ -203,31 +224,140 @@ function Gallery({
 }: {
     images: ProductDetail["images"]
     hasStock: boolean
-    onZoom: (src: string) => void
+    onZoom: (index: number) => void
 }) {
-    const [[active, direction], setActive] = useState<[number, number]>([0, 0])
+    const count = images.length
+    const visibleCount = Math.min(count, 5)
+    const remaining = count - visibleCount
+
+    return (
+        <div className="absolute inset-0 overflow-hidden bg-border">
+            <div
+                className={cn(
+                    "grid h-full w-full gap-px",
+                    count === 1 && "grid-cols-1 grid-rows-1",
+                    count === 2 && "grid-cols-2 grid-rows-1",
+                    (count === 3 || count === 4) && "grid-cols-2 grid-rows-2",
+                    count >= 5 && "grid-cols-4 grid-rows-2"
+                )}
+            >
+                {images.slice(0, visibleCount).map((img, i) => {
+                    const isLastVisible = i === visibleCount - 1
+                    return (
+                        <motion.button
+                            key={img.id}
+                            onClick={() => onZoom(i)}
+                            aria-label={
+                                isLastVisible && remaining > 0
+                                    ? `نمایش همه‌ی ${count} تصویر`
+                                    : "نمایش تصویر در سایز کامل"
+                            }
+                            initial={false}
+                            whileTap={{ scale: 0.97 }}
+                            className={cn(
+                                "group relative overflow-hidden bg-muted",
+                                getTileSpan(count, i)
+                            )}
+                        >
+                            {img.image && (
+                                <Image
+                                    src={img.image}
+                                    alt={img.alt_text || `تصویر محصول ${i + 1}`}
+                                    fill
+                                    sizes={
+                                        count === 1
+                                            ? "(min-width: 1024px) 60vw, 100vw"
+                                            : "(min-width: 1024px) 30vw, 50vw"
+                                    }
+                                    quality={95}
+                                    priority={i === 0}
+                                    draggable={false}
+                                    className={cn(
+                                        "object-cover transition-transform duration-500 ease-out select-none group-hover:scale-105",
+                                        !hasStock && "blur-sm brightness-75 grayscale"
+                                    )}
+                                />
+                            )}
+
+                            <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+
+                            <div className="absolute bottom-2.5 left-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
+                                <ZoomIn className="h-4 w-4" />
+                            </div>
+
+                            {isLastVisible && remaining > 0 && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/75 via-black/50 to-black/30 text-lg font-bold text-white backdrop-blur-[1px]">
+                                    +{remaining}
+                                </div>
+                            )}
+                        </motion.button>
+                    )
+                })}
+            </div>
+
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/55 via-black/20 to-transparent lg:hidden" />
+
+            {!hasStock && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div
+                        className="flex flex-col items-center gap-1.5"
+                        style={{
+                            textShadow: `0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8), 0 0 16px rgba(0,0,0,.5)`,
+                        }}
+                    >
+                        <Lock className="h-8 w-8" strokeWidth={1.8} />
+                        <p className="text-sm font-medium tracking-wide">ناموجود</p>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function Lightbox({
+    images,
+    index,
+    onClose,
+    onNavigate,
+}: {
+    images: ProductDetail["images"]
+    index: number | null
+    onClose: () => void
+    onNavigate: (index: number) => void
+}) {
+    const [direction, setDirection] = useState(0)
+    const isOpen = index !== null
     const hasMultiple = images.length > 1
+    const current = isOpen ? images[index] : null
 
     const goTo = (i: number, dir: number) => {
+        if (index === null) return
         const next = ((i % images.length) + images.length) % images.length
-        if (next === active) return
-        setActive([next, dir])
+        setDirection(dir)
+        onNavigate(next)
     }
+
+    useEffect(() => {
+        if (!isOpen) return
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose()
+        }
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+    }, [isOpen])
 
     const SWIPE_OFFSET_THRESHOLD = 42
     const SWIPE_VELOCITY_THRESHOLD = 380
 
     const handleDragEnd = (_: unknown, info: PanInfo) => {
-        if (!hasMultiple) return
+        if (!hasMultiple || index === null) return
         const { offset, velocity } = info
         if (offset.x < -SWIPE_OFFSET_THRESHOLD || velocity.x < -SWIPE_VELOCITY_THRESHOLD) {
-            goTo(active + 1, 1)
+            goTo(index + 1, 1)
         } else if (offset.x > SWIPE_OFFSET_THRESHOLD || velocity.x > SWIPE_VELOCITY_THRESHOLD) {
-            goTo(active - 1, -1)
+            goTo(index - 1, -1)
         }
     }
-
-    const current = images[active]
 
     const slideVariants = {
         enter: (dir: number) => ({
@@ -244,119 +374,19 @@ function Gallery({
     }
 
     return (
-        <div className="absolute inset-0 overflow-hidden">
-            <AnimatePresence custom={direction} mode="popLayout" initial={false}>
-                <motion.div
-                    key={current?.id ?? active}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    drag={hasMultiple ? "x" : false}
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.035}
-                    dragTransition={{ bounceStiffness: 800, bounceDamping: 48 }}
-                    onDragEnd={handleDragEnd}
-                    className="absolute inset-0"
-                >
-                    {current?.image && (
-                        <Image
-                            src={current.image}
-                            alt={current.alt_text || "تصویر محصول"}
-                            fill
-                            sizes="(min-width: 1024px) 60vw, 100vw"
-                            quality={95}
-                            draggable={false}
-                            priority={active === 0}
-                            className={cn(
-                                "object-cover select-none",
-                                !hasStock && "blur-sm brightness-75 grayscale"
-                            )}
-                        />
-                    )}
-                </motion.div>
-            </AnimatePresence>
-
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-black/35 to-transparent" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-black/45 to-transparent" />
-
-            {current?.image && (
-                <button
-                    onClick={() => onZoom(current.image)}
-                    aria-label="نمایش تصویر در سایز کامل"
-                    className="absolute top-4 left-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-50 backdrop-blur-md transition hover:opacity-100 active:scale-90"
-                >
-                    <ZoomIn className="h-4 w-4" />
-                </button>
-            )}
-
-            {!hasStock && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div
-                        className="flex flex-col items-center gap-1.5"
-                        style={{
-                            textShadow: `0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8), 0 0 16px rgba(0,0,0,.5)`,
-                        }}
-                    >
-                        <Lock className="h-8 w-8" strokeWidth={1.8} />
-                        <p className="text-sm font-medium tracking-wide">ناموجود</p>
-                    </div>
-                </div>
-            )}
-
-            {hasMultiple && (
-                <>
-                    <button
-                        onClick={() => goTo(active - 1, -1)}
-                        aria-label="تصویر قبلی"
-                        className="absolute top-1/2 right-4 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-50 backdrop-blur-md transition hover:opacity-100 active:scale-90"
-                    >
-                        <ChevronRight className="h-4 w-4" />
-                    </button>
-                    <button
-                        onClick={() => goTo(active + 1, 1)}
-                        aria-label="تصویر بعدی"
-                        className="absolute top-1/2 left-4 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-50 backdrop-blur-md transition hover:opacity-100 active:scale-90"
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                    </button>
-
-                    <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
-                        {images.map((img, i) => (
-                            <button
-                                key={img.id}
-                                onClick={() => goTo(i, i > active ? 1 : -1)}
-                                aria-label={`تصویر ${i + 1}`}
-                                className={cn(
-                                    "h-1 rounded-full transition-all duration-200",
-                                    i === active ? "w-6 bg-primary" : "w-1.5 bg-background/70"
-                                )}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-        </div>
-    )
-}
-
-function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
-    return (
         <AnimatePresence>
-            {src && (
+            {isOpen && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+                    className="fixed inset-0 z-99999 flex items-center justify-center bg-black/80 backdrop-blur-sm"
                 >
                     <button
                         onClick={onClose}
                         aria-label="بستن"
-                        className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground transition hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+                        className="absolute top-4 right-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-70 backdrop-blur-md transition hover:opacity-100 active:scale-90"
                     >
                         <X className="h-4 w-4" />
                     </button>
@@ -367,16 +397,81 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
                         exit={{ scale: 0.96, opacity: 0 }}
                         transition={{ type: "spring", stiffness: 300, damping: 28 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative h-[85vh] w-[92vw] max-w-3xl"
+                        className="relative h-[85vh] w-[92vw] max-w-3xl overflow-hidden"
                     >
-                        <Image
-                            src={src}
-                            alt="نمایش کامل تصویر محصول"
-                            fill
-                            sizes="92vw"
-                            quality={95}
-                            className="object-contain"
-                        />
+                        <AnimatePresence custom={direction} mode="popLayout" initial={false}>
+                            <motion.div
+                                key={current?.id ?? index}
+                                custom={direction}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                                drag={hasMultiple ? "x" : false}
+                                dragConstraints={{ left: 0, right: 0 }}
+                                dragElastic={0.035}
+                                dragTransition={{ bounceStiffness: 800, bounceDamping: 48 }}
+                                onDragEnd={handleDragEnd}
+                                className="absolute inset-0"
+                            >
+                                {current?.image && (
+                                    <Image
+                                        src={current.image}
+                                        alt={current.alt_text || "نمایش کامل تصویر محصول"}
+                                        fill
+                                        sizes="92vw"
+                                        quality={95}
+                                        draggable={false}
+                                        className="object-contain select-none"
+                                    />
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+
+                        {hasMultiple && index !== null && (
+                            <>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        goTo(index - 1, -1)
+                                    }}
+                                    aria-label="تصویر قبلی"
+                                    className="absolute top-1/2 right-3 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-70 backdrop-blur-md transition hover:opacity-100 active:scale-90"
+                                >
+                                    <ChevronRight className="h-4 w-4" />
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        goTo(index + 1, 1)
+                                    }}
+                                    aria-label="تصویر بعدی"
+                                    className="absolute top-1/2 left-3 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-70 backdrop-blur-md transition hover:opacity-100 active:scale-90"
+                                >
+                                    <ChevronLeft className="h-4 w-4" />
+                                </button>
+
+                                <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                                    {images.map((img, i) => (
+                                        <button
+                                            key={img.id}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                goTo(i, i > index ? 1 : -1)
+                                            }}
+                                            aria-label={`تصویر ${i + 1}`}
+                                            className={cn(
+                                                "h-1 rounded-full transition-all duration-200",
+                                                i === index
+                                                    ? "w-6 bg-primary"
+                                                    : "w-1.5 bg-background/70"
+                                            )}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </motion.div>
                 </motion.div>
             )}

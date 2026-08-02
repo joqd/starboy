@@ -1,5 +1,6 @@
 import { HeroImage } from "@/components/hero-image"
 import ScrollVelocityGallery from "@/components/scroll-velocity-gallery"
+import MobileProductSlider from "@/components/mobile-product-slider"
 import { getLatestProducts } from "@/lib/api/product"
 
 export default async function Home() {
@@ -7,7 +8,12 @@ export default async function Home() {
 
     return (
         <main dir="rtl">
-            <ScrollVelocityGallery items={latestProducts.results} className="z-50" />
+            <ScrollVelocityGallery
+                items={latestProducts.results}
+                className="z-50 hidden lg:block"
+            />
+            <MobileProductSlider items={latestProducts.results} className="lg:hidden" />
+
             <div className="absolute bottom-0 left-0 hidden xl:block">
                 <HeroImage />
             </div>

@@ -3,19 +3,23 @@
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "./ui/button"
-import { ShoppingBag } from "lucide-react"
 import { LoginDialog } from "./login-dialog"
 import { usePathname } from "next/navigation"
-import StarboyLogo from "./starboyLogo"
+import StarboyLogo from "./starboy-logo"
+import Cart from "./cart"
 
 function MenuItems() {
     return (
-        <div className="flex space-x-2">
-            <LoginDialog />
-            <Button className="ghost" variant="ghost" size="icon">
-                <ShoppingBag className="h-[1.2rem] w-[1.2rem]" />
-            </Button>
-            <ModeToggle />
+        <div className="flex space-x-4">
+            <div className="items-center flex">
+                <LoginDialog />
+            </div>
+            <div className="items-center flex">
+                <Cart />
+            </div>
+            <div className="items-center flex">
+                <ModeToggle />
+            </div>
         </div>
     )
 }
@@ -40,7 +44,7 @@ export default function FloatingMenu() {
 
             <div dir="rtl" className="fixed top-0 left-0 z-9999 w-full lg:hidden">
                 <div className="flex items-center justify-between px-5 py-3">
-                    <div>
+                    <div dir="ltr">
                         <MenuItems />
                     </div>
 

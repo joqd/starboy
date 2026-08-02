@@ -151,3 +151,7 @@ input:focus-visible {
 .ghost {
     @apply hover:bg-transparent;
 }
+
+button {
+    @apply font-bold;
+}
