@@ -10,6 +10,8 @@ import type { ProductDetail } from "@/types/product"
 import { Button } from "./ui/button"
 import { Separator } from "./ui/separator"
 import { ButtonGroup } from "@/components/ui/button-group"
+import { addItemToCart } from "@/lib/api/cart"
+import { useCart } from "@/hooks/use-cart"
 
 type Props = {
     product: ProductDetail
@@ -49,6 +51,14 @@ export default function ProductView({ product }: Props) {
         comparePrice && comparePrice > displayPrice
             ? Math.round(((comparePrice - displayPrice) / comparePrice) * 100)
             : null
+
+    const { addItem } = useCart()
+
+    const handleAddToCart = async () => {
+        if (!selectedVariant) return
+
+        await addItem(selectedVariant.sku, quantity)
+    }
 
     return (
         <div
@@ -116,7 +126,7 @@ export default function ProductView({ product }: Props) {
                         <div>
                             <div className="mb-2.5 flex space-x-2 text-xs font-medium tracking-wide uppercase">
                                 <div>سایز</div>
-								<Separator orientation="vertical" />
+                                <Separator orientation="vertical" />
                                 <div>راهنمای سایز</div>
                             </div>
 
@@ -134,7 +144,7 @@ export default function ProductView({ product }: Props) {
                                             className={cn(
                                                 "font-inter relative flex items-center justify-center border text-xs font-semibold transition active:scale-[0.96]",
                                                 active
-                                                    ? "bg-primary hover:bg-primary text-background dark:text-pink-100"
+                                                    ? "bg-primary text-background hover:bg-primary dark:text-pink-100"
                                                     : "bg-background text-foreground hover:bg-background",
                                                 disabled &&
                                                     "cursor-not-allowed border-border/60 bg-muted/60 text-muted-foreground line-through opacity-60"
@@ -173,6 +183,7 @@ export default function ProductView({ product }: Props) {
 
                         <Button
                             disabled={!canAddToCart}
+                            onClick={handleAddToCart}
                             className={cn(
                                 "flex flex-1 items-center justify-center border px-4 font-bold transition active:scale-[0.98]",
                                 canAddToCart

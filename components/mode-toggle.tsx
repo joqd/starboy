@@ -1,13 +1,10 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
 import { Moon, Sun } from "lucide-react"
-import { usePathname } from "next/navigation"
 
 export function ModeToggle() {
     const { setTheme } = useTheme()
-    const pathname = usePathname()
 
     return (
         <div>

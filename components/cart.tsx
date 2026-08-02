@@ -1,47 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "./ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ShoppingBag } from "lucide-react"
-import CartSheet, { type CartItem } from "./cart-sheet"
+
+import CartSheet from "./cart-sheet"
+import { useCart } from "@/hooks/use-cart"
 
 export default function Cart() {
     const [open, setOpen] = useState(false)
 
-    const [items, setItems] = useState<CartItem[]>([
-        {
-            id: 1,
-            title: "هودی استاربوی مدل کلاسیک",
-            image: "/products/hoodie-1.jpg",
-            size_name: "L",
-            price: 1250000,
-            compare_price: 1500000,
-            quantity: 1,
-            stock: 5,
-        },
-        {
-            id: 2,
-            title: "تیشرت بیسیک سفید",
-            image: "/products/tshirt-1.jpg",
-            size_name: "M",
-            price: 480000,
-            compare_price: null,
-            quantity: 2,
-            stock: 3,
-        },
-    ])
+    const { cart, updateItem, removeItem } = useCart()
 
-    const handleQuantityChange = (id: number, quantity: number) => {
-        setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)))
+    const items = cart?.items ?? []
+
+    const handleQuantityChange = async (sku: string, quantity: number) => {
+        if (quantity < 1) return
+
+        await updateItem(sku, quantity)
     }
 
-    const handleRemove = (id: number) => {
-        setItems((prev) => prev.filter((item) => item.id !== id))
+    const handleRemove = async (sku: string) => {
+        await removeItem(sku)
     }
 
     const handleCheckout = () => {
-        console.log("در حال انتقال به صفحه‌ی تسویه‌حساب با آیتم‌های:", items)
+        console.log("checkout", cart)
     }
 
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)

@@ -60,6 +60,7 @@ export interface ProductDetail {
     featured: boolean
     collections: ProductCollection[]
     images: ProductImage[]
+    audio: string
     variants: ProductVariant[]
     is_in_wishlist: boolean
     created_at: string

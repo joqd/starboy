@@ -14,23 +14,14 @@ import {
 import { formatPrice } from "@/lib/utils"
 import { Button } from "./ui/button"
 
-export type CartItem = {
-    id: number
-    title: string
-    image: string
-    size_name: string
-    price: number
-    compare_price?: number | null
-    quantity: number
-    stock: number
-}
+import type { CartItem } from "@/types/cart"
 
 type Props = {
     items: CartItem[]
     open: boolean
     onOpenChange: (open: boolean) => void
-    onQuantityChange: (id: number, quantity: number) => void
-    onRemove: (id: number) => void
+    onQuantityChange: (sku: string, quantity: number) => void
+    onRemove: (sku: string) => void
     onCheckout: () => void
     trigger?: ReactNode
 }
@@ -113,7 +104,7 @@ export default function CartSheet({
                                                 {item.image && (
                                                     <Image
                                                         src={item.image}
-                                                        alt={item.title}
+                                                        alt={item.product_title}
                                                         fill
                                                         sizes="64px"
                                                         className="object-cover"
@@ -124,11 +115,11 @@ export default function CartSheet({
                                             <div className="flex flex-1 flex-col gap-1.5">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <p className="line-clamp-2 text-[12.5px] leading-tight font-semibold text-foreground">
-                                                        {item.title}
+                                                        {item.product_title}
                                                     </p>
                                                     <Button
                                                         variant={"ghost"}
-                                                        onClick={() => onRemove(item.id)}
+                                                        onClick={() => onRemove(item.sku)}
                                                         aria-label="حذف از سبد خرید"
                                                         className="ghost shrink-0 transition hover:text-destructive active:scale-90"
                                                     >
@@ -137,7 +128,7 @@ export default function CartSheet({
                                                 </div>
 
                                                 <span className="w-fit rounded-full border border-border/70 bg-muted/70 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                                    سایز {item.size_name}
+                                                    سایز {item.size}
                                                 </span>
 
                                                 <div className="mt-auto flex items-center justify-between">
@@ -145,7 +136,7 @@ export default function CartSheet({
                                                         <Button
                                                             onClick={() =>
                                                                 onQuantityChange(
-                                                                    item.id,
+                                                                    item.sku,
                                                                     Math.max(1, item.quantity - 1)
                                                                 )
                                                             }
@@ -162,14 +153,17 @@ export default function CartSheet({
                                                         <Button
                                                             onClick={() =>
                                                                 onQuantityChange(
-                                                                    item.id,
+                                                                    item.sku,
                                                                     Math.min(
-                                                                        item.stock,
+                                                                        item.available_stock,
                                                                         item.quantity + 1
                                                                     )
                                                                 )
                                                             }
-                                                            disabled={item.quantity >= item.stock}
+                                                            disabled={
+                                                                item.quantity >=
+                                                                item.available_stock
+                                                            }
                                                             aria-label="افزایش تعداد"
                                                             variant={"ghost"}
                                                             className="ghost flex h-7 w-7 items-center justify-center text-muted-foreground transition active:scale-90 disabled:opacity-40"
