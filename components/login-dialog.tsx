@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -11,27 +11,18 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, User, UserPen } from "lucide-react"
+
+import { User } from "lucide-react"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/toast"
-import {
-    fetchCurrentUser,
-    logout as logoutRequest,
-    requestLoginOtp,
-    verifyLoginOtp,
-} from "@/lib/api/auth"
-import type { User as UserType } from "@/types/user"
+import { requestLoginOtp, verifyLoginOtp, fetchCurrentUser } from "@/lib/api/auth"
 import { ApiError } from "@/lib/api/client"
+import { useAuth } from "@/hooks/use-auth"
+import { useUser } from "@/hooks/use-user"
+import { useCart } from "@/hooks/use-cart"
+import UserProfileDialog from "@/components/user-menu"
 
 const PHONE_REGEX = /^09\d{9}$/
 const OTP_LENGTH = 5
@@ -39,37 +30,17 @@ const OTP_LENGTH = 5
 type Step = "phone" | "otp"
 
 export function LoginDialog() {
-    // ---- session state -------------------------------------------------
-    const [user, setUser] = useState<UserType | null>(null)
-    const [checkingSession, setCheckingSession] = useState(true)
+    // ---- session state (shared across the app) --------------------------
+    const { user, checkingSession, isLoginOpen, setLoginOpen, completeLogin, logout } = useAuth()
 
     // ---- dialog / form state --------------------------------------------
-    const [open, setOpen] = useState(false)
     const [step, setStep] = useState<Step>("phone")
     const [phone, setPhone] = useState("")
     const [code, setCode] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
 
-    // Check for an existing session (sessionid cookie) once on mount.
-    useEffect(() => {
-        let cancelled = false
-
-        fetchCurrentUser()
-            .then((currentUser) => {
-                if (!cancelled) setUser(currentUser)
-            })
-            .catch(() => {
-                if (!cancelled) setUser(null)
-            })
-            .finally(() => {
-                if (!cancelled) setCheckingSession(false)
-            })
-
-        return () => {
-            cancelled = true
-        }
-    }, [])
+    const { resetCart } = useCart()
 
     const validatePhone = () => {
         if (!PHONE_REGEX.test(phone)) {
@@ -107,8 +78,7 @@ export function LoginDialog() {
             await verifyLoginOtp(phone, code)
             const currentUser = await fetchCurrentUser()
 
-            setUser(currentUser)
-            setOpen(false)
+            resetCart()
             setStep("phone")
             setPhone("")
             setCode("")
@@ -117,6 +87,10 @@ export function LoginDialog() {
                 type: "success",
                 description: "ورود با موفقیت انجام شد",
             })
+
+            // Sets the user, closes the dialog, and runs whatever action
+            // (e.g. checkout) was waiting on login — in that order.
+            completeLogin(currentUser)
         } catch (err) {
             setError(err instanceof ApiError ? err.message : "کد وارد شده صحیح نیست.")
         } finally {
@@ -134,21 +108,17 @@ export function LoginDialog() {
 
     // NOTE: we deliberately do NOT reset step/phone/code here. If the user
     // accidentally dismisses the dialog while on the OTP step, reopening it
-    // (e.g. via the login button) should resume right where they left off.
+    // (e.g. via the login button, or by triggering the checkout guard)
+    // should resume right where they left off.
     const handleOpenChange = (value: boolean) => {
-        setOpen(value)
+        setLoginOpen(value)
         if (value) setError("")
     }
 
     const handleLogout = async () => {
         try {
-            await logoutRequest()
-        } catch {
-            // Even if the request fails (e.g. session already expired
-            // server-side), there's nothing meaningful to do locally except
-            // drop the client-side user state below.
+            await logout()
         } finally {
-            setUser(null)
             toast.add({
                 type: "success",
                 description: "از حساب خود خارج شدید",
@@ -156,45 +126,23 @@ export function LoginDialog() {
         }
     }
 
+    const { changeName, changeAvatar } = useUser()
+
     // ---- authenticated: avatar + menu -----------------------------------
     if (!checkingSession && user) {
-        const initials = (user.full_name?.trim() || user.phone).slice(0, 2)
-
         return (
-            <DropdownMenu>
-                <DropdownMenuTrigger
-                    render={
-                        <Button variant="outline" size="icon" >
-                            <Avatar className="h-[1.8rem] w-[1.8rem]">
-                                <AvatarImage src={user.avatar} />
-                                <AvatarFallback className="text-xs font-bold">
-                                    {initials}
-                                </AvatarFallback>
-                            </Avatar>
-                        </Button>
-                    }
-                />
-
-                <DropdownMenuContent className={"w-48"} dir="rtl" align="start">
-                    <DropdownMenuItem className={"cursor-pointer"} disabled>
-                        <UserPen className="ml-2 h-4 w-4" />
-                        ویرایش اطلاعات
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem className={"cursor-pointer"} onClick={handleLogout}>
-                        <LogOut className="ml-2 h-4 w-4" />
-                        خروج از حساب
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <UserProfileDialog
+                user={user}
+                onNameChange={changeName}
+                onAvatarChange={changeAvatar}
+                onLogout={handleLogout}
+            />
         )
     }
 
     // ---- unauthenticated / still checking: login button + dialog --------
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={isLoginOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger
                 render={
                     <Button variant="outline" size="icon" disabled={checkingSession}>
@@ -203,7 +151,7 @@ export function LoginDialog() {
                 }
             />
 
-            <DialogContent dir="rtl" className="sm:max-w-sm ">
+            <DialogContent dir="rtl" className="sm:max-w-sm">
                 {step === "phone" ? (
                     <>
                         <DialogHeader>

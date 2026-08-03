@@ -20,7 +20,8 @@ import { useAudio } from "@/hooks/use-audio"
 
 type RepeatMode = "off" | "all" | "one"
 
-const SPRING = { type: "spring" as const, stiffness: 360, damping: 32 }
+const SPRING = { type: "spring" as const, stiffness: 600, damping: 48 }
+const SPRING_2 = { type: "spring" as const, stiffness: 500, damping: 48 }
 
 function formatTime(totalSeconds: number) {
     if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return "0:00"
@@ -145,7 +146,7 @@ export function MusicPlayer() {
     const progress = duration ? (currentTime / duration) * 100 : 0
 
     return (
-        <>
+        <main>
             {currentAudio && <audio ref={audioRef} preload="metadata" />}
 
             <AnimatePresence>
@@ -153,27 +154,27 @@ export function MusicPlayer() {
                     (minimized ? (
                         <motion.button
                             key="mini-tab"
-                            initial={{ y: 56, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 56, opacity: 0 }}
-                            transition={SPRING}
+                            initial={{ y: 56 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 56 }}
+                            transition={SPRING_2}
                             onClick={() => setMinimized(false)}
                             aria-label="بازکردن پلیر"
-                            className="fixed bottom-0 left-1/2 z-9999 flex w-20 -translate-x-1/2 justify-center rounded-t-xl border-t border-r border-l border-white/15 bg-pink-100/80 px-5 py-2 shadow-lg backdrop-blur-2xl backdrop-saturate-150 dark:bg-background/60"
+                            className="fixed bottom-0 left-1/2 z-9999 flex w-20 -translate-x-1/2 justify-center rounded-t-xl border-t border-r border-l border-white/15 bg-pink-100/80 px-5 py-1.5 backdrop-blur-2xl backdrop-saturate-150 dark:bg-background/60"
                         >
-                            <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+                            <ChevronUp className="h-3.5 w-3.5 text-foreground" />
                         </motion.button>
                     ) : (
                         <motion.div
                             key="player"
-                            initial={{ y: 90, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 90, opacity: 0 }}
+                            initial={{ y: 180 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 180 }}
                             transition={SPRING}
-                            className="fixed bottom-4 left-1/2 z-9999 w-100 -translate-x-1/2 overflow-hidden rounded-[26px] border border-white/15 bg-background/55 shadow-2xl backdrop-blur-2xl backdrop-saturate-150"
+                            className="fixed bottom-2 left-1/2 z-9999 w-xs max-w-100 -translate-x-1/2 overflow-hidden rounded-3xl border border-white/15 bg-pink-200/70 backdrop-blur-3xl backdrop-saturate-150 lg:w-full dark:bg-background/55"
                         >
                             <div className="flex items-center gap-2.5 px-3 pt-3">
-                                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl bg-muted">
+                                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted">
                                     {currentAudio.cover && (
                                         <Image
                                             src={currentAudio.cover}
@@ -189,10 +190,10 @@ export function MusicPlayer() {
                                 </div>
 
                                 <div className="font-inter min-w-0 flex-1">
-                                    <p className="truncate text-[12px] font-semibold text-foreground">
+                                    <p className="truncate text-[13px] font-semibold text-foreground">
                                         {currentAudio.title}
                                     </p>
-                                    <p className="truncate text-[10.5px] text-muted-foreground">
+                                    <p className="truncate text-[11.5px] opacity-80">
                                         {currentAudio.artist}
                                     </p>
                                 </div>
@@ -200,7 +201,7 @@ export function MusicPlayer() {
                                 <button
                                     onClick={() => setMinimized(true)}
                                     aria-label="کوچک‌کردن پلیر"
-                                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-70 transition hover:opacity-100 active:scale-90"
+                                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-foreground opacity-70 transition hover:opacity-100 active:scale-90"
                                 >
                                     <ChevronDown className="h-3.5 w-3.5" />
                                 </button>
@@ -208,7 +209,7 @@ export function MusicPlayer() {
                                 <button
                                     onClick={handleClose}
                                     aria-label="بستن پلیر"
-                                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-70 transition hover:opacity-100 active:scale-90"
+                                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-foreground opacity-70 transition hover:opacity-100 active:scale-90"
                                 >
                                     <X className="h-3.5 w-3.5" />
                                 </button>
@@ -230,7 +231,7 @@ export function MusicPlayer() {
                                         style={{ left: `${progress}%` }}
                                     />
                                 </div>
-                                <div className="font-inter mt-0.5 flex items-center justify-between text-[9px] text-muted-foreground tabular-nums">
+                                <div className="font-inter mt-0.5 flex items-center justify-between text-[9px] text-foreground tabular-nums">
                                     <span>{formatTime(currentTime)}</span>
                                     <span>{formatTime(duration)}</span>
                                 </div>
@@ -241,7 +242,7 @@ export function MusicPlayer() {
                                     onClick={() => setShuffle((s) => !s)}
                                     aria-label="پخش تصادفی"
                                     aria-pressed={shuffle}
-                                    className="flex h-7 w-7 flex-col items-center justify-center gap-0.5 text-muted-foreground transition active:scale-90"
+                                    className="flex h-7 w-7 flex-col items-center justify-center gap-0.5 text-foreground transition active:scale-90"
                                 >
                                     <Shuffle
                                         className={cn("h-3 w-3", shuffle && "text-foreground")}
@@ -301,6 +302,6 @@ export function MusicPlayer() {
                         </motion.div>
                     ))}
             </AnimatePresence>
-        </>
+        </main>
     )
 }

@@ -30,7 +30,7 @@ function ToastViewport({ className, ...props }: ToastPrimitive.Viewport.Props) {
             dir="rtl"
             data-slot="toast-viewport"
             className={cn(
-                "pointer-events-none fixed z-50 flex max-h-screen w-full flex-col-reverse p-4 outline-none sm:flex-col",
+                "pointer-events-none fixed z-99999 flex max-h-screen w-full flex-col-reverse p-4 outline-none sm:flex-col",
                 "bottom-0 left-1/2 mb-3 max-w-[420px] -translate-x-1/2",
                 className
             )}

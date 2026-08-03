@@ -36,6 +36,21 @@ export function AmbientGlow() {
                     ease: "easeInOut",
                 }}
             />
+
+            {/* Bottom Center Glow */}
+            {/* <motion.div
+                className="absolute -bottom-150 left-1/2 h-220 w-220 -translate-x-1/2 rounded-full bg-violet-500/30 blur-[220px]"
+                animate={{
+                    y: [0, -25, 0],
+                    opacity: [0.2, 0.4, 0.2],
+                    scale: [1, 1.05, 1],
+                }}
+                transition={{
+                    duration: 26,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                }}
+            /> */}
         </div>
     )
 }

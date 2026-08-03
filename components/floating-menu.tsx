@@ -44,8 +44,10 @@ function PlayRandomButton() {
 
 function MenuItems() {
     return (
-        <div className="flex space-x-2">
-            <PlayRandomButton />
+        <div className="flex items-center space-x-2">
+            <div className="hidden lg:block">
+                <PlayRandomButton />
+            </div>
             <Cart />
             <ModeToggle />
 

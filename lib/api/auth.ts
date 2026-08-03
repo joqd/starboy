@@ -26,3 +26,21 @@ export function fetchCurrentUser(): Promise<User> {
         method: "GET",
     })
 }
+
+export function updateUserName(full_name: string): Promise<User> {
+    return request<User>("/api/auth/me/", {
+        method: "PATCH",
+        body: JSON.stringify({ full_name }),
+    })
+}
+
+export function updateUserAvatar(file: File): Promise<User> {
+    const formData = new FormData()
+
+    formData.append("avatar", file)
+
+    return request<User>("/api/auth/me/", {
+        method: "PATCH",
+        body: formData,
+    })
+}

@@ -48,7 +48,9 @@ export default async function request<T>(path: string, options: RequestInit = {}
 
     const headers = new Headers(options.headers)
 
-    headers.set("Content-Type", "application/json")
+    if (!(options.body instanceof FormData)) {
+        headers.set("Content-Type", "application/json")
+    }
 
     if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
         await ensureCsrfCookie()

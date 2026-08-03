@@ -21,7 +21,7 @@ export function updateCartItemQuantity(sku: string, quantity: number): Promise<C
     })
 }
 
-export function RemoveItemFromCart(sku: string): Promise<Cart> {
+export function removeItemFromCart(sku: string): Promise<Cart> {
     return request<Cart>(`/api/cart/items/${sku}/`, {
         method: "DELETE",
     })

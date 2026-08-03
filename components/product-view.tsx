@@ -20,7 +20,6 @@ import type { ProductDetail } from "@/types/product"
 import { Button } from "./ui/button"
 import { Separator } from "./ui/separator"
 import { ButtonGroup } from "@/components/ui/button-group"
-import { addItemToCart } from "@/lib/api/cart"
 import { useCart } from "@/hooks/use-cart"
 import { useAudio } from "@/hooks/use-audio"
 
@@ -51,10 +50,10 @@ export default function ProductView({ product }: Props) {
     const [quantity, setQuantity] = useState(1)
     const [wishlisted, setWishlisted] = useState(product.is_in_wishlist)
     const [zoomedIndex, setZoomedIndex] = useState<number | null>(null)
+    const [addToCartError, setAddToCartError] = useState<string | null>(null)
 
     const selectedVariant = sortedVariants.find((v) => v.id === selectedVariantId) ?? null
     const productHasStock = sortedVariants.some((v) => v.stock > 0 && v.is_active)
-    const canAddToCart = selectedVariant !== null && selectedVariant.stock > 0
 
     const displayPrice = selectedVariant?.price ?? sortedVariants[0]?.price ?? 0
     const comparePrice = selectedVariant?.compare_price ?? sortedVariants[0]?.compare_price ?? null
@@ -63,8 +62,28 @@ export default function ProductView({ product }: Props) {
             ? Math.round(((comparePrice - displayPrice) / comparePrice) * 100)
             : null
 
-    const { addItem } = useCart()
+    const { addItem, getItemQuantity, isPending } = useCart()
     const { setAudio, setPlaying } = useAudio()
+
+    // The cart is managed server-side, so "how many can I add" has to account
+    // for whatever quantity of this exact variant is already in the cart.
+    const quantityInCart = selectedVariant ? getItemQuantity(selectedVariant.sku) : 0
+    const availableToAdd = selectedVariant ? Math.max(0, selectedVariant.stock - quantityInCart) : 0
+    const isVariantPending = selectedVariant ? isPending(selectedVariant.sku) : false
+    const canAddToCart =
+        selectedVariant !== null &&
+        selectedVariant.is_active &&
+        availableToAdd > 0 &&
+        !isVariantPending
+
+    // Reset the quantity selector whenever the chosen variant (or its
+    // available stock) changes, so a leftover value can't sneak past the
+    // new variant's limit.
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setAddToCartError(null)
+        setQuantity(1)
+    }, [selectedVariantId, availableToAdd])
 
     const handlePlayAudio = () => {
         if (!product.audio) return
@@ -73,9 +92,21 @@ export default function ProductView({ product }: Props) {
     }
 
     const handleAddToCart = async () => {
-        if (!selectedVariant) return
+        if (!selectedVariant || isVariantPending) return
 
-        await addItem(selectedVariant.sku, quantity)
+        const quantityToAdd = Math.min(quantity, availableToAdd)
+        if (quantityToAdd <= 0) {
+            setAddToCartError("موجودی این سایز کافی نیست")
+            return
+        }
+
+        setAddToCartError(null)
+        try {
+            await addItem(selectedVariant.sku, quantityToAdd)
+            setQuantity(1)
+        } catch {
+            setAddToCartError("افزودن به سبد خرید با خطا مواجه شد، دوباره تلاش کنید")
+        }
     }
 
     return (
@@ -190,8 +221,9 @@ export default function ProductView({ product }: Props) {
                         <div className="flex items-center rounded-lg border border-border bg-background">
                             <Button
                                 variant={"ghost"}
+                                disabled={quantity <= 1}
                                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90"
+                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90 disabled:opacity-40"
                                 aria-label="کاهش تعداد"
                             >
                                 <Minus className="h-3.5 w-3.5" />
@@ -201,8 +233,9 @@ export default function ProductView({ product }: Props) {
                             </span>
                             <Button
                                 variant={"ghost"}
-                                onClick={() => setQuantity((q) => q + 1)}
-                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90"
+                                disabled={quantity >= availableToAdd}
+                                onClick={() => setQuantity((q) => Math.min(availableToAdd, q + 1))}
+                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90 disabled:opacity-40"
                                 aria-label="افزایش تعداد"
                             >
                                 <Plus className="h-3.5 w-3.5" />
@@ -219,16 +252,26 @@ export default function ProductView({ product }: Props) {
                                     : "cursor-not-allowed bg-muted text-muted-foreground"
                             )}
                         >
-                            {canAddToCart ? (
+                            {isVariantPending ? (
+                                "در حال افزودن..."
+                            ) : canAddToCart ? (
                                 "افزودن به سبد خرید"
                             ) : (
                                 <>
                                     <Lock className="h-3.5 w-3.5" strokeWidth={1.8} />
-                                    ناموجود
+                                    {selectedVariant &&
+                                    quantityInCart > 0 &&
+                                    selectedVariant.stock > 0
+                                        ? "همه‌ی موجودی در سبد شماست"
+                                        : "ناموجود"}
                                 </>
                             )}
                         </Button>
                     </div>
+
+                    {addToCartError && (
+                        <p className="text-[11px] font-medium text-destructive">{addToCartError}</p>
+                    )}
 
                     {product.description && (
                         <div className="border-t pt-4">
@@ -383,7 +426,7 @@ function Lightbox({
         }
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen])
+    }, [isOpen, onClose])
 
     const SWIPE_OFFSET_THRESHOLD = 42
     const SWIPE_VELOCITY_THRESHOLD = 380

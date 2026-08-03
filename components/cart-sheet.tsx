@@ -11,8 +11,10 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
+import { toast } from "@/components/ui/toast"
 import { formatPrice } from "@/lib/utils"
 import { Button } from "./ui/button"
+import { useAuth } from "@/hooks/use-auth"
 
 import type { CartItem } from "@/types/cart"
 
@@ -22,7 +24,6 @@ type Props = {
     onOpenChange: (open: boolean) => void
     onQuantityChange: (sku: string, quantity: number) => void
     onRemove: (sku: string) => void
-    onCheckout: () => void
     trigger?: ReactNode
 }
 
@@ -32,9 +33,10 @@ export default function CartSheet({
     onOpenChange,
     onQuantityChange,
     onRemove,
-    onCheckout,
     trigger,
 }: Props) {
+    const { user, checkingSession, openLogin } = useAuth()
+
     const isEmpty = items.length === 0
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const compareTotal = items.reduce(
@@ -42,6 +44,26 @@ export default function CartSheet({
         0
     )
     const totalSaved = compareTotal - subtotal
+
+    const showCheckoutComingSoon = () => {
+        toast.add({
+            type: "success",
+            description:
+                "امکان تسویه‌حساب هنوز آماده نشده است. به محض تکمیل این بخش، به شما اطلاع‌رسانی خواهیم داد.",
+        })
+    }
+
+    const handleCheckout = () => {
+        // Not signed in: close the cart, send them to login, and resume
+        // checkout automatically the moment they finish logging in.
+        if (!user) {
+            onOpenChange(false)
+            openLogin(showCheckoutComingSoon)
+            return
+        }
+
+        showCheckoutComingSoon()
+    }
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -218,7 +240,11 @@ export default function CartSheet({
                                 </span>
                             </div>
 
-                            <Button className={"w-full"} onClick={onCheckout}>
+                            <Button
+                                className={"w-full"}
+                                onClick={handleCheckout}
+                                disabled={checkingSession}
+                            >
                                 تسویه حساب
                             </Button>
 
