@@ -2,22 +2,28 @@
 
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
+import { Button } from "./ui/button"
 
 export function ModeToggle() {
     const { setTheme } = useTheme()
 
     return (
         <div>
-            <div
-                className="ghost hidden cursor-pointer dark:flex"
+            <Button
+                variant={"outline"}
+                className="hidden cursor-pointer dark:flex"
                 onClick={() => setTheme("light")}
             >
                 <Sun className="h-[1.2rem] w-[1.2rem]" />
-            </div>
+            </Button>
 
-            <div className="ghost cursor-pointer dark:hidden" onClick={() => setTheme("dark")}>
+            <Button
+                variant={"outline"}
+                className="cursor-pointer dark:hidden"
+                onClick={() => setTheme("dark")}
+            >
                 <Moon className="h-[1.2rem] w-[1.2rem]" />
-            </div>
+            </Button>
         </div>
     )
 }

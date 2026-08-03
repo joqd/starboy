@@ -164,7 +164,7 @@ export function LoginDialog() {
             <DropdownMenu>
                 <DropdownMenuTrigger
                     render={
-                        <Button variant="outline" size="icon" className="rounded-full">
+                        <Button variant="outline" size="icon" >
                             <Avatar className="h-[1.8rem] w-[1.8rem]">
                                 <AvatarImage src={user.avatar} />
                                 <AvatarFallback className="text-xs font-bold">
@@ -197,18 +197,13 @@ export function LoginDialog() {
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger
                 render={
-                    <Button
-                        className={"ghost"}
-                        variant="ghost"
-                        size="icon"
-                        disabled={checkingSession}
-                    >
+                    <Button variant="outline" size="icon" disabled={checkingSession}>
                         <User className="h-[1.2rem] w-[1.2rem]" />
                     </Button>
                 }
             />
 
-            <DialogContent dir="rtl" className="sm:max-w-sm">
+            <DialogContent dir="rtl" className="sm:max-w-sm ">
                 {step === "phone" ? (
                     <>
                         <DialogHeader>

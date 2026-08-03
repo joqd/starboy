@@ -93,7 +93,7 @@ export default function ProductView({ product }: Props) {
                     "border lg:h-full lg:w-105 lg:flex-none lg:justify-center lg:border-l xl:w-115"
                 )}
             >
-                <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 lg:flex-none lg:px-8 lg:py-10">
+                <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 lg:mx-0 lg:flex-none lg:px-8 lg:py-10">
                     <Link
                         href="/"
                         className="flex w-fit items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground"

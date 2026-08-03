@@ -7,64 +7,60 @@ import { LoginDialog } from "./login-dialog"
 import { usePathname } from "next/navigation"
 import StarboyLogo from "./starboy-logo"
 import Cart from "./cart"
+import { Button } from "./ui/button"
 import { useAudio } from "@/hooks/use-audio"
+import { cn } from "@/lib/utils"
 
 function PlayRandomButton() {
-    const { isPlaying, random, setPlaying } = useAudio()
-
-    if (isPlaying) return null
+    const { currentAudio, random, setPlaying } = useAudio()
 
     const handleClick = async () => {
         const audio = await random()
         if (audio) setPlaying(true)
     }
 
+    const isVisible = !currentAudio
+
     return (
-        <div className="flex items-center">
-            <button
+        <div
+            className={cn(
+                "flex transition-all duration-300",
+                isVisible
+                    ? "w-9 scale-100 opacity-100"
+                    : "pointer-events-none w-0 scale-75 opacity-0"
+            )}
+        >
+            <Button
+                variant="outline"
+                size="icon"
                 onClick={handleClick}
                 aria-label="پخش موزیک تصادفی"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/80 transition hover:text-foreground active:scale-90"
             >
-                <Music className="h-4 w-4" />
-            </button>
+                <Music className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
         </div>
     )
 }
 
 function MenuItems() {
     return (
-        <div className="flex space-x-4">
+        <div className="flex space-x-2">
             <PlayRandomButton />
+            <Cart />
+            <ModeToggle />
 
-            <div className="flex items-center">
-                <LoginDialog />
-            </div>
-            <div className="flex items-center">
-                <Cart />
-            </div>
-            <div className="flex items-center">
-                <ModeToggle />
-            </div>
+            <Separator className="" orientation="vertical" />
+            <LoginDialog />
         </div>
     )
 }
 
 export default function FloatingMenu() {
-    const pathname = usePathname()
-
     return (
         <div>
-            <div className="fixed right-6 bottom-6 z-9999 hidden lg:block">
+            <div className="fixed right-0 px-8 bottom-6 z-9999 hidden lg:block">
                 <div className="flex items-center">
                     <MenuItems />
-
-                    {pathname === "/" && (
-                        <>
-                            <Separator className="mx-3" orientation="vertical" />
-                            <div className="colored text-[10px]">اسکرول کنید</div>
-                        </>
-                    )}
                 </div>
             </div>
 

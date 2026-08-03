@@ -39,7 +39,7 @@ export default function Cart() {
             onRemove={handleRemove}
             onCheckout={handleCheckout}
             trigger={
-                <div className="ghost relative">
+                <div className="relative size-9 items-center rounded-lg outline">
                     <ShoppingBag className="h-[1.2rem] w-[1.2rem]" />
 
                     {itemCount > 0 && (
