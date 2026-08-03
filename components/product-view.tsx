@@ -48,7 +48,6 @@ export default function ProductView({ product }: Props) {
         sortedVariants.find((v) => v.is_active && v.stock > 0)?.id ?? null
     )
     const [quantity, setQuantity] = useState(1)
-    const [wishlisted, setWishlisted] = useState(product.is_in_wishlist)
     const [zoomedIndex, setZoomedIndex] = useState<number | null>(null)
     const [addToCartError, setAddToCartError] = useState<string | null>(null)
 
@@ -368,7 +367,7 @@ function Gallery({
                             </div>
 
                             {isLastVisible && remaining > 0 && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/75 via-black/50 to-black/30 text-lg font-bold text-white backdrop-blur-[1px]">
+                                <div className="absolute inset-0 flex items-center justify-center bg-linear-to-t from-black/75 via-black/50 to-black/30 text-lg font-bold text-white backdrop-blur-[1px]">
                                     +{remaining}
                                 </div>
                             )}
@@ -377,7 +376,7 @@ function Gallery({
                 })}
             </div>
 
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/55 via-black/20 to-transparent lg:hidden" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-black/55 via-black/20 to-transparent lg:hidden" />
 
             {!hasStock && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30">
