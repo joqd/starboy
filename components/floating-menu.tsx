@@ -58,7 +58,7 @@ function MenuItems() {
 export default function FloatingMenu() {
     return (
         <div>
-            <div className="fixed right-0 px-8 bottom-6 z-9999 hidden lg:block">
+            <div className="fixed right-0 bottom-6 z-9999 hidden px-8 lg:block">
                 <div className="flex items-center">
                     <MenuItems />
                 </div>

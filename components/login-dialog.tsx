@@ -175,7 +175,7 @@ export function LoginDialog() {
                     }
                 />
 
-                <DropdownMenuContent className={"w-48"} dir="rtl" align="end">
+                <DropdownMenuContent className={"w-48"} dir="rtl" align="start">
                     <DropdownMenuItem className={"cursor-pointer"} disabled>
                         <UserPen className="ml-2 h-4 w-4" />
                         ویرایش اطلاعات
