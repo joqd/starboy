@@ -4,7 +4,17 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
-import { ArrowRight, ChevronLeft, ChevronRight, Lock, Minus, Plus, X, ZoomIn } from "lucide-react"
+import {
+    ArrowRight,
+    ChevronLeft,
+    ChevronRight,
+    Lock,
+    Minus,
+    Music,
+    Plus,
+    X,
+    ZoomIn,
+} from "lucide-react"
 import { cn, formatPrice } from "@/lib/utils"
 import type { ProductDetail } from "@/types/product"
 import { Button } from "./ui/button"
@@ -12,6 +22,7 @@ import { Separator } from "./ui/separator"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { addItemToCart } from "@/lib/api/cart"
 import { useCart } from "@/hooks/use-cart"
+import { useAudio } from "@/hooks/use-audio"
 
 type Props = {
     product: ProductDetail
@@ -53,6 +64,13 @@ export default function ProductView({ product }: Props) {
             : null
 
     const { addItem } = useCart()
+    const { setAudio, setPlaying } = useAudio()
+
+    const handlePlayAudio = () => {
+        if (!product.audio) return
+        setAudio(product.audio)
+        setPlaying(true)
+    }
 
     const handleAddToCart = async () => {
         if (!selectedVariant) return
@@ -121,6 +139,16 @@ export default function ProductView({ product }: Props) {
                             </>
                         )}
                     </div>
+
+                    {product.audio && (
+                        <button
+                            onClick={handlePlayAudio}
+                            className="flex w-fit items-center gap-1.5 rounded-full border border-border/70 bg-muted/70 px-3 py-1.5 text-[11px] font-medium text-foreground transition active:scale-[0.97]"
+                        >
+                            <Music className="h-3 w-3" />
+                            پخش موزیک
+                        </button>
+                    )}
 
                     {sortedVariants.length > 0 && (
                         <div>
@@ -284,7 +312,7 @@ function Gallery({
                                     priority={i === 0}
                                     draggable={false}
                                     className={cn(
-                                        "object-cover transition-transform duration-500 ease-out select-none group-hover:scale-105",
+                                        "object-cover transition-transform duration-500 ease-out select-none",
                                         !hasStock && "blur-sm brightness-75 grayscale"
                                     )}
                                 />

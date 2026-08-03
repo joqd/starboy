@@ -1,3 +1,5 @@
+import { Audio } from "./audio"
+
 export type ProductList = {
     count: number
     next: string | null
@@ -60,7 +62,7 @@ export interface ProductDetail {
     featured: boolean
     collections: ProductCollection[]
     images: ProductImage[]
-    audio: string
+    audio: Audio | null
     variants: ProductVariant[]
     is_in_wishlist: boolean
     created_at: string

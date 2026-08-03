@@ -209,7 +209,7 @@ function Card({
                     </motion.div>
 
                     {!hasStock && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 bg-black/35">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 bg-black/35 text-white">
                             <Lock className="h-12 w-12" strokeWidth={1.8} />
                             <p className="text-lg font-medium tracking-wide">ناموجود</p>
                         </div>

@@ -5,6 +5,7 @@ import { AmbientGlow } from "@/components/ambient-glow"
 import localFont from "next/font/local"
 import { Inter } from "next/font/google"
 import FloatingMenu from "@/components/floating-menu"
+import { MusicPlayer } from "@/components/music-player"
 
 const YekanBakh = localFont({
     src: "./assets/fonts/YekanBakh-Regular.woff2",
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
             suppressHydrationWarning
             className={cn("antialiased", "font-sans", YekanBakh.className)}
         >
-            <body className={`${inter.variable} relative h-screen w-screen overflow-hidden`}>
+            <body className={`${inter.variable} relative h-screen w-screen overflow-hidden select-none`}>
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="dark"
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                 >
                     <AmbientGlow />
                     <FloatingMenu />
+                    <MusicPlayer />
 
                     {children}
                 </ThemeProvider>
