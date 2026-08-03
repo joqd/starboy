@@ -159,7 +159,7 @@ export function MusicPlayer() {
                             transition={SPRING}
                             onClick={() => setMinimized(false)}
                             aria-label="بازکردن پلیر"
-                            className="fixed bottom-0 left-1/2 z-9999 flex w-20 -translate-x-1/2 justify-center rounded-t-xl border-t border-r border-l border-white/15 bg-background/60 px-5 py-2 shadow-lg backdrop-blur-2xl backdrop-saturate-150"
+                            className="fixed bottom-0 left-1/2 z-9999 flex w-20 -translate-x-1/2 justify-center rounded-t-xl border-t border-r border-l border-white/15 bg-pink-100/80 px-5 py-2 shadow-lg backdrop-blur-2xl backdrop-saturate-150 dark:bg-background/60"
                         >
                             <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
                         </motion.button>
