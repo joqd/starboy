@@ -84,7 +84,7 @@ export function MusicPlayer() {
 
         resetAutoHideTimer()
         return clearAutoHideTimer
-    }, [currentAudio?.id, minimized, clearAutoHideTimer, resetAutoHideTimer])
+    }, [currentAudio, currentAudio?.id, minimized, clearAutoHideTimer, resetAutoHideTimer])
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
