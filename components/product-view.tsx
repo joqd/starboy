@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
@@ -11,6 +11,7 @@ import {
     Lock,
     Minus,
     Music,
+    Pause,
     Plus,
     X,
     ZoomIn,
@@ -62,7 +63,10 @@ export default function ProductView({ product }: Props) {
             : null
 
     const { addItem, getItemQuantity, isPending } = useCart()
-    const { setAudio, setPlaying } = useAudio()
+    const { currentAudio, isPlaying, setAudio, setPlaying } = useAudio()
+
+    const isThisAudio = currentAudio?.id === product.audio?.id
+    const isThisAudioPlaying = isThisAudio && isPlaying
 
     // The cart is managed server-side, so "how many can I add" has to account
     // for whatever quantity of this exact variant is already in the cart.
@@ -84,9 +88,25 @@ export default function ProductView({ product }: Props) {
         setQuantity(1)
     }, [selectedVariantId, availableToAdd])
 
-    const handlePlayAudio = () => {
-        if (!product.audio) return
+    // Capture whether the player was already on *before* this product was
+    // opened, so we only auto-start audio for a player that was silent —
+    // we never want to hijack a track the user already has going.
+    const wasPlayingOnEntry = useRef(isPlaying)
+
+    useEffect(() => {
+        if (!product.audio || wasPlayingOnEntry.current) return
         setAudio(product.audio)
+        setPlaying(true)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product.id])
+
+    const handleToggleAudio = () => {
+        if (!product.audio) return
+        if (isThisAudioPlaying) {
+            setPlaying(false)
+            return
+        }
+        if (!isThisAudio) setAudio(product.audio)
         setPlaying(true)
     }
 
@@ -115,6 +135,23 @@ export default function ProductView({ product }: Props) {
         >
             <div className="relative order-1 h-[46vh] w-full shrink-0 lg:order-2 lg:h-full lg:flex-1">
                 <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedIndex} />
+
+                {product.audio && (
+                    <button
+                        onClick={handleToggleAudio}
+                        aria-label={isThisAudioPlaying ? "توقف موزیک" : "پخش موزیک"}
+                        className="absolute top-4 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-90 backdrop-blur-md transition hover:opacity-100 active:scale-90"
+                    >
+                        {isThisAudioPlaying && (
+                            <span className="absolute inset-0 animate-ping rounded-full bg-primary/25" />
+                        )}
+                        {isThisAudioPlaying ? (
+                            <Pause className="relative h-4 w-4" />
+                        ) : (
+                            <Music className="relative h-4 w-4" />
+                        )}
+                    </button>
+                )}
             </div>
 
             <div
@@ -170,16 +207,6 @@ export default function ProductView({ product }: Props) {
                         )}
                     </div>
 
-                    {product.audio && (
-                        <button
-                            onClick={handlePlayAudio}
-                            className="flex w-fit items-center gap-1.5 rounded-full border border-border/70 bg-muted/70 px-3 py-1.5 text-[11px] font-medium text-foreground transition active:scale-[0.97]"
-                        >
-                            <Music className="h-3 w-3" />
-                            پخش موزیک
-                        </button>
-                    )}
-
                     {sortedVariants.length > 0 && (
                         <div>
                             <div className="mb-2.5 flex space-x-2 text-xs font-medium tracking-wide uppercase">
@@ -202,7 +229,7 @@ export default function ProductView({ product }: Props) {
                                             className={cn(
                                                 "font-inter relative flex items-center justify-center border text-xs font-semibold transition active:scale-[0.96]",
                                                 active
-                                                    ? "bg-primary text-background hover:bg-primary dark:text-pink-100"
+                                                    ? "bg-primary text-background hover:bg-primary dark:text-background"
                                                     : "bg-background text-foreground hover:bg-background",
                                                 disabled &&
                                                     "cursor-not-allowed border-border/60 bg-muted/60 text-muted-foreground line-through opacity-60"

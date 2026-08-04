@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import useSWR from "swr"
 
 import { getAudios, getNextAudio, getPrevAudio, getRandomAudio } from "@/lib/api/audio"
@@ -9,30 +10,30 @@ export function useAudio() {
 
     const { currentAudio, isPlaying, setAudio, setPlaying } = useAudioPlayerStore()
 
-    const next = async () => {
+    const next = useCallback(async () => {
         if (!currentAudio) return
 
         const audio = await getNextAudio(currentAudio.id)
         setAudio(audio)
 
         return audio
-    }
+    }, [currentAudio, setAudio])
 
-    const previous = async () => {
+    const previous = useCallback(async () => {
         if (!currentAudio) return
 
         const audio = await getPrevAudio(currentAudio.id)
         setAudio(audio)
 
         return audio
-    }
+    }, [currentAudio, setAudio])
 
-    const random = async () => {
+    const random = useCallback(async () => {
         const audio = await getRandomAudio()
         setAudio(audio)
 
         return audio
-    }
+    }, [setAudio])
 
     return {
         audios: data?.results ?? [],

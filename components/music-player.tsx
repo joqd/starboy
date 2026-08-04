@@ -23,6 +23,10 @@ type RepeatMode = "off" | "all" | "one"
 const SPRING = { type: "spring" as const, stiffness: 600, damping: 48 }
 const SPRING_2 = { type: "spring" as const, stiffness: 500, damping: 48 }
 
+// How long the expanded player waits with no interaction before it
+// auto-minimizes itself.
+const AUTO_HIDE_DELAY = 6000
+
 function formatTime(totalSeconds: number) {
     if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return "0:00"
     const minutes = Math.floor(totalSeconds / 60)
@@ -53,6 +57,34 @@ export function MusicPlayer() {
     const handlePrevious = useCallback(async () => {
         await previous()
     }, [previous])
+
+    // Auto-minimize after a stretch of no interaction with the expanded
+    // player. Any pointer interaction inside it (play/pause, seek, skip,
+    // etc.) pushes the countdown back out via resetAutoHideTimer.
+    const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const clearAutoHideTimer = useCallback(() => {
+        if (hideTimerRef.current) {
+            clearTimeout(hideTimerRef.current)
+            hideTimerRef.current = null
+        }
+    }, [])
+
+    const resetAutoHideTimer = useCallback(() => {
+        clearAutoHideTimer()
+        hideTimerRef.current = setTimeout(() => setMinimized(true), AUTO_HIDE_DELAY)
+    }, [clearAutoHideTimer])
+
+    useEffect(() => {
+        // Nothing to hide when the player is already minimized or closed.
+        if (!currentAudio || minimized) {
+            clearAutoHideTimer()
+            return
+        }
+
+        resetAutoHideTimer()
+        return clearAutoHideTimer
+    }, [currentAudio?.id, minimized, clearAutoHideTimer, resetAutoHideTimer])
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -160,7 +192,7 @@ export function MusicPlayer() {
                             transition={SPRING_2}
                             onClick={() => setMinimized(false)}
                             aria-label="بازکردن پلیر"
-                            className="fixed bottom-0 left-1/2 z-9999 flex w-20 -translate-x-1/2 justify-center rounded-t-xl border-t border-r border-l border-white/15 bg-pink-100/80 px-5 py-1.5 backdrop-blur-2xl backdrop-saturate-150 dark:bg-background/60"
+                            className="fixed bottom-0 left-1/2 z-9999 flex w-20 -translate-x-1/2 justify-center rounded-t-xl border-t border-r border-l border-white/15 bg-rose-100 px-5 py-1.5 backdrop-blur-2xl backdrop-saturate-150 dark:bg-background/60"
                         >
                             <ChevronUp className="h-3.5 w-3.5 text-foreground" />
                         </motion.button>
@@ -171,7 +203,10 @@ export function MusicPlayer() {
                             animate={{ y: 0 }}
                             exit={{ y: 180 }}
                             transition={SPRING}
-                            className="fixed bottom-2 left-1/2 z-9999 w-xs max-w-100 -translate-x-1/2 overflow-hidden rounded-3xl border border-white/15 bg-pink-200/70 backdrop-blur-3xl backdrop-saturate-150 lg:w-full dark:bg-background/55"
+                            onPointerDownCapture={resetAutoHideTimer}
+                            onMouseEnter={clearAutoHideTimer}
+                            onMouseLeave={resetAutoHideTimer}
+                            className="fixed bottom-2 left-1/2 z-9999 w-xs max-w-100 -translate-x-1/2 overflow-hidden rounded-3xl border border-white/15 bg-rose-100 backdrop-blur-3xl backdrop-saturate-150 lg:w-full dark:bg-background/55"
                         >
                             <div className="flex items-center gap-2.5 px-3 pt-3">
                                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted">
@@ -261,7 +296,7 @@ export function MusicPlayer() {
                                 <button
                                     onClick={() => setPlaying(!isPlaying)}
                                     aria-label={isPlaying ? "توقف موزیک" : "پخش موزیک"}
-                                    className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-background transition active:scale-90 dark:text-pink-100"
+                                    className="mx-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-background transition active:scale-90 dark:text-white"
                                 >
                                     {isPlaying ? (
                                         <Pause className="h-3.5 w-3.5" fill="currentColor" />
@@ -273,7 +308,7 @@ export function MusicPlayer() {
                                 <button
                                     onClick={handleNext}
                                     aria-label="موزیک بعدی"
-                                    className="flex h-7 w-7 items-center justify-center text-foreground transition active:scale-90"
+                                    className="text-backgroun flex h-7 w-7 items-center justify-center transition active:scale-90"
                                 >
                                     <SkipForward className="h-3.5 w-3.5" fill="currentColor" />
                                 </button>
