@@ -221,9 +221,9 @@ export function MusicPlayer() {
                                     onClick={handleSeek}
                                     className="group relative h-2.5 w-full cursor-pointer"
                                 >
-                                    <div className="absolute top-1/2 h-[3px] w-full -translate-y-1/2 rounded-full bg-foreground/15" />
+                                    <div className="absolute top-1/2 h-0.75 w-full -translate-y-1/2 rounded-full bg-foreground/15" />
                                     <div
-                                        className="absolute top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary"
+                                        className="absolute top-1/2 h-0.75 -translate-y-1/2 rounded-full bg-primary"
                                         style={{ width: `${progress}%` }}
                                     />
                                     <div

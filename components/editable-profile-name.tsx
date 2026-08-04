@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Pencil } from "lucide-react"
 
 type Props = {
     value: string

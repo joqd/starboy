@@ -33,10 +33,6 @@ export default function Cart() {
         await removeItem(sku)
     }
 
-    const handleCheckout = () => {
-        console.log("checkout", cart)
-    }
-
     return (
         <CartSheet
             items={items}
@@ -44,7 +40,6 @@ export default function Cart() {
             onOpenChange={setOpen}
             onQuantityChange={handleQuantityChange}
             onRemove={handleRemove}
-            onCheckout={handleCheckout}
             trigger={
                 <div className="relative size-9 items-center rounded-lg outline">
                     <ShoppingBag className="h-[1.2rem] w-[1.2rem]" />
