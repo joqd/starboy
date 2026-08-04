@@ -16,7 +16,7 @@ interface StarboyLogoProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const StarboyLogo: React.FC<StarboyLogoProps> = ({
-    className = "fill-primary w-75 ml-6",
+    className = "fill-pink-400 dark:fill-pink-200 w-75 ml-6",
     style = {},
     fill = "#000000",
     width,
