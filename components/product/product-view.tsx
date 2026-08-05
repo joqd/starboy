@@ -255,8 +255,8 @@ export default function ProductView({ product }: Props) {
                             >
                                 <Minus className="h-3.5 w-3.5" />
                             </Button>
-                            <span className="font-inter w-5 text-center text-[12px] font-bold text-foreground tabular-nums">
-                                {quantity}
+                            <span className="w-5 text-center text-[12px] font-bold text-foreground tabular-nums">
+                                {formatPrice(quantity)}
                             </span>
                             <Button
                                 variant={"ghost"}

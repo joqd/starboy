@@ -124,12 +124,10 @@ export default function CartSheet({
                                         !!item.compare_price && item.compare_price > item.price
 
                                     return (
-                                        // items-stretch باعث می‌شود تصویر و محتوا هم‌ارتفاع شوند
                                         <div
                                             key={item.id}
                                             className="flex items-stretch gap-3 py-3.5 first:pt-1 last:pb-1"
                                         >
-                                            {/* 1. تصویر محصول - ارتفاع آن ۱۰۰٪ ارتفاع کل آیتم را می‌گیرد */}
                                             <div className="relative aspect-3/4 w-20 shrink-0 self-stretch overflow-hidden rounded-lg border border-border bg-muted/40">
                                                 {item.image && (
                                                     <Image
@@ -142,9 +140,7 @@ export default function CartSheet({
                                                 )}
                                             </div>
 
-                                            {/* 2. محتوای متنی و اکشن‌ها */}
                                             <div className="flex flex-1 flex-col justify-between gap-1.5">
-                                                {/* عنوان و دکمه حذف */}
                                                 <div className="flex items-start justify-between gap-2">
                                                     <h4 className="line-clamp-2 text-xs leading-snug font-medium text-foreground">
                                                         {item.product_title}
@@ -161,7 +157,6 @@ export default function CartSheet({
                                                     </Button>
                                                 </div>
 
-                                                {/* ویژگی‌ها (سایز) */}
                                                 {item.size && (
                                                     <div>
                                                         <Badge
@@ -173,7 +168,6 @@ export default function CartSheet({
                                                     </div>
                                                 )}
 
-                                                {/* کنترل تعداد + قیمت */}
                                                 <div className="mt-1 flex items-center justify-between">
                                                     <div className="flex items-center rounded-md border border-border bg-muted/20 p-0.5">
                                                         <Button
@@ -199,7 +193,7 @@ export default function CartSheet({
                                                         </Button>
 
                                                         <span className="w-6 text-center text-xs font-semibold text-foreground tabular-nums">
-                                                            {item.quantity}
+                                                            {formatPrice(item.quantity)}
                                                         </span>
 
                                                         <Button
