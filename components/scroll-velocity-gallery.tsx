@@ -373,10 +373,10 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                                     className="flex flex-col items-center gap-2 text-neutral-50"
                                     style={{
                                         textShadow: `
-                                0 1px 2px rgba(0,0,0,.9),
-                                0 0 8px rgba(0,0,0,.8),
-                                0 0 16px rgba(0,0,0,.5)
-                            `,
+                    0 1px 2px rgba(0,0,0,.9),
+                    0 0 8px rgba(0,0,0,.8),
+                    0 0 16px rgba(0,0,0,.5)
+                `,
                                     }}
                                 >
                                     <Lock className="h-12 w-12" strokeWidth={1.8} />
@@ -389,12 +389,21 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -8 }}
                                 transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                                className="pointer-events-none absolute z-0 hidden w-full rounded-t-2xl px-5 py-1.5 font-bold whitespace-nowrap text-neutral-50 backdrop-blur-xl xl:block"
+                                className="pointer-events-none absolute z-0 hidden w-full rounded-t-2xl px-5 py-1.5 font-bold whitespace-nowrap text-neutral-50 xl:block"
+                                style={{
+                                    textShadow: `
+										0 3px 6px rgba(0,0,0,.95),
+										0 0 12px rgba(0,0,0,.9),
+										0 0 24px rgba(0,0,0,.8),
+										0 0 32px rgba(0,0,0,.7)
+									`,
+                                    transition: "text-shadow 0.3s ease-in-out",
+                                }}
                             >
-                                <p className="text-md">{item.title}</p>
+                                <p className="text-lg">{item.title}</p>
 
                                 {item.variants?.[0] && (
-                                    <p className="mt-0.5 text-sm">
+                                    <p className="text-md mt-0.5">
                                         <span>{formatPrice(item.variants[0].price)}</span> تومان
                                     </p>
                                 )}
