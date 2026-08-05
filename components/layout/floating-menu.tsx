@@ -49,7 +49,7 @@ function MenuItems() {
             <Cart />
             <ModeToggle />
 
-            <Separator className="" orientation="vertical" />
+            <Separator orientation="vertical" />
             <LoginDialog />
         </div>
     )
