@@ -70,8 +70,6 @@ export default function FloatingMenu() {
                     <div dir="ltr">
                         <MenuItems />
                     </div>
-
-                    {/* <StarboyLogo className="w-40 text-[#efbe0a]" /> */}
                 </div>
             </div>
         </div>

@@ -223,7 +223,7 @@ function SectionHeading() {
             dir="ltr"
             className="absolute top-[max(90px,3vw)] left-[4vw] hidden select-none lg:block"
         >
-            <StarboyLogo className="w-98 text-[#e10430] dark:text-[#efbe0a]" />
+            <StarboyLogo className="w-98 text-primary" />
         </div>
     )
 }
