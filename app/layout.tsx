@@ -1,5 +1,5 @@
 import "./globals.css"
-import { ThemeProvider } from "@/components/providers/theme-provider"
+import { ThemeProvider } from "@/components/common/theme-provider"
 import { cn } from "@/lib/utils"
 import { AmbientGlow } from "@/components/layout/ambient-glow"
 import localFont from "next/font/local"
