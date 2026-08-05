@@ -1,5 +1,5 @@
 import { HeroImage } from "@/components/layout/hero-image"
-import ScrollVelocityGallery from "@/components/common/scroll-velocity-gallery"
+import ScrollVelocityGallery from "@/components/product/scroll-velocity-gallery"
 import MobileProductSlider from "@/components/product/mobile-product-slider"
 import { getLatestProducts } from "@/lib/api/product"
 

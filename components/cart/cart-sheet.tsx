@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
 
 import type { CartItem } from "@/types/cart"
+import { ScrollArea } from "../ui/scroll-area"
+import { Badge } from "../ui/badge"
 
 type Props = {
     items: CartItem[]
@@ -115,64 +117,68 @@ export default function CartSheet({
                     </div>
                 ) : (
                     <>
-                        <div dir="rtl" className="flex-1 overflow-y-auto px-5 py-4">
-                            <ul className="flex flex-col gap-4">
+                        <ScrollArea className="flex-1 px-4">
+                            <div dir="rtl" className="flex flex-col divide-y divide-border/60 py-2">
                                 {items.map((item) => {
                                     const hasDiscount =
                                         !!item.compare_price && item.compare_price > item.price
+
                                     return (
-                                        <li key={item.id} className="flex gap-3">
-                                            <div className="relative h-24 w-18 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+                                        // items-stretch باعث می‌شود تصویر و محتوا هم‌ارتفاع شوند
+                                        <div
+                                            key={item.id}
+                                            className="flex items-stretch gap-3 py-3.5 first:pt-1 last:pb-1"
+                                        >
+                                            {/* 1. تصویر محصول - ارتفاع آن ۱۰۰٪ ارتفاع کل آیتم را می‌گیرد */}
+                                            <div className="relative aspect-3/4 w-20 shrink-0 self-stretch overflow-hidden rounded-lg border border-border bg-muted/40">
                                                 {item.image && (
                                                     <Image
                                                         src={item.image}
                                                         alt={item.product_title}
                                                         fill
-                                                        sizes="64px"
+                                                        sizes="80px"
                                                         className="object-cover"
                                                     />
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-1 flex-col gap-1.5">
+                                            {/* 2. محتوای متنی و اکشن‌ها */}
+                                            <div className="flex flex-1 flex-col justify-between gap-1.5">
+                                                {/* عنوان و دکمه حذف */}
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <p className="line-clamp-2 text-[12.5px] leading-tight font-semibold text-foreground">
+                                                    <h4 className="line-clamp-2 text-xs leading-snug font-medium text-foreground">
                                                         {item.product_title}
-                                                    </p>
+                                                    </h4>
+
                                                     <Button
-                                                        variant={"ghost"}
+                                                        variant="ghost"
+                                                        size="icon"
                                                         onClick={() => onRemove(item.sku)}
-                                                        aria-label="حذف از سبد خرید"
-                                                        className="ghost shrink-0 transition hover:text-destructive active:scale-90"
+                                                        aria-label="حذف محصول"
+                                                        className="h-6 w-6 shrink-0 text-muted-foreground/70 hover:bg-destructive/10 hover:text-destructive"
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
                                                     </Button>
                                                 </div>
 
-                                                <span className="w-fit rounded-full border border-border/70 bg-muted/70 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                                    سایز {item.size}
-                                                </span>
-
-                                                <div className="mt-auto flex items-center justify-between">
-                                                    <div className="flex items-center gap-1 rounded-lg border border-border bg-background">
-                                                        <Button
-                                                            onClick={() =>
-                                                                onQuantityChange(
-                                                                    item.sku,
-                                                                    Math.max(1, item.quantity - 1)
-                                                                )
-                                                            }
-                                                            disabled={item.quantity <= 1}
-                                                            aria-label="کاهش تعداد"
-                                                            variant={"ghost"}
-                                                            className="ghost flex h-7 w-7 items-center justify-center text-muted-foreground transition active:scale-90 disabled:opacity-40"
+                                                {/* ویژگی‌ها (سایز) */}
+                                                {item.size && (
+                                                    <div>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="h-4 border-border/80 px-1.5 text-[10px] font-normal text-muted-foreground"
                                                         >
-                                                            <Minus className="h-3 w-3" />
-                                                        </Button>
-                                                        <span className="font-inter w-4 text-center text-[11px] font-bold text-foreground tabular-nums">
-                                                            {item.quantity}
-                                                        </span>
+                                                            سایز: {item.size}
+                                                        </Badge>
+                                                    </div>
+                                                )}
+
+                                                {/* کنترل تعداد + قیمت */}
+                                                <div className="mt-1 flex items-center justify-between">
+                                                    <div className="flex items-center rounded-md border border-border bg-muted/20 p-0.5">
                                                         <Button
+                                                            variant="ghost"
+                                                            size="icon"
                                                             onClick={() =>
                                                                 onQuantityChange(
                                                                     item.sku,
@@ -187,23 +193,42 @@ export default function CartSheet({
                                                                 item.available_stock
                                                             }
                                                             aria-label="افزایش تعداد"
-                                                            variant={"ghost"}
-                                                            className="ghost flex h-7 w-7 items-center justify-center text-muted-foreground transition active:scale-90 disabled:opacity-40"
+                                                            className="h-5 w-5 rounded text-foreground hover:bg-background"
                                                         >
                                                             <Plus className="h-3 w-3" />
                                                         </Button>
+
+                                                        <span className="w-6 text-center text-xs font-semibold text-foreground tabular-nums">
+                                                            {item.quantity}
+                                                        </span>
+
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() =>
+                                                                onQuantityChange(
+                                                                    item.sku,
+                                                                    Math.max(1, item.quantity - 1)
+                                                                )
+                                                            }
+                                                            disabled={item.quantity <= 1}
+                                                            aria-label="کاهش تعداد"
+                                                            className="h-5 w-5 rounded text-foreground hover:bg-background disabled:opacity-30"
+                                                        >
+                                                            <Minus className="h-3 w-3" />
+                                                        </Button>
                                                     </div>
 
-                                                    <div className="flex items-baseline gap-1.5">
+                                                    <div className="flex flex-col items-end">
                                                         {hasDiscount && (
-                                                            <span className="text-[10px] text-muted-foreground tabular-nums line-through">
+                                                            <span className="text-[10px] text-muted-foreground/80 tabular-nums line-through">
                                                                 {formatPrice(
                                                                     (item.compare_price as number) *
                                                                         item.quantity
                                                                 )}
                                                             </span>
                                                         )}
-                                                        <span className="text-[12.5px] font-bold text-foreground tabular-nums">
+                                                        <span className="text-xs font-bold text-foreground tabular-nums">
                                                             {formatPrice(
                                                                 item.price * item.quantity
                                                             )}
@@ -211,11 +236,11 @@ export default function CartSheet({
                                                     </div>
                                                 </div>
                                             </div>
-                                        </li>
+                                        </div>
                                     )
                                 })}
-                            </ul>
-                        </div>
+                            </div>
+                        </ScrollArea>
 
                         <div
                             dir="rtl"
