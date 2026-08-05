@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useCart } from "@/hooks/use-cart"
 import { useAudio } from "@/hooks/use-audio"
+import SizeGuide from "./size-guide"
 
 type Props = {
     product: ProductDetail
@@ -212,7 +213,7 @@ export default function ProductView({ product }: Props) {
                             <div className="mb-2.5 flex space-x-2 text-xs font-medium tracking-wide uppercase">
                                 <div>سایز</div>
                                 <Separator orientation="vertical" />
-                                <div>راهنمای سایز</div>
+                                <SizeGuide />
                             </div>
 
                             <ButtonGroup>
