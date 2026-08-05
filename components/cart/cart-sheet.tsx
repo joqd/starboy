@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet"
 import { toast } from "@/components/ui/toast"
 import { formatPrice } from "@/lib/utils"
-import { Button } from "./ui/button"
+import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
 
 import type { CartItem } from "@/types/cart"

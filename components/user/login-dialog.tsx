@@ -22,7 +22,7 @@ import { ApiError } from "@/lib/api/client"
 import { useAuth } from "@/hooks/use-auth"
 import { useUser } from "@/hooks/use-user"
 import { useCart } from "@/hooks/use-cart"
-import UserProfileDialog from "@/components/user-menu"
+import UserProfileDialog from "@/components/user/user-menu"
 
 const PHONE_REGEX = /^09\d{9}$/
 const OTP_LENGTH = 5

@@ -2,10 +2,10 @@
 
 import { Music } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
-import { ModeToggle } from "@/components/mode-toggle"
-import { LoginDialog } from "./login-dialog"
-import Cart from "./cart"
-import { Button } from "./ui/button"
+import { ModeToggle } from "@/components/layout/mode-toggle"
+import { LoginDialog } from "@/components/user/login-dialog"
+import Cart from "@/components/cart/cart"
+import { Button } from "@/components/ui/button"
 import { useAudio } from "@/hooks/use-audio"
 import { cn } from "@/lib/utils"
 

@@ -15,8 +15,8 @@ import { Separator } from "@/components/ui/separator"
 import { LogOut, Loader2, Package, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-import EditableProfileName from "./editable-profile-name"
-import AvatarUploader from "./avatar-uploader"
+import EditableProfileName from "@/components/user/editable-profile-name"
+import AvatarUploader from "@/components/user/avatar-uploader"
 import { useLogout } from "@/hooks/use-logout"
 import { User } from "@/types/user"
 

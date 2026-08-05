@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProduct } from "@/lib/api/product"
-import ProductView from "@/components/product-view"
+import ProductView from "@/components/product/product-view"
 
 type Props = {
     params: Promise<{

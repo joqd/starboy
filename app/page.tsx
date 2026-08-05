@@ -1,6 +1,6 @@
-import { HeroImage } from "@/components/hero-image"
-import ScrollVelocityGallery from "@/components/scroll-velocity-gallery"
-import MobileProductSlider from "@/components/mobile-product-slider"
+import { HeroImage } from "@/components/layout/hero-image"
+import ScrollVelocityGallery from "@/components/common/scroll-velocity-gallery"
+import MobileProductSlider from "@/components/product/mobile-product-slider"
 import { getLatestProducts } from "@/lib/api/product"
 
 export default async function Home() {
