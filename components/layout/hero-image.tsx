@@ -12,10 +12,10 @@ export function HeroImage() {
                 height={841}
                 loading="eager"
                 draggable={false}
-                className="w-130 object-contain select-none dark:hidden"
+                className="w-100 object-contain select-none dark:hidden"
             />
 
-            <div className="relative hidden aspect-657/841 w-130 dark:block">
+            <div className="relative hidden aspect-657/841 w-100 dark:block">
                 <Image
                     src="/images/baby-blue-movie.png"
                     alt="Starboy"
@@ -24,21 +24,6 @@ export function HeroImage() {
                     draggable={false}
                     className="object-contain grayscale select-none"
                 />
-                {/* <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                        background: "linear-gradient(160deg, #062987 0%, #0548c6 100%)",
-                        mixBlendMode: "color",
-                        WebkitMaskImage: "url(/images/baby-blue-movie.png)",
-                        WebkitMaskSize: "contain",
-                        WebkitMaskRepeat: "no-repeat",
-                        WebkitMaskPosition: "center",
-                        maskImage: "url(/images/baby-blue-movie.png)",
-                        maskSize: "contain",
-                        maskRepeat: "no-repeat",
-                        maskPosition: "center",
-                    }}
-                /> */}
             </div>
         </>
     )
