@@ -15,6 +15,13 @@ export function verifyLoginOtp(phone: string, code: string): Promise<void> {
     })
 }
 
+export function resendOtp(phone: string): Promise<void> {
+    return request<void>("/api/auth/resend/", {
+        method: "POST",
+        body: JSON.stringify({ phone }),
+    })
+}
+
 export function logout(): Promise<{ detail: string }> {
     return request<{ detail: string }>("/api/auth/logout/", {
         method: "POST",
