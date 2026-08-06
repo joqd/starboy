@@ -160,3 +160,32 @@ button {
     @apply border-border bg-background shadow-xs hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50;
     @apply inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4;
 }
+
+/* Add to app/globals.css */
+
+/*
+ * Simple, global cross-fade for every route change — no shared-element
+ * morphing, no elements changing position/size, just the old page fading
+ * out while the new one fades in, in place. Because next-view-transitions
+ * wraps document.startViewTransition() around every navigation done
+ * through its <Link> (see layout.tsx), and nothing anywhere in the app
+ * sets a per-element view-transition-name, the browser only ever creates
+ * ONE animated group: ::view-transition-*(root) — the whole page as a
+ * single flat snapshot. That's what keeps this to a pure fade with zero
+ * layout/position animation, on every page, automatically.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: ease-in-out;
+    /* Ensures this stays a plain opacity cross-fade only — no browser
+       adds its own transform/slide by default here, this is just being
+       explicit about intent. */
+    mix-blend-mode: normal;
+}
+
+/* Prevents the transition's layered snapshots from briefly introducing
+   scrollbars or a layout jump mid-animation. */
+::view-transition-group(root) {
+    overflow: clip;
+}

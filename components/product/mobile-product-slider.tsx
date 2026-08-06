@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import type { MouseEvent } from "react"
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { motion, useMotionValue, useSpring, useTransform, useMotionValueEvent } from "motion/react"
 import type { MotionValue, PanInfo } from "motion/react"
 import { Lock } from "lucide-react"

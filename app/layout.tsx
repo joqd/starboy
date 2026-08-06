@@ -8,6 +8,7 @@ import FloatingMenu from "@/components/layout/floating-menu"
 import { AuthProvider } from "@/hooks/use-auth"
 import { Toaster } from "@/components/ui/toast"
 import { MusicPlayer } from "@/components/music/music-player"
+import { ViewTransitions } from "next-view-transitions"
 
 const YekanBakh = localFont({
     src: "./assets/fonts/YekanBakh-Regular.woff2",
@@ -27,29 +28,31 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
     return (
-        <html
-            lang="en"
-            suppressHydrationWarning
-            className={cn("antialiased", "font-sans", YekanBakh.className)}
-        >
-            <body
-                className={`${inter.variable} relative h-screen w-screen overflow-hidden select-none`}
+        <ViewTransitions>
+            <html
+                lang="en"
+                suppressHydrationWarning
+                className={cn("antialiased", "font-sans", YekanBakh.className)}
             >
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="dark"
-                    enableSystem
-                    disableTransitionOnChange
+                <body
+                    className={`${inter.variable} relative h-screen w-screen overflow-hidden select-none`}
                 >
-                    <AmbientGlow />
-                    <AuthProvider>
-                        <FloatingMenu />
-                        {children}
-                    </AuthProvider>
-                    <MusicPlayer />
-                    <Toaster />
-                </ThemeProvider>
-            </body>
-        </html>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="dark"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <AmbientGlow />
+                        <AuthProvider>
+                            <FloatingMenu />
+                            {children}
+                        </AuthProvider>
+                        <MusicPlayer />
+                        <Toaster />
+                    </ThemeProvider>
+                </body>
+            </html>
+        </ViewTransitions>
     )
 }

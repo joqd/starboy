@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import {
