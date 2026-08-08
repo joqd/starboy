@@ -1,12 +1,9 @@
 services:
     web:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        image: ${DOCKERHUB_USERNAME:-rodxa}/${IMAGE_NAME:-starboy}:${IMAGE_TAG:-latest}
+        container_name: ${APP_NAME:-starboy}
+        restart: unless-stopped
         env_file:
             - .env
         ports:
-            - "${PORT:-3000}:3000"
-        restart: unless-stopped
+            - "${HOST_PORT:-3000}:3000"
