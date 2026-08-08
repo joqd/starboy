@@ -3,6 +3,8 @@ import ScrollVelocityGallery from "@/components/product/scroll-velocity-gallery"
 import MobileProductSlider from "@/components/product/mobile-product-slider"
 import { getLatestProducts } from "@/lib/api/product"
 
+export const dynamic = "force-dynamic"
+
 export default async function Home() {
     const latestProducts = await getLatestProducts()
 
