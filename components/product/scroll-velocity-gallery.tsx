@@ -219,10 +219,7 @@ export default function ScrollVelocityGallery({
 
 function SectionHeading() {
     return (
-        <div
-            dir="ltr"
-            className="absolute top-20 left-20 hidden select-none lg:block"
-        >
+        <div dir="ltr" className="absolute top-20 left-20 hidden select-none lg:block">
             <StarboyLogo className="w-120 text-primary" />
         </div>
     )
@@ -400,7 +397,9 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                                     transition: "text-shadow 0.3s ease-in-out",
                                 }}
                             >
-                                <p className="wrap-break-word whitespace-normal overflow-wrap-anywhere">{item.title}</p>
+                                <p className="overflow-wrap-anywhere wrap-break-word whitespace-normal">
+                                    {item.title}
+                                </p>
 
                                 {item.variants?.[0] && (
                                     <p className="text-md mt-0.5">

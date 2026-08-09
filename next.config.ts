@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
                 protocol: "https",
                 hostname: "api.starboy.ir",
             },
-			{
+            {
                 protocol: "https",
                 hostname: "c377485.parspack.net",
             },

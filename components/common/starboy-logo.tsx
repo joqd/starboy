@@ -17,7 +17,8 @@ const StarboyLogo = ({ className, width = 225, height = 50, ...props }: StarboyL
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => setMounted(true), [])
 
-    const src = mounted && resolvedTheme === "dark" ? "/brand/text/golden.svg" : "/brand/text/red.svg"
+    const src =
+        mounted && resolvedTheme === "dark" ? "/brand/text/golden.svg" : "/brand/text/red.svg"
 
     return (
         <Image
