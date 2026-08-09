@@ -29,15 +29,21 @@ const CARD_H = 340
 const STEP_Y = CARD_H + 34
 const BASE_Y = 0
 
-// Fixed-size render window, same trick as desktop: only ever mount
-// (2*LOOPS+1)*n cards no matter how far the user scrolls.
-const LOOPS = 1
+// Fixed render window: this many cards are mounted AT ALL TIMES, no matter
+// how large the catalog is. The previous approach mounted (2*LOOPS+1)*n —
+// three full copies of the whole product list — which was fine for a
+// handful of items but meant a 40-product catalog kept 120 <Image>s and
+// 120 sets of motion transforms alive and recalculating every frame, even
+// far off-screen. WINDOW_RADIUS=5 (11 cards) covers what's visible plus
+// enough buffer for the spring/wave overshoot, and costs the same whether
+// the catalog has 8 products or 800.
+const WINDOW_RADIUS = 5
 
 const PX_PER_STEP = STEP_Y
 const SCROLL_SPEED_MULTIPLIER = 1.6
 
-const POSITION_STIFFNESS = 60
-const POSITION_DAMPING = 20
+const POSITION_STIFFNESS = 80
+const POSITION_DAMPING = 30
 
 // Per-card ripple, vertical only.
 const WAVE_PHASE_STEP = (2 * Math.PI) / 5
@@ -80,11 +86,13 @@ export default function ScrollVelocityGalleryMobile({
         mass: 1,
     })
 
-    const [centerLoop, setCenterLoop] = useState(0)
+    // Tracks the nearest whole card index to the current scroll position.
+    // The window of mounted cards is recentered around this — it updates
+    // roughly once per card scrolled, not every frame.
+    const [centerIndex, setCenterIndex] = useState(0)
     useMotionValueEvent(smoothS, "change", (latest) => {
-        if (n === 0) return
-        const nearest = Math.round(latest / n)
-        if (nearest !== centerLoop) setCenterLoop(nearest)
+        const nearest = Math.round(latest)
+        if (nearest !== centerIndex) setCenterIndex(nearest)
     })
 
     const velocityFactor = useScrollVelocityFactor(smoothS)
@@ -97,15 +105,20 @@ export default function ScrollVelocityGalleryMobile({
 
     const groupY = useTransform(smoothS, (v) => -v * STEP_Y + BASE_Y)
 
+    // Always exactly 2*WINDOW_RADIUS+1 slots. Each slot's globalIndex only
+    // determines its Y position; the actual product shown is globalIndex
+    // wrapped (mod n) into the real list — that wrap is the entire "infinite"
+    // effect, and it costs nothing extra.
     const slots = useMemo(() => {
+        if (n === 0) return []
         const out: { item: ProductListItem; globalIndex: number }[] = []
-        for (let loop = centerLoop - LOOPS; loop <= centerLoop + LOOPS; loop++) {
-            for (let i = 0; i < n; i++) {
-                out.push({ item: items[i], globalIndex: loop * n + i })
-            }
+        for (let offset = -WINDOW_RADIUS; offset <= WINDOW_RADIUS; offset++) {
+            const globalIndex = centerIndex + offset
+            const itemIndex = ((globalIndex % n) + n) % n
+            out.push({ item: items[itemIndex], globalIndex })
         }
         return out
-    }, [items, n, centerLoop])
+    }, [items, n, centerIndex])
 
     if (n === 0) return null
 
@@ -123,9 +136,9 @@ export default function ScrollVelocityGalleryMobile({
                     onPan={handlePan}
                     role="list"
                 >
-                    {slots.map(({ item, globalIndex }, key) => (
+                    {slots.map(({ item, globalIndex }) => (
                         <Card
-                            key={`${item.id}-${key}`}
+                            key={globalIndex}
                             item={item}
                             globalIndex={globalIndex}
                             scrollPos={smoothS}
@@ -205,11 +218,10 @@ const Card = memo(function Card({
     )
     // scale, zIndex, and opacity are all compositor-only properties — the
     // browser can animate them on the GPU without ever repainting the
-    // card's pixels. This is what actually gives the "lift to front" look
-    // now: no per-frame boxShadow (that property forces a real repaint on
-    // every change, and with (2*LOOPS+1)*n cards mounted at once, an
-    // animated shadow on all of them was the single biggest cause of jank
-    // on mobile). A plain static shadow class below still sells the depth.
+    // card's pixels. This is what gives the "lift to front" look: no
+    // per-frame boxShadow (that property forces a real repaint on every
+    // change, and was the other big source of jank alongside the mount
+    // count). A plain static shadow class below still sells the depth.
     const scale = useTransform(elevation, (e) => 1 + e * 0.06)
     const zIndex = useTransform(elevation, (e) => Math.round(e * 100))
     const opacity = useTransform(elevation, (e) => 0.75 + e * 0.25)

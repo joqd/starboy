@@ -28,10 +28,22 @@ export type ProductImage = {
     is_primary: boolean
 }
 
+export type SizeAttributes = {
+    key: string
+    value: string
+    sort_order: number
+}
+
+export type ProductSize = {
+    name: string
+    label: string
+    attributes: SizeAttributes[]
+}
+
 export type ProductVariant = {
     id: number
     sku: string
-    size: number
+    size: ProductSize
     size_name: string
     price: number
     compare_price: number | null
