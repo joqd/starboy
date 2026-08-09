@@ -70,7 +70,7 @@ const MOBILE_BREAKPOINT = 768 // px, matches Tailwind's `md`
 // as slightly faster, more forceful input — which reads as a deeper wave —
 // without touching the wave math itself. Kept close to 1 on purpose; this
 // is a feel adjustment, not a redesign.
-const SCROLL_SPEED_MULTIPLIER = 1.15
+const SCROLL_SPEED_MULTIPLIER = 1.5
 
 // Underdamped springs — deliberately below critical damping (critical here
 // is ~2*sqrt(stiffness*mass)), so the group doesn't just ease toward its
