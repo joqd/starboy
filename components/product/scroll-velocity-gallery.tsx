@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { Link } from "next-view-transitions"
-import { useMemo, useState } from "react"
+import { memo, useEffect, useMemo, useRef, useState } from "react"
 import type { WheelEvent } from "react"
 import StarboyLogo from "../common/starboy-logo"
 import {
@@ -12,6 +12,7 @@ import {
     useMotionValue,
     useMotionValueEvent,
     useSpring,
+    useReducedMotion,
     animate,
 } from "motion/react"
 import { Lock } from "lucide-react"
@@ -21,29 +22,47 @@ import type { ScrollVelocityGalleryProps } from "@/types/gallery"
 import type { ProductListItem } from "@/types/product"
 import { cn, formatPrice } from "@/lib/utils"
 
-// Card size and per-step 3D translation: a card sits this many px away in
-// x/y/z from its neighbor. rotateY is fixed and identical on every card —
-// the "receding line" look comes purely from the translate step, not from
-// per-card rotation. x, z, and rotateY stay completely static per card (see
-// Plane below); only y carries the shared sine-wave ripple.
-const PLANE_W = 320
-const PLANE_H = 384
-const STEP = { x: 260, y: -90, z: -288 }
-const ROTATE_Y = -50
-const BASE_Y = 100
+// ---------------------------------------------------------------------------
+// Responsive geometry
+// ---------------------------------------------------------------------------
+// Card size and per-step 3D translation differ between desktop and mobile:
+// mobile gets a smaller card, a shorter step, and — the main ask — a much
+// gentler rotateY so the row reads as a soft, easy-to-scan tilt instead of a
+// steep desktop-style perspective on a small screen.
+type GalleryMetrics = {
+    planeW: number
+    planeH: number
+    step: { x: number; y: number; z: number }
+    rotateY: number
+    baseY: number
+    waveMaxYPx: number
+}
 
-// How many extra copies of the product list to render on each side of the
-// "real" one. This is a fixed-size RENDER WINDOW, not a travel limit: as the
-// user keeps scrolling past a full cycle, the window recenters (see
-// `centerLoop` below) instead of clamping, so scrolling is unbounded while
-// the number of mounted <Plane> nodes stays constant at (2*LOOPS+1)*n
-// forever, however long the user scrolls.
-const LOOPS = 1
+const DESKTOP_METRICS: GalleryMetrics = {
+    planeW: 320,
+    planeH: 384,
+    step: { x: 260, y: -90, z: -288 },
+    rotateY: -50,
+    baseY: 100,
+    waveMaxYPx: 36,
+}
+
+const MOBILE_METRICS: GalleryMetrics = {
+    planeW: 190,
+    planeH: 230,
+    step: { x: 148, y: -46, z: -150 },
+    // Gentle angle: roughly half the desktop tilt so cards face the viewer
+    // much more directly and stay legible on a small screen.
+    rotateY: -20,
+    baseY: 60,
+    waveMaxYPx: 20,
+}
+
+const MOBILE_BREAKPOINT = 768 // px, matches Tailwind's `md`
 
 // How many px of wheel/drag input correspond to one product-index step.
-// Using STEP.x keeps a roughly 1:1 feel between physical input and the
-// resulting on-screen travel.
-const PX_PER_STEP = STEP.x
+// Kept close to 1:1 with the card's own step so physical input and on-screen
+// travel feel matched, on both desktop and mobile geometry.
 
 // Small multiplier applied to raw wheel/drag input before it reaches the
 // spring. The wave's depth is driven by input velocity (see waveEnvelope
@@ -77,11 +96,43 @@ const POSITION_DAMPING = 20
 // 2*PI / WAVE_PHASE_STEP cards, so this is picked so ~6 cards — roughly a
 // screen's worth at the gallery's card spacing — show one complete cycle.
 const WAVE_PHASE_STEP = (2 * Math.PI) / 6
-// The wave's height at waveIntensity = 1 (the component's default). Every
-// card shares the same wavePhase/waveEnvelope, so raising this just makes
-// the one shared sine curve taller; it never moves any single card on its
-// own.
-const WAVE_MAX_Y_PX = 36
+
+// ---------------------------------------------------------------------------
+// Render window (this replaces the old "LOOPS" full-catalog mounting)
+// ---------------------------------------------------------------------------
+// How many cards to mount on EACH side of the centered index. This is a
+// fixed, small constant — completely independent of how many products are
+// in `items`. Only ~(2*RADIUS+1) <Plane> nodes are ever mounted, no matter
+// whether the catalog has 10 products or 500. This is what makes the strip
+// "infinite" cheaply: instead of tripling the whole list (the old
+// `(2*LOOPS+1)*n` approach, which scaled with catalog size and was the
+// actual source of the lag on weak devices), we keep a tiny sliding window
+// of cards around the current position and re-map each slot's item via
+// `index % n` as the window slides.
+// Radius is a balance: big enough that a card's image has time to finish
+// downloading before it scrolls into view (cards mount `radius` steps
+// before they're centered), small enough to stay cheap. Since the total
+// mounted count no longer scales with catalog size, this can comfortably be
+// larger than the bare minimum needed for the visible frustum.
+const DESKTOP_RADIUS = 12 // -> up to 25 mounted cards
+const MOBILE_RADIUS = 7 // -> up to 15 mounted cards, lighter for weak phones
+
+function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window === "undefined") return false
+        return window.innerWidth < breakpoint
+    })
+
+    useEffect(() => {
+        const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`)
+        const update = () => setIsMobile(mql.matches)
+        update()
+        mql.addEventListener("change", update)
+        return () => mql.removeEventListener("change", update)
+    }, [breakpoint])
+
+    return isMobile
+}
 
 export default function ScrollVelocityGallery({
     items,
@@ -93,13 +144,24 @@ export default function ScrollVelocityGallery({
     waveIntensity = 2.5,
 }: ScrollVelocityGalleryProps) {
     const n = items.length
+    const isMobile = useIsMobile()
+    const reduceMotion = useReducedMotion()
+
+    const metrics = useMemo(() => (isMobile ? MOBILE_METRICS : DESKTOP_METRICS), [isMobile])
+    const radius = isMobile ? MOBILE_RADIUS : DESKTOP_RADIUS
+    // On mobile (and for prefers-reduced-motion users) the wave costs real
+    // frame time for very little visual payoff on a small screen — turn it
+    // down instead of off, so the row still feels alive but cheaper to
+    // compute every frame.
+    const effectiveWaveIntensity = reduceMotion ? 0 : waveIntensity
 
     // Total input, in px, from wheel + drag combined — this is the single
-    // source of truth for "how far through the list are we". It is now
+    // source of truth for "how far through the list are we". It is
     // intentionally UNBOUNDED: nothing clamps it, so the user can scroll or
-    // drag forever in either direction. What used to keep this safe (the
-    // min/max clamp) is replaced by `centerLoop` below, which keeps the
-    // *rendered* window bounded instead of the input itself.
+    // drag forever in either direction. Safety no longer comes from
+    // clamping this value — it comes from the render window below, which
+    // keeps the *mounted* card count constant regardless of how far this
+    // drifts.
     const inputPx = useMotionValue(0)
 
     // Direction convention: scrolling/dragging DOWN or LEFT moves forward
@@ -113,7 +175,7 @@ export default function ScrollVelocityGallery({
         inputPx.set(inputPx.get() + (info.delta.y - info.delta.x) * SCROLL_SPEED_MULTIPLIER)
     }
 
-    const sTarget = useTransform(inputPx, (px) => px / PX_PER_STEP)
+    const sTarget = useTransform(inputPx, (px) => px / metrics.step.x)
     // The wave lives here: a single underdamped spring for the whole
     // group, not one per card — see the constants above.
     const smoothS = useSpring(sTarget, {
@@ -122,20 +184,23 @@ export default function ScrollVelocityGallery({
         mass: 1,
     })
 
-    // Which "loop" of the product list is currently centered under the
-    // camera, e.g. 0 while browsing the first pass through the list, 1
-    // once the user has scrolled a full extra cycle forward, -1 a full
-    // cycle backward, etc. `slots` below only ever mounts LOOPS copies on
-    // either side of this value, so however far centerLoop drifts over a
-    // long session, the mounted <Plane> count never grows past
-    // (2*LOOPS+1)*n. This is a React state update — not a per-frame motion
-    // value — so it only re-renders roughly once per full cycle scrolled
-    // (once every n index-steps), not on every scroll tick.
-    const [centerLoop, setCenterLoop] = useState(0)
+    // Which product index is currently centered under the camera, as a
+    // plain (unbounded) integer — e.g. 0 at the start, 47 after scrolling
+    // 47 steps forward, -12 after scrolling 12 steps back. This is a React
+    // state update — not a per-frame motion value — and it only changes
+    // when the nearest integer index actually changes, so it fires once per
+    // index step, not every frame. Slot recomputation triggered by it is
+    // cheap: the window size is a fixed small constant (see `slots` below),
+    // not something that grows with the catalog.
+    const [centerIndex, setCenterIndex] = useState(0)
+    const centerIndexRef = useRef(0)
     useMotionValueEvent(smoothS, "change", (latest) => {
         if (n === 0) return
-        const nearest = Math.round(latest / n)
-        if (nearest !== centerLoop) setCenterLoop(nearest)
+        const nearest = Math.round(latest)
+        if (nearest !== centerIndexRef.current) {
+            centerIndexRef.current = nearest
+            setCenterIndex(nearest)
+        }
     })
 
     // True velocity of the input itself (px/s), independent of whether the
@@ -146,9 +211,9 @@ export default function ScrollVelocityGallery({
 
     // Group-level position: every card's own transform is static (see
     // Plane below); only this shared container moves.
-    const groupX = useTransform(smoothS, (v) => -v * STEP.x)
-    const groupY = useTransform(smoothS, (v) => -v * STEP.y + BASE_Y)
-    const groupZ = useTransform(smoothS, (v) => -v * STEP.z)
+    const groupX = useTransform(smoothS, (v) => -v * metrics.step.x)
+    const groupY = useTransform(smoothS, (v) => -v * metrics.step.y + metrics.baseY)
+    const groupZ = useTransform(smoothS, (v) => -v * metrics.step.z)
 
     // A gentle envelope (0..1) tracking how fast the user is currently
     // scrolling/dragging — each card scales its own ripple by this, so the
@@ -159,21 +224,26 @@ export default function ScrollVelocityGallery({
         damping: 25,
         mass: 0.8,
     })
-    // LOOPS copies of the product list on each side of centerLoop, each
-    // slot carrying a globalIndex used for its 3D position. As centerLoop
-    // drifts with continued scrolling, this window slides along with it —
-    // old, now-far-away copies are dropped and new ones are mounted in
-    // their place — which is what makes the strip infinite instead of a
-    // fixed-length strip that dead-stops at either end.
+
+    // A fixed-size sliding window of `radius` cards on each side of
+    // centerIndex — (2*radius+1) slots total, ALWAYS, no matter how big
+    // `items` is. Each slot's `globalIndex` is the real (unbounded) index
+    // used for 3D position, and `index % n` maps it back to an actual
+    // product — that wraparound is the entire "infinite" effect. Because
+    // `globalIndex` is used directly as the React key, cards that stay
+    // inside the window as it slides keep their component identity (no
+    // remount); only the one or two cards that fall off one edge unmount
+    // while one or two new ones mount at the other — never a bulk
+    // remount of every visible card.
     const slots = useMemo(() => {
+        if (n === 0) return []
         const out: { item: ProductListItem; globalIndex: number }[] = []
-        for (let loop = centerLoop - LOOPS; loop <= centerLoop + LOOPS; loop++) {
-            for (let i = 0; i < n; i++) {
-                out.push({ item: items[i], globalIndex: loop * n + i })
-            }
+        for (let idx = centerIndex - radius; idx <= centerIndex + radius; idx++) {
+            const i = ((idx % n) + n) % n
+            out.push({ item: items[i], globalIndex: idx })
         }
         return out
-    }, [items, n, centerLoop])
+    }, [items, n, centerIndex, radius])
 
     if (n === 0) return null
 
@@ -186,27 +256,33 @@ export default function ScrollVelocityGallery({
 
             <div
                 className="relative flex h-full w-full items-center justify-center"
-                style={{ perspective: 2000, perspectiveOrigin: "10% 10%" }}
+                style={{
+                    perspective: isMobile ? 1200 : 2000,
+                    perspectiveOrigin: isMobile ? "50% 15%" : "10% 10%",
+                }}
             >
                 <motion.div
-                    className="relative flex cursor-grab items-center justify-center"
+                    className="relative flex cursor-grab touch-pan-y items-center justify-center"
                     style={{
                         x: groupX,
                         y: groupY,
                         z: groupZ,
                         transformStyle: "preserve-3d",
+                        willChange: "transform",
                     }}
                     onPan={handlePan}
                     role="list"
                 >
-                    {slots.map(({ item, globalIndex }, key) => (
+                    {slots.map(({ item, globalIndex }) => (
                         <Plane
-                            key={`${item.id}-${key}`}
+                            key={globalIndex}
                             item={item}
                             globalIndex={globalIndex}
                             wavePhase={smoothS}
                             waveEnvelope={waveEnvelope}
-                            waveIntensity={waveIntensity}
+                            waveIntensity={effectiveWaveIntensity}
+                            metrics={metrics}
+                            isMobile={isMobile}
                         />
                     ))}
                 </motion.div>
@@ -231,7 +307,7 @@ function ScrollHint() {
             aria-hidden="true"
             className="colored pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 text-[10px] tracking-wider uppercase lg:hidden"
         >
-            اسکرول کنید
+            برای مرور بکشید
         </div>
     )
 }
@@ -242,11 +318,27 @@ interface PlaneProps {
     wavePhase: MotionValue<number>
     waveEnvelope: MotionValue<number>
     waveIntensity: number
+    metrics: GalleryMetrics
+    isMobile: boolean
 }
 
-function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: PlaneProps) {
+// Wrapped in memo(): with the fixed-size render window above, most cards
+// keep the same `globalIndex` key across renders as the window slides, so
+// there's no reason for them to re-render just because the parent's `slots`
+// array was recomputed. Only cards whose own props actually changed (a new
+// item at that slot, or a metrics/isMobile flip) re-render.
+const Plane = memo(function Plane({
+    item,
+    globalIndex,
+    wavePhase,
+    waveEnvelope,
+    waveIntensity,
+    metrics,
+    isMobile,
+}: PlaneProps) {
     const [hovered, setHovered] = useState(false)
     const Wrapper = motion.div
+    const { planeW, planeH, step, rotateY, waveMaxYPx } = metrics
 
     // This card's own point on the shared wave — offset from every other
     // card's by globalIndex * WAVE_PHASE_STEP, so at any instant different
@@ -258,17 +350,16 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
     // Base position, wave ripple, and hover offset are combined into one
     // useTransform instead of three chained ones (rippleY -> y -> finalY).
     // Motion values recompute their whole dependency chain on every frame
-    // for every mounted card, so with (2*LOOPS+1)*n cards on screen,
-    // collapsing 3 transforms into 1 removes two full subscription/update
-    // passes per card per frame — same visual result, a third of the work.
+    // for every mounted card, so with a small fixed render window this is
+    // already cheap — collapsing 3 transforms into 1 shaves it further.
     const hoverY = useMotionValue(0)
     const finalY = useTransform(
         [wavePhase, waveEnvelope, hoverY],
         ([phase, envelope, hoverOffset]: number[]) =>
-            globalIndex * STEP.y +
+            globalIndex * step.y +
             Math.sin(phase - globalIndex * WAVE_PHASE_STEP) *
                 envelope *
-                WAVE_MAX_Y_PX *
+                waveMaxYPx *
                 waveIntensity +
             hoverOffset
     )
@@ -277,23 +368,19 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
 
     return (
         <Wrapper
-            // {...(item.slug && hasStock ? { href: `/p/${item.slug}` } : { href: `/#` })}
             role="listitem"
             className="absolute"
             style={{
-                width: PLANE_W,
-                height: PLANE_H,
+                width: planeW,
+                height: planeH,
                 // x/z and rotateY stay static per card; only y carries the
                 // continuously-varying sine offset. That's the whole wave —
                 // no rotation, no horizontal movement, so nothing "shakes";
                 // it's a single clean vertical sine curve across the row.
-                // The clip/rasterization note that used to live here still
-                // applies to x/z/rotateY — see the inner clipping div below
-                // for why that split matters.
-                x: globalIndex * STEP.x,
+                x: globalIndex * step.x,
                 y: finalY,
-                z: globalIndex * STEP.z,
-                rotateY: ROTATE_Y,
+                z: globalIndex * step.z,
+                rotateY,
                 transformStyle: "preserve-3d",
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
@@ -317,6 +404,7 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
 
                 setHovered(false)
             }}
+            onTap={() => isMobile && setHovered((prev) => !prev)}
         >
             {/*
               Clipping/rounding lives on this inner, non-rotating-relative-
@@ -334,26 +422,54 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                         src={item.images[0]?.image}
                         alt={item.title}
                         fill
-                        sizes="320px"
+                        sizes={isMobile ? "190px" : "320px"}
                         draggable={false}
                         className={cn(
                             "border border-neutral-400/30 object-cover transition duration-150 select-none",
                             !hasStock && hovered && "blur-sm grayscale",
                             hovered ? "brightness-100" : "brightness-80"
                         )}
-                        loading="lazy"
+                        // Intentionally NOT loading="lazy" here: the render
+                        // window above already keeps the mounted count small
+                        // and constant, so every mounted card's image is
+                        // close enough to view to be worth fetching right
+                        // away. `loading="lazy"` was adding an extra
+                        // near-viewport delay on top of that, which is what
+                        // caused the last few images to visibly pop in
+                        // after scrolling instead of being ready in time.
+                        loading="eager"
                     />
                 </Link>
 
                 {!hasStock && hovered && (
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] transition duration-150" />
                 )}
+
+                {/*
+                  Mobile has no hover, so touch users would otherwise never
+                  see the title/price at all (the desktop label below is
+                  hover-gated and hidden pre-xl). A small always-on gradient
+                  caption gives them the same info at a glance, without
+                  needing a tap.
+                */}
+                {isMobile && hasStock && (
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-3xl bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pt-6 pb-2 text-neutral-50">
+                        <p className="truncate text-xs font-medium">{item.title}</p>
+                        {item.variants?.[0] && (
+                            <p className="mt-0.5 text-[11px] opacity-90">
+                                <span>{formatPrice(item.variants[0].price)}</span> تومان
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/*
               Hover label: sits outside the card to its right (not inside/
               on top of the image), counter-rotated so it reads flat and
-              legible instead of inheriting the card's 3D tilt.
+              legible instead of inheriting the card's 3D tilt. Desktop only
+              (xl:) — mobile gets the always-on gradient caption above
+              instead, since there's no hover on touch.
             */}
             <AnimatePresence>
                 {hovered && (
@@ -413,4 +529,6 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
             </AnimatePresence>
         </Wrapper>
     )
-}
+})
+
+Plane.displayName = "Plane"
