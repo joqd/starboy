@@ -1,4 +1,8 @@
+"use client"
+
 import Image from "next/image"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import type { ComponentProps } from "react"
 
 type StarboyLogoProps = Omit<ComponentProps<typeof Image>, "src" | "alt"> & {
@@ -6,26 +10,25 @@ type StarboyLogoProps = Omit<ComponentProps<typeof Image>, "src" | "alt"> & {
     height?: number
 }
 
-const StarboyLogo = ({ className, width = 150, height = 150, ...props }: StarboyLogoProps) => {
+const StarboyLogo = ({ className, width = 225, height = 50, ...props }: StarboyLogoProps) => {
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    useEffect(() => setMounted(true), [])
+
+    const src = mounted && resolvedTheme === "dark" ? "/brand/text/golden.svg" : "/brand/text/red.svg"
+
     return (
-        <>
-            <Image
-                src="/brand/text/red.svg"
-                alt="Starboy"
-                width={width}
-                height={height}
-                className={`${className ?? ""} dark:hidden`}
-                {...props}
-            />
-            <Image
-                src="/brand/text/golden.svg"
-                alt="Starboy"
-                width={width}
-                height={height}
-                className={`${className ?? ""} hidden dark:block`}
-                {...props}
-            />
-        </>
+        <Image
+            src={src}
+            alt="Starboy"
+            width={width}
+            height={height}
+            priority
+            className={className}
+            {...props}
+        />
     )
 }
 
