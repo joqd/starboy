@@ -453,7 +453,7 @@ const Plane = memo(function Plane({
                   needing a tap.
                 */}
                 {isMobile && hasStock && (
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-3xl bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pt-6 pb-2 text-neutral-50">
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-3xl bg-linear-to-t from-black/80 via-black/30 to-transparent px-3 pt-6 pb-2 text-neutral-50">
                         <p className="truncate text-xs font-medium">{item.title}</p>
                         {item.variants?.[0] && (
                             <p className="mt-0.5 text-[11px] opacity-90">
