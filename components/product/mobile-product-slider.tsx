@@ -1,61 +1,76 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import type { MouseEvent } from "react"
 import Image from "next/image"
 import { Link } from "next-view-transitions"
-import { motion, useMotionValue, useSpring, useTransform, useMotionValueEvent } from "motion/react"
+import { memo, useMemo, useState } from "react"
+import type { WheelEvent } from "react"
+import StarboyLogo from "../common/starboy-logo"
+import {
+    motion,
+    useTransform,
+    useMotionValue,
+    useMotionValueEvent,
+    useSpring,
+    animate,
+} from "motion/react"
+import { Lock, Menu } from "lucide-react"
 import type { MotionValue, PanInfo } from "motion/react"
-import { Lock } from "lucide-react"
+import { useScrollVelocityFactor } from "@/lib/use-scroll-velocity"
+import type { ScrollVelocityGalleryProps } from "@/types/gallery"
 import type { ProductListItem } from "@/types/product"
 import { cn, formatPrice } from "@/lib/utils"
 
-const CARD_W = 340
-const CARD_H = 470
-const STEP_X = 150
+// Mobile variant of ScrollVelocityGallery: same underdamped-spring
+// "plucked string" physics as the desktop version, but with no
+// perspective/rotateY/z. Cards sit in a single vertical column and the
+// only axis that ever moves is Y — group position + per-card ripple.
+const CARD_W = 280
+const CARD_H = 340
+const STEP_Y = CARD_H + 34
+const BASE_Y = 0
 
+// Fixed-size render window, same trick as desktop: only ever mount
+// (2*LOOPS+1)*n cards no matter how far the user scrolls.
 const LOOPS = 1
 
-const PX_PER_STEP = STEP_X
+const PX_PER_STEP = STEP_Y
+const SCROLL_SPEED_MULTIPLIER = 1.15
 
-const POSITION_STIFFNESS = 260
-const POSITION_DAMPING = 30
+const POSITION_STIFFNESS = 60
+const POSITION_DAMPING = 20
 
-type Props = {
-    items: ProductListItem[]
-    className?: string
-}
+// Per-card ripple, vertical only.
+const WAVE_PHASE_STEP = (2 * Math.PI) / 5
+const WAVE_MAX_Y_PX = 20
 
-export default function MobileProductSlider({ items, className = "" }: Props) {
+// How many index-steps of distance from the current scroll position still
+// count as "in focus". A card at distance 0 is fully elevated (front,
+// slightly larger, strongest shadow); past ELEVATION_RANGE it settles flat
+// behind its neighbors. This is what makes overlapping cards read as a
+// deliberate stack instead of two flat images clipping into each other.
+const ELEVATION_RANGE = 1.35
+
+export default function ScrollVelocityGalleryMobile({
+    items,
+    className = "",
+    waveIntensity = 2.5,
+}: ScrollVelocityGalleryProps) {
     const n = items.length
 
     const inputPx = useMotionValue(0)
 
-    const handlePan = (_: unknown, info: PanInfo) => {
-        inputPx.set(inputPx.get() - info.delta.x)
+    const handleWheel = (e: WheelEvent) => {
+        inputPx.set(inputPx.get() + e.deltaY * SCROLL_SPEED_MULTIPLIER)
     }
-
-    const SWIPE_VELOCITY_THRESHOLD = 500
-
-    const handlePanEnd = (_: unknown, info: PanInfo) => {
-        const current = sTarget.get()
-        let nearestStep = Math.round(current)
-
-        if (Math.abs(info.velocity.x) > SWIPE_VELOCITY_THRESHOLD) {
-            nearestStep = info.velocity.x < 0 ? Math.ceil(current) : Math.floor(current)
-            if (nearestStep === Math.round(current) && nearestStep === current) {
-                nearestStep += info.velocity.x < 0 ? 1 : -1
-            }
-        }
-
-        inputPx.set(nearestStep * PX_PER_STEP)
+    const handlePan = (_: unknown, info: PanInfo) => {
+        inputPx.set(inputPx.get() + info.delta.y * SCROLL_SPEED_MULTIPLIER)
     }
 
     const sTarget = useTransform(inputPx, (px) => px / PX_PER_STEP)
     const smoothS = useSpring(sTarget, {
         stiffness: POSITION_STIFFNESS,
         damping: POSITION_DAMPING,
-        mass: 0.85,
+        mass: 1,
     })
 
     const [centerLoop, setCenterLoop] = useState(0)
@@ -65,7 +80,15 @@ export default function MobileProductSlider({ items, className = "" }: Props) {
         if (nearest !== centerLoop) setCenterLoop(nearest)
     })
 
-    const groupX = useTransform(smoothS, (v) => -v * STEP_X)
+    const velocityFactor = useScrollVelocityFactor(smoothS)
+    const targetEnvelope = useTransform(velocityFactor, (v) => Math.min(Math.abs(v), 1))
+    const waveEnvelope = useSpring(targetEnvelope, {
+        stiffness: 80,
+        damping: 25,
+        mass: 0.8,
+    })
+
+    const groupY = useTransform(smoothS, (v) => -v * STEP_Y + BASE_Y)
 
     const slots = useMemo(() => {
         const out: { item: ProductListItem; globalIndex: number }[] = []
@@ -81,141 +104,162 @@ export default function MobileProductSlider({ items, className = "" }: Props) {
 
     return (
         <section
-            className={cn(
-                "relative flex h-screen w-full items-center justify-center overflow-hidden",
-                className
-            )}
+            className={`relative h-screen w-full overflow-hidden ${className}`}
+            onWheel={handleWheel}
         >
-            <motion.div
-                dir="rtl"
-                role="list"
-                onPan={handlePan}
-                onPanEnd={handlePanEnd}
-                className="relative flex h-full w-full cursor-grab touch-pan-y items-center justify-center active:cursor-grabbing"
-                style={{ x: groupX }}
-            >
-                {slots.map(({ item, globalIndex }, key) => (
-                    <Card
-                        key={`${item.id}-${key}`}
-                        item={item}
-                        globalIndex={globalIndex}
-                        smoothS={smoothS}
-                        inputPx={inputPx}
-                    />
-                ))}
-            </motion.div>
+            {/* <TopBar /> */}
+
+            <div className="relative flex h-full w-full items-center justify-center">
+                <motion.div
+                    className="relative flex cursor-grab flex-col items-center justify-center will-change-transform"
+                    style={{ y: groupY, touchAction: "none" }}
+                    onPan={handlePan}
+                    role="list"
+                >
+                    {slots.map(({ item, globalIndex }, key) => (
+                        <Card
+                            key={`${item.id}-${key}`}
+                            item={item}
+                            globalIndex={globalIndex}
+                            scrollPos={smoothS}
+                            waveEnvelope={waveEnvelope}
+                            waveIntensity={waveIntensity}
+                        />
+                    ))}
+                </motion.div>
+            </div>
         </section>
     )
 }
 
-function Card({
-    item,
-    globalIndex,
-    smoothS,
-    inputPx,
-}: {
+// Fixed header: logo top-left, menu top-right, sitting on a blurred
+// gradient scrim so both stay legible over whatever card is passing
+// underneath.
+function TopBar() {
+    return (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
+            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/85 via-background/35 to-transparent backdrop-blur-md" />
+            <div className="relative flex items-center justify-between px-4 pt-4">
+                <div dir="ltr" className="pointer-events-auto select-none">
+                    <StarboyLogo className="w-20 text-primary" />
+                </div>
+                <button
+                    type="button"
+                    aria-label="منو"
+                    className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full text-primary"
+                >
+                    <Menu className="h-5 w-5" strokeWidth={2} />
+                </button>
+            </div>
+        </div>
+    )
+}
+
+interface CardProps {
     item: ProductListItem
     globalIndex: number
-    smoothS: MotionValue<number>
-    inputPx: MotionValue<number>
-}) {
+    scrollPos: MotionValue<number>
+    waveEnvelope: MotionValue<number>
+    waveIntensity: number
+}
+
+const Card = memo(function Card({
+    item,
+    globalIndex,
+    scrollPos,
+    waveEnvelope,
+    waveIntensity,
+}: CardProps) {
+    const [pressed, setPressed] = useState(false)
+    const pressY = useMotionValue(0)
+
+    // How "in focus" this card is right now — 1 at the current scroll
+    // position, fading to 0 by ELEVATION_RANGE steps away. Drives scale,
+    // shadow, and stacking order together so a card that overlaps its
+    // neighbor visibly lifts in front of it instead of just clipping.
+    const elevation = useTransform(scrollPos, (pos) =>
+        Math.max(0, 1 - Math.abs(globalIndex - pos) / ELEVATION_RANGE)
+    )
+
+    const finalY = useTransform(
+        [scrollPos, waveEnvelope, pressY],
+        ([pos, envelope, pressOffset]: number[]) =>
+            globalIndex * STEP_Y +
+            Math.sin(pos - globalIndex * WAVE_PHASE_STEP) *
+                envelope *
+                WAVE_MAX_Y_PX *
+                waveIntensity +
+            pressOffset
+    )
+    const scale = useTransform(elevation, (e) => 1 + e * 0.06)
+    const zIndex = useTransform(elevation, (e) => Math.round(e * 100))
+    const boxShadow = useTransform(
+        elevation,
+        (e) => `0 ${8 + e * 18}px ${24 + e * 28}px rgba(0,0,0,${0.12 + e * 0.28})`
+    )
+
     const hasStock = item.variants?.some((variant) => variant.stock > 0)
-
-    const distance = useTransform(smoothS, (v) => globalIndex - v)
-    const absDistance = useTransform(distance, (d) => Math.abs(d))
-
-    const scale = useTransform(absDistance, [0, 1, 2], [1, 0.8, 0.66])
-    const imageBlur = useTransform(absDistance, [0, 0.6, 1, 2], [0, 2, 6, 10])
-    const imageFilter = useTransform(imageBlur, (b) => `blur(${b}px)`)
-    const captionOpacity = useTransform(absDistance, [0, 0.4, 0.9], [1, 0.15, 0])
-    const zIndex = useTransform(absDistance, (d) => Math.round(50 - d * 5))
-
-    const handleClick = (e: MouseEvent) => {
-        if (absDistance.get() > 0.5) {
-            e.preventDefault()
-            inputPx.set(globalIndex * PX_PER_STEP)
-        }
-    }
 
     return (
         <motion.div
             role="listitem"
             className="absolute"
-            style={{
-                width: CARD_W,
-                height: CARD_H,
-                x: globalIndex * STEP_X,
-                scale,
-                zIndex,
+            style={{ width: CARD_W, height: CARD_H, y: finalY, scale, zIndex }}
+            onTapStart={() => {
+                animate(pressY, 6, { type: "spring", stiffness: 450, damping: 22 })
+                setPressed(true)
+            }}
+            onTap={() => {
+                animate(pressY, 0, { type: "spring", stiffness: 450, damping: 22 })
+                setPressed(false)
+            }}
+            onTapCancel={() => {
+                animate(pressY, 0, { type: "spring", stiffness: 450, damping: 22 })
+                setPressed(false)
             }}
         >
-            <Link
-                href={`/p/${item.slug}`}
-                onClick={handleClick}
-                aria-label={item.title}
-                className="relative block h-full w-full"
+            <motion.div
+                className="relative h-full w-full overflow-hidden rounded-3xl"
+                style={{ boxShadow, transform: "translateZ(0)" }}
             >
-                <motion.div
-                    style={{ filter: imageFilter }}
-                    className="relative h-full w-full overflow-hidden rounded-3xl bg-muted shadow-2xl ring-1 shadow-black/20 ring-black/5"
-                >
-                    {item.images[0]?.image && (
-                        <Image
-                            src={item.images[0].image}
-                            alt={item.title}
-                            fill
-                            sizes="240px"
-                            draggable={false}
-                            className={cn(
-                                "object-cover select-none",
-                                !hasStock && "blur-sm brightness-75 grayscale"
-                            )}
-                        />
-                    )}
-
-                    {/* Shadow for text readability */}
-                    <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-black/90 via-black/50 to-transparent" />
-
-                    {/* Product info */}
-                    <motion.div
-                        style={{ opacity: captionOpacity }}
-                        className="absolute inset-x-0 bottom-0 z-10 p-4 text-white"
-                    >
-                        {item.variants?.[0] && (
-                            <span>
-                                <p
-                                    className="line-clamp-1 text-lg font-semibold"
-                                    style={{
-                                        textShadow:
-                                            "0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8)",
-                                    }}
-                                >
-                                    {item.title}
-                                </p>
-                                <p
-                                    className="mt-1 text-xs font-bold tabular-nums"
-                                    style={{
-                                        textShadow:
-                                            "0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8)",
-                                    }}
-                                >
-                                    {formatPrice(item.variants[0].price)}
-                                    <span className="mr-1 text-[10px] font-medium opacity-90">
-                                        تومان
-                                    </span>
-                                </p>
-                            </span>
+                <Link href={`p/${item.slug}`} className="relative block h-full w-full">
+                    <Image
+                        src={item.images[0]?.image}
+                        alt={item.title}
+                        fill
+                        sizes="280px"
+                        draggable={false}
+                        className={cn(
+                            "border border-neutral-400/30 object-cover transition duration-150 select-none",
+                            !hasStock && "grayscale",
+                            pressed ? "brightness-90" : "brightness-100"
                         )}
-                    </motion.div>
+                        loading="lazy"
+                    />
+                </Link>
 
-                    {!hasStock && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 bg-black/35 text-white">
-                            <Lock className="h-12 w-12" strokeWidth={1.8} />
-                            <p className="text-lg font-medium tracking-wide">ناموجود</p>
+                {!hasStock && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />}
+
+                {!hasStock ? (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <div className="flex flex-col items-center gap-2 text-neutral-50">
+                            <Lock className="h-9 w-9" strokeWidth={1.8} />
+                            <p className="text-sm font-medium tracking-wide">ناموجود</p>
                         </div>
-                    )}
-                </motion.div>
-            </Link>
+                    </div>
+                ) : (
+                    <div className="pointer-events-none absolute right-0 bottom-0 left-0 rounded-b-3xl bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pt-10 pb-3 text-neutral-50">
+                        <p className="overflow-wrap-anywhere text-sm font-bold wrap-break-word whitespace-normal">
+                            {item.title}
+                        </p>
+                        {item.variants?.[0] && (
+                            <p className="mt-0.5 text-xs">
+                                <span>{formatPrice(item.variants[0].price)}</span> تومان
+                            </p>
+                        )}
+                    </div>
+                )}
+            </motion.div>
         </motion.div>
     )
-}
+})
