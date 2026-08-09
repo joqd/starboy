@@ -34,7 +34,7 @@ const BASE_Y = 0
 const LOOPS = 1
 
 const PX_PER_STEP = STEP_Y
-const SCROLL_SPEED_MULTIPLIER = 1.15
+const SCROLL_SPEED_MULTIPLIER = 1.6
 
 const POSITION_STIFFNESS = 60
 const POSITION_DAMPING = 20
@@ -62,8 +62,15 @@ export default function ScrollVelocityGalleryMobile({
     const handleWheel = (e: WheelEvent) => {
         inputPx.set(inputPx.get() + e.deltaY * SCROLL_SPEED_MULTIPLIER)
     }
+    // Wheel and touch-drag are opposite conventions, not the same gesture
+    // with a different name: scrolling a wheel down moves content up, but
+    // dragging a finger down should move content down WITH the finger —
+    // that's what every native mobile scroll view does. The desktop
+    // version only ever deals with wheel/mouse-drag, so it never hit this;
+    // on touch it has to be inverted relative to raw pan delta or the
+    // whole gallery feels like it's fighting the user's thumb.
     const handlePan = (_: unknown, info: PanInfo) => {
-        inputPx.set(inputPx.get() + info.delta.y * SCROLL_SPEED_MULTIPLIER)
+        inputPx.set(inputPx.get() - info.delta.y * SCROLL_SPEED_MULTIPLIER)
     }
 
     const sTarget = useTransform(inputPx, (px) => px / PX_PER_STEP)
@@ -107,7 +114,7 @@ export default function ScrollVelocityGalleryMobile({
             className={`relative h-screen w-full overflow-hidden ${className}`}
             onWheel={handleWheel}
         >
-            {/* <TopBar /> */}
+            <TopBar />
 
             <div className="relative flex h-full w-full items-center justify-center">
                 <motion.div
@@ -132,21 +139,26 @@ export default function ScrollVelocityGalleryMobile({
     )
 }
 
-// Fixed header: logo top-left, menu top-right, sitting on a blurred
-// gradient scrim so both stay legible over whatever card is passing
-// underneath.
+// Fixed header: logo top-left, menu top-right. Uses the same frosted-glass
+// treatment as iOS system bars — a strong blur + saturation boost over a
+// translucent fill, rather than a flat gradient scrim — so it reads clearly
+// whether the card behind it is a bright product photo or a dark one, with
+// a hairline bottom border to separate it from the content instead of
+// relying on shadow alone.
 function TopBar() {
     return (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20">
-            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/85 via-background/35 to-transparent backdrop-blur-md" />
-            <div className="relative flex items-center justify-between px-4 pt-4">
-                <div dir="ltr" className="pointer-events-auto select-none">
+        <div
+            dir="ltr"
+            className="absolute inset-x-0 top-0 z-20 border-b border-white/10 bg-background/60 shadow-sm backdrop-blur-2xl backdrop-saturate-150"
+        >
+            <div className="flex items-center justify-between px-4 py-3">
+                <div className="select-none">
                     <StarboyLogo className="w-20 text-primary" />
                 </div>
                 <button
                     type="button"
                     aria-label="منو"
-                    className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full text-primary"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-primary"
                 >
                     <Menu className="h-5 w-5" strokeWidth={2} />
                 </button>
@@ -191,12 +203,16 @@ const Card = memo(function Card({
                 waveIntensity +
             pressOffset
     )
+    // scale, zIndex, and opacity are all compositor-only properties — the
+    // browser can animate them on the GPU without ever repainting the
+    // card's pixels. This is what actually gives the "lift to front" look
+    // now: no per-frame boxShadow (that property forces a real repaint on
+    // every change, and with (2*LOOPS+1)*n cards mounted at once, an
+    // animated shadow on all of them was the single biggest cause of jank
+    // on mobile). A plain static shadow class below still sells the depth.
     const scale = useTransform(elevation, (e) => 1 + e * 0.06)
     const zIndex = useTransform(elevation, (e) => Math.round(e * 100))
-    const boxShadow = useTransform(
-        elevation,
-        (e) => `0 ${8 + e * 18}px ${24 + e * 28}px rgba(0,0,0,${0.12 + e * 0.28})`
-    )
+    const opacity = useTransform(elevation, (e) => 0.75 + e * 0.25)
 
     const hasStock = item.variants?.some((variant) => variant.stock > 0)
 
@@ -204,7 +220,7 @@ const Card = memo(function Card({
         <motion.div
             role="listitem"
             className="absolute"
-            style={{ width: CARD_W, height: CARD_H, y: finalY, scale, zIndex }}
+            style={{ width: CARD_W, height: CARD_H, y: finalY, scale, zIndex, opacity }}
             onTapStart={() => {
                 animate(pressY, 6, { type: "spring", stiffness: 450, damping: 22 })
                 setPressed(true)
@@ -218,9 +234,9 @@ const Card = memo(function Card({
                 setPressed(false)
             }}
         >
-            <motion.div
-                className="relative h-full w-full overflow-hidden rounded-3xl"
-                style={{ boxShadow, transform: "translateZ(0)" }}
+            <div
+                className="relative h-full w-full overflow-hidden rounded-3xl shadow-xl shadow-black/25"
+                style={{ transform: "translateZ(0)" }}
             >
                 <Link href={`p/${item.slug}`} className="relative block h-full w-full">
                     <Image
@@ -228,6 +244,7 @@ const Card = memo(function Card({
                         alt={item.title}
                         fill
                         sizes="280px"
+                        quality={75}
                         draggable={false}
                         className={cn(
                             "border border-neutral-400/30 object-cover transition duration-150 select-none",
@@ -259,7 +276,7 @@ const Card = memo(function Card({
                         )}
                     </div>
                 )}
-            </motion.div>
+            </div>
         </motion.div>
     )
 })
