@@ -400,7 +400,7 @@ function Plane({ item, globalIndex, wavePhase, waveEnvelope, waveIntensity }: Pl
                                     transition: "text-shadow 0.3s ease-in-out",
                                 }}
                             >
-                                <p className="text-lg">{item.title}</p>
+                                <p className="wrap-break-word whitespace-normal overflow-wrap-anywhere">{item.title}</p>
 
                                 {item.variants?.[0] && (
                                     <p className="text-md mt-0.5">
