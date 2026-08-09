@@ -10,7 +10,7 @@ const StarboyLogo = ({ className, width = 150, height = 150, ...props }: Starboy
     return (
         <>
             <Image
-                src="/brand/red.svg"
+                src="/brand/text/red.svg"
                 alt="Starboy"
                 width={width}
                 height={height}
@@ -18,7 +18,7 @@ const StarboyLogo = ({ className, width = 150, height = 150, ...props }: Starboy
                 {...props}
             />
             <Image
-                src="/brand/golden.svg"
+                src="/brand/text/golden.svg"
                 alt="Starboy"
                 width={width}
                 height={height}
