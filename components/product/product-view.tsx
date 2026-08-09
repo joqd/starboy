@@ -44,7 +44,7 @@ export default function ProductView({ product }: Props) {
                   },
               ]
 
-    const sortedVariants = [...product.variants].sort((a, b) => a.size - b.size)
+    const sortedVariants = [...product.variants].sort()
 
     const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
         sortedVariants.find((v) => v.is_active && v.stock > 0)?.id ?? null
@@ -236,7 +236,7 @@ export default function ProductView({ product }: Props) {
                                                     "cursor-not-allowed border-border/60 bg-muted/60 text-muted-foreground line-through opacity-60"
                                             )}
                                         >
-                                            {variant.size_name}
+                                            {variant.size.label}
                                         </Button>
                                     )
                                 })}
