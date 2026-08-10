@@ -74,11 +74,11 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 // ---------------------------------------------------------------------------
 function MobileHero() {
     return (
-        <section className="relative mx-4 mt-4 aspect-[4/5] overflow-hidden rounded-[2rem]">
-            <div className="absolute inset-0 [&>*]:h-full [&>*]:w-full [&>*]:object-cover">
+        <section className="relative mx-4 mt-4 aspect-4/5 overflow-hidden rounded-[2rem]">
+            <div className="absolute inset-0 *:h-full *:w-full *:object-cover">
                 <HeroImage />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-neutral-50">
                 <p className="text-xs tracking-[0.2em] uppercase opacity-80">کالکشن جدید</p>
                 <h1 className="mt-1 text-2xl leading-tight font-bold">استایل خودت رو بساز</h1>
@@ -105,7 +105,7 @@ function ScrollStrip({ children }: { children: React.ReactNode }) {
             className={cn(
                 "flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1",
                 "scroll-px-4 overscroll-x-contain",
-                "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                "scrollbar-none [&::-webkit-scrollbar]:hidden"
             )}
         >
             {children}
@@ -141,7 +141,7 @@ function CollectionsSection({ items }: { items: CollectionItem[] }) {
                     <li key={collection.slug} className="w-40 shrink-0 snap-start">
                         <Link
                             href={`/collections/${collection.slug}`}
-                            className="relative block aspect-[3/4] overflow-hidden rounded-2xl"
+                            className="relative block aspect-3/4 overflow-hidden rounded-2xl"
                         >
                             <Image
                                 src={collection.image}
@@ -151,7 +151,7 @@ function CollectionsSection({ items }: { items: CollectionItem[] }) {
                                 className="object-cover"
                                 loading={idx < 2 ? "eager" : "lazy"}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
                             <div className="absolute inset-x-0 bottom-0 p-3 text-neutral-50">
                                 <p className="text-sm font-semibold">{collection.title}</p>
                                 <p className="text-[11px] opacity-80">
@@ -229,7 +229,7 @@ function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean })
             href={`p/${item.slug}`}
             className="block overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm"
         >
-            <div className="relative aspect-[3/4] w-full bg-muted">
+            <div className="relative aspect-3/4 w-full bg-muted">
                 <Image
                     src={item.images[0]?.image}
                     alt={item.title}

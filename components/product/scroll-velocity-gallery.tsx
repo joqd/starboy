@@ -267,7 +267,7 @@ export default function ScrollVelocityGallery({
     // `isMobile`'s own post-mount correction (see useIsMobile) may not have
     // landed yet in this same effect pass — this sidesteps that race
     // entirely rather than depending on its timing.
-     
+
     useEffect(() => {
         const stored = readStoredScrollPosition()
         if (stored === 0) return
