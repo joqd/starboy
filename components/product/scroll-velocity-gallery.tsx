@@ -60,6 +60,25 @@ const MOBILE_METRICS: GalleryMetrics = {
 
 const MOBILE_BREAKPOINT = 768 // px, matches Tailwind's `md`
 
+// Persists the raw, unbounded `inputPx` value (not the derived index) across
+// route changes, so leaving for a product page and coming back restores the
+// exact same spot instead of resetting to the start. sessionStorage (not a
+// module-level variable) so it survives both SPA transitions and a hard
+// reload/back-navigation within the same tab, and read/write only happen
+// once per mount/unmount — never per animation frame.
+const GALLERY_SCROLL_STORAGE_KEY = "gallery-scroll-position"
+
+function readStoredScrollPosition(): number {
+    if (typeof window === "undefined") return 0
+    try {
+        const saved = window.sessionStorage.getItem(GALLERY_SCROLL_STORAGE_KEY)
+        const parsed = saved ? Number(saved) : 0
+        return Number.isFinite(parsed) ? parsed : 0
+    } catch {
+        return 0
+    }
+}
+
 // How many px of wheel/drag input correspond to one product-index step.
 // Kept close to 1:1 with the card's own step so physical input and on-screen
 // travel feel matched, on both desktop and mobile geometry.
@@ -118,10 +137,13 @@ const DESKTOP_RADIUS = 12 // -> up to 25 mounted cards
 const MOBILE_RADIUS = 7 // -> up to 15 mounted cards, lighter for weak phones
 
 function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
-    const [isMobile, setIsMobile] = useState(() => {
-        if (typeof window === "undefined") return false
-        return window.innerWidth < breakpoint
-    })
+    // Deliberately NOT reading window.innerWidth in the initializer. Doing so
+    // makes the client's first (hydration) render disagree with the server
+    // (which always sees `desktop`, since window doesn't exist there) —
+    // that's a hydration mismatch on every geometry value derived from this
+    // flag. Starting both at `false` keeps hydration honest; the real value
+    // is applied a moment later, after mount.
+    const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
         const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`)
@@ -162,6 +184,14 @@ export default function ScrollVelocityGallery({
     // clamping this value — it comes from the render window below, which
     // keeps the *mounted* card count constant regardless of how far this
     // drifts.
+    //
+    // Always starts at 0, matching the server render exactly — the saved
+    // position (see the mount effect below) is applied AFTER hydration,
+    // never read synchronously here. Reading sessionStorage during the
+    // initial render would make the client's first paint disagree with the
+    // server's (which has no sessionStorage), which is a hydration
+    // mismatch — same category of bug as `useIsMobile` above, just for a
+    // different value.
     const inputPx = useMotionValue(0)
 
     // Direction convention: scrolling/dragging DOWN or LEFT moves forward
@@ -202,6 +232,49 @@ export default function ScrollVelocityGallery({
             setCenterIndex(nearest)
         }
     })
+
+    // Cheap per-frame ref update (no re-render, no I/O) so the latest raw
+    // position is always on hand; the actual sessionStorage write only
+    // happens once, on unmount (see below), not on every change.
+    const rawInputPxRef = useRef(0)
+    useMotionValueEvent(inputPx, "change", (latest) => {
+        rawInputPxRef.current = latest
+    })
+
+    // Restore, after mount (post-hydration, client-only — see the note on
+    // `inputPx` above for why this can't happen during render). Reads the
+    // real viewport width directly instead of trusting `isMobile`, since
+    // `isMobile`'s own post-mount correction (see useIsMobile) may not have
+    // landed yet in this same effect pass — this sidesteps that race
+    // entirely rather than depending on its timing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        const stored = readStoredScrollPosition()
+        if (stored === 0) return
+        const stepX =
+            window.innerWidth < MOBILE_BREAKPOINT ? MOBILE_METRICS.step.x : DESKTOP_METRICS.step.x
+        const targetIndex = Math.round(stored / stepX)
+        inputPx.set(stored)
+        smoothS.jump(targetIndex)
+        centerIndexRef.current = targetIndex
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCenterIndex(targetIndex)
+    }, [inputPx, smoothS])
+
+    useEffect(() => {
+        return () => {
+            try {
+                window.sessionStorage.setItem(
+                    GALLERY_SCROLL_STORAGE_KEY,
+                    String(rawInputPxRef.current)
+                )
+            } catch {
+                // sessionStorage can throw in private-browsing/quota edge
+                // cases — losing the saved position is harmless, so just
+                // skip it rather than crash the unmount.
+            }
+        }
+    }, [])
 
     // True velocity of the input itself (px/s), independent of whether the
     // page scrolls — this is what makes the wave's intensity track how

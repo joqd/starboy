@@ -132,7 +132,7 @@ export default function ProductView({ product }: Props) {
     return (
         <div
             dir="rtl"
-            className="relative flex h-screen w-full flex-col overflow-hidden lg:flex-row"
+            className="relative flex w-full flex-col lg:h-screen lg:flex-row lg:overflow-hidden"
         >
             <div className="relative order-1 h-[46vh] w-full shrink-0 lg:order-2 lg:h-full lg:flex-1">
                 <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedIndex} />
@@ -157,11 +157,11 @@ export default function ProductView({ product }: Props) {
 
             <div
                 className={cn(
-                    "order-2 flex min-h-0 flex-1 flex-col lg:order-1",
+                    "order-2 flex flex-col lg:order-1 lg:min-h-0 lg:flex-1",
                     "border lg:h-full lg:w-105 lg:flex-none lg:justify-center lg:border-l xl:w-115"
                 )}
             >
-                <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto px-5 py-5 lg:mx-0 lg:flex-none lg:px-8 lg:py-10">
+                <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-5 py-5 lg:mx-0 lg:flex-none lg:overflow-y-auto lg:px-8 lg:py-10">
                     <Link
                         href="/"
                         className="flex w-fit items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground"
@@ -213,7 +213,7 @@ export default function ProductView({ product }: Props) {
                             <div className="mb-2.5 flex space-x-2 text-xs font-medium tracking-wide uppercase">
                                 <div>سایز</div>
                                 <Separator orientation="vertical" />
-                                <SizeGuide />
+                                <SizeGuide variants={sortedVariants} />
                             </div>
 
                             <ButtonGroup>

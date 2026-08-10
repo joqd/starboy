@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useMemo, useState } from "react"
 import {
     Dialog,
     DialogContent,
@@ -16,7 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Loader2 } from "lucide-react"
+import type { ProductVariant } from "@/types/product"
 
 // ---------- Types ----------
 interface SizeGuideColumn {
@@ -29,61 +29,53 @@ interface SizeGuideRow {
     values: Record<string, string>
 }
 
-interface SizeGuideData {
-    columns: SizeGuideColumn[]
-    rows: SizeGuideRow[]
+type Props = {
+    variants: ProductVariant[]
 }
 
-// ---------- API layer ----------
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function fetchSizeGuide(): Promise<SizeGuideData> {
-    await new Promise((resolve) => setTimeout(resolve, 400))
-    return {
-        columns: [
-            { key: "chest", label: "دور سینه" },
-            { key: "waist", label: "دور کمر" },
-            { key: "length", label: "قد" },
-        ],
-        rows: [
-            { size: "S", values: { chest: "88-92", waist: "72-76", length: "66" } },
-            { size: "M", values: { chest: "93-97", waist: "77-81", length: "68" } },
-            { size: "L", values: { chest: "98-104", waist: "82-88", length: "70" } },
-            { size: "XL", values: { chest: "105-111", waist: "89-95", length: "72" } },
-        ],
+// ---------- Derivation ----------
+// The size guide table is built straight from the variants the product
+// already carries (variant.size.attributes) — there's nothing to fetch and
+// no loading/error state needed, since this data is present the moment the
+// product page renders. One row per distinct size, one column per distinct
+// attribute key, ordered by attribute.sort_order.
+function buildSizeGuide(variants: ProductVariant[]): {
+    columns: SizeGuideColumn[]
+    rows: SizeGuideRow[]
+} {
+    const seenSizes = new Set<string>()
+    const columnOrder = new Map<string, number>()
+    const rows: SizeGuideRow[] = []
+
+    for (const variant of variants) {
+        const { size } = variant
+        if (!size || size.attributes.length === 0 || seenSizes.has(size.name)) continue
+        seenSizes.add(size.name)
+
+        const values: Record<string, string> = {}
+        for (const attr of size.attributes) {
+            values[attr.key] = attr.value
+            if (!columnOrder.has(attr.key)) columnOrder.set(attr.key, attr.sort_order)
+        }
+        rows.push({ size: size.label, values })
     }
+
+    const columns = Array.from(columnOrder.entries())
+        .sort(([, a], [, b]) => a - b)
+        .map(([key]) => ({ key, label: key }))
+
+    return { columns, rows }
 }
 
 // ---------- Component ----------
 
-export default function SizeGuide() {
+export default function SizeGuide({ variants }: Props) {
     const [open, setOpen] = useState(false)
-    const [data, setData] = useState<SizeGuideData | null>(null)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (!open || data) return
+    // Derived once per `variants` identity, not on every open/close toggle.
+    const { columns, rows } = useMemo(() => buildSizeGuide(variants), [variants])
 
-        let cancelled = false
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLoading(true)
-        setError(null)
-
-        fetchSizeGuide()
-            .then((result) => {
-                if (!cancelled) setData(result)
-            })
-            .catch(() => {
-                if (!cancelled) setError("دریافت راهنمای سایز با خطا مواجه شد.")
-            })
-            .finally(() => {
-                if (!cancelled) setLoading(false)
-            })
-
-        return () => {
-            cancelled = true
-        }
-    }, [open, data])
+    if (columns.length === 0 || rows.length === 0) return null
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -96,54 +88,38 @@ export default function SizeGuide() {
                     <DialogTitle className="text-right">راهنمای سایز</DialogTitle>
                 </DialogHeader>
 
-                {loading && (
-                    <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm">در حال دریافت اطلاعات...</span>
-                    </div>
-                )}
-
-                {error && <p className="py-4 text-right text-sm text-destructive">{error}</p>}
-
-                {!loading && !error && data && (
-                    <>
-                        <div className="overflow-x-auto">
-                            <Table dir="rtl">
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="text-right">سایز</TableHead>
-                                        {data.columns.map((col) => (
-                                            <TableHead key={col.key} className="text-right">
-                                                {col.label}
-                                            </TableHead>
-                                        ))}
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {data.rows.map((row) => (
-                                        <TableRow key={row.size}>
-                                            <TableCell className="font-inter text-right font-medium">
-                                                {row.size}
-                                            </TableCell>
-                                            {data.columns.map((col) => (
-                                                <TableCell
-                                                    key={col.key}
-                                                    className="font-inter text-right"
-                                                >
-                                                    {row.values[col.key] ?? "-"}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
+                <div className="overflow-x-auto">
+                    <Table dir="rtl">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="text-right">سایز</TableHead>
+                                {columns.map((col) => (
+                                    <TableHead key={col.key} className="text-right">
+                                        {col.label}
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {rows.map((row) => (
+                                <TableRow key={row.size}>
+                                    <TableCell className="font-inter text-right font-medium">
+                                        {row.size}
+                                    </TableCell>
+                                    {columns.map((col) => (
+                                        <TableCell key={col.key} className="font-inter text-right">
+                                            {row.values[col.key] ?? "-"}
+                                        </TableCell>
                                     ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
 
-                        <p className="mt-2 text-right text-xs text-muted-foreground">
-                            اندازه ها کاملا دقیق و متناسب با محصول هستند
-                        </p>
-                    </>
-                )}
+                <p className="mt-2 text-right text-xs text-muted-foreground">
+                    اندازه ها کاملا دقیق و متناسب با محصول هستند
+                </p>
             </DialogContent>
         </Dialog>
     )
