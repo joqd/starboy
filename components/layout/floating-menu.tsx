@@ -65,7 +65,7 @@ export default function FloatingMenu() {
             </div>
 
             <div dir="rtl" className="fixed top-0 left-0 z-9999 w-full lg:hidden">
-                <div className="flex items-center justify-between border-b border-white/10 bg-background/70 px-5 py-3 backdrop-blur-2xl backdrop-saturate-150">
+                <div className="flex items-center justify-between border-white/10 px-5 py-3">
                     <div dir="ltr">
                         <MenuItems />
                     </div>
