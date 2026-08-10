@@ -34,7 +34,12 @@ export default async function MobileHome({ recentProducts, className = "" }: Mob
     ])
 
     return (
-        <div className={cn("pb-16", className)}>
+        // overflow-x-hidden here is a defensive backstop, not the fix for
+        // the horizontal-scroll bug itself — that was <main>'s w-screen in
+        // page.tsx (100vw doesn't subtract the scrollbar's width). Keeping
+        // this too means a future child that overflows its container
+        // slightly won't reopen the same page-level scroll.
+        <div className={cn("overflow-x-hidden pb-16", className)}>
             <MobileHero />
             <FeaturedSection items={featured} />
             <CollectionsSection items={collections} />
@@ -69,11 +74,11 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 // ---------------------------------------------------------------------------
 function MobileHero() {
     return (
-        <section className="relative mx-4 mt-4 aspect-4/5 overflow-hidden rounded-[2rem]">
-            <div className="absolute inset-0 *:h-full *:w-full *:object-cover">
+        <section className="relative mx-4 mt-4 aspect-[4/5] overflow-hidden rounded-[2rem]">
+            <div className="absolute inset-0 [&>*]:h-full [&>*]:w-full [&>*]:object-cover">
                 <HeroImage />
             </div>
-            <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-neutral-50">
                 <p className="text-xs tracking-[0.2em] uppercase opacity-80">کالکشن جدید</p>
                 <h1 className="mt-1 text-2xl leading-tight font-bold">استایل خودت رو بساز</h1>
@@ -100,7 +105,7 @@ function ScrollStrip({ children }: { children: React.ReactNode }) {
             className={cn(
                 "flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1",
                 "scroll-px-4 overscroll-x-contain",
-                "scrollbar-none [&::-webkit-scrollbar]:hidden"
+                "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             )}
         >
             {children}
@@ -136,7 +141,7 @@ function CollectionsSection({ items }: { items: CollectionItem[] }) {
                     <li key={collection.slug} className="w-40 shrink-0 snap-start">
                         <Link
                             href={`/collections/${collection.slug}`}
-                            className="relative block aspect-3/4 overflow-hidden rounded-2xl"
+                            className="relative block aspect-[3/4] overflow-hidden rounded-2xl"
                         >
                             <Image
                                 src={collection.image}
@@ -146,7 +151,7 @@ function CollectionsSection({ items }: { items: CollectionItem[] }) {
                                 className="object-cover"
                                 loading={idx < 2 ? "eager" : "lazy"}
                             />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
                             <div className="absolute inset-x-0 bottom-0 p-3 text-neutral-50">
                                 <p className="text-sm font-semibold">{collection.title}</p>
                                 <p className="text-[11px] opacity-80">
@@ -224,7 +229,7 @@ function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean })
             href={`p/${item.slug}`}
             className="block overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm"
         >
-            <div className="relative aspect-3/4 w-full bg-muted">
+            <div className="relative aspect-[3/4] w-full bg-muted">
                 <Image
                     src={item.images[0]?.image}
                     alt={item.title}
@@ -248,14 +253,28 @@ function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean })
 
             <div className="space-y-1 p-2.5">
                 <p className="truncate text-xs font-medium">{item.title}</p>
-                {item.variants?.[0] && (
-                    <p className="text-[11px] text-muted-foreground">
-                        <span className="font-semibold text-foreground">
-                            {formatPrice(item.variants[0].price)}
-                        </span>{" "}
-                        تومان
-                    </p>
-                )}
+                {/*
+                  Always render this line, even with nothing to show. Real
+                  out-of-stock products may come back with an empty
+                  `variants` array (no price at all), and conditionally
+                  skipping the paragraph in that case shortened just those
+                  cards — a two-column grid then looks ragged, sold-out
+                  cards visibly shorter than in-stock ones in the same row.
+                  `invisible` keeps the line's height without showing
+                  placeholder text.
+                */}
+                <p className="text-[11px] text-muted-foreground">
+                    {item.variants?.[0] ? (
+                        <>
+                            <span className="font-semibold text-foreground">
+                                {formatPrice(item.variants[0].price)}
+                            </span>{" "}
+                            تومان
+                        </>
+                    ) : (
+                        <span className="invisible">—</span>
+                    )}
+                </p>
             </div>
         </Link>
     )

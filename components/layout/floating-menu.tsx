@@ -28,12 +28,7 @@ function PlayRandomButton() {
                     : "pointer-events-none w-0 scale-75 opacity-0"
             )}
         >
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={handleClick}
-                aria-label="پخش موزیک تصادفی"
-            >
+            <Button variant="ghost" size="icon" onClick={handleClick} aria-label="پخش موزیک تصادفی">
                 <Music className="h-[1.2rem] w-[1.2rem]" />
             </Button>
         </div>
@@ -42,14 +37,14 @@ function PlayRandomButton() {
 
 function MenuItems() {
     return (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center rounded-xl bg-accent px-2 py-1">
             <div className="hidden lg:block">
                 <PlayRandomButton />
             </div>
             <Cart />
             <ModeToggle />
 
-            <Separator orientation="vertical" />
+            <Separator className="mx-1" orientation="vertical" />
             <LoginDialog />
         </div>
     )

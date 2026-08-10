@@ -41,11 +41,11 @@ export default function Cart() {
             onQuantityChange={handleQuantityChange}
             onRemove={handleRemove}
             trigger={
-                <div className="relative size-9 items-center rounded-lg outline">
+                <div className="icon relative size-9 items-center rounded-lg">
                     <ShoppingBag className="h-[1.2rem] w-[1.2rem]" />
 
                     {itemCount > 0 && (
-                        <Badge className="font-inter absolute -top-2 -right-1 h-4 w-4 justify-center rounded-full px-1 text-[10px] leading-none font-bold">
+                        <Badge className="font-inter absolute top-0 right-0.5 h-3.5 w-3.5 justify-center rounded-full px-1 text-[10px] leading-none font-bold">
                             {itemCount}
                         </Badge>
                     )}

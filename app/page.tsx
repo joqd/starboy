@@ -13,7 +13,14 @@ export default async function Home() {
         // animated gallery renders and needs a locked, full-screen canvas.
         // Below lg, MobileHome is a normal scrollable editorial page — it's
         // several sections tall by design, so the page needs to scroll.
-        <main dir="rtl" className="relative w-screen lg:h-screen lg:overflow-hidden">
+        //
+        // w-full, not w-screen: 100vw doesn't subtract the vertical
+        // scrollbar's width, so on any page tall enough to scroll (which
+        // MobileHome always is), w-screen made <main> a few pixels wider
+        // than the visible viewport — that's what was causing the whole
+        // page to scroll horizontally on mobile. w-full (100% of the
+        // already-correctly-sized body) doesn't have that problem.
+        <main dir="rtl" className="relative w-full lg:h-screen lg:overflow-hidden">
             <ScrollVelocityGallery
                 items={latestProducts.results}
                 className="z-50 hidden lg:block"
