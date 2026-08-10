@@ -134,7 +134,23 @@ const WAVE_PHASE_STEP = (2 * Math.PI) / 6
 // mounted count no longer scales with catalog size, this can comfortably be
 // larger than the bare minimum needed for the visible frustum.
 const DESKTOP_RADIUS = 12 // -> up to 25 mounted cards
-const MOBILE_RADIUS = 7 // -> up to 15 mounted cards, lighter for weak phones
+const MOBILE_RADIUS = 5 // -> up to 11 mounted cards, lighter for weak phones
+
+// Only cards within this distance of centerIndex are eager-loaded; the rest
+// of the mobile render window is lazy. On mobile the render window (11
+// cards) is wider than what's actually near the viewport, so eager-loading
+// every mounted card means competing for bandwidth with the LCP image on
+// slow connections. Desktop keeps everything eager (smaller relative cost,
+// and desktop bandwidth/CPU isn't the bottleneck per the Lighthouse report).
+const MOBILE_EAGER_RADIUS = 2
+
+// Multiplier applied to `waveIntensity` on mobile. The wave is driven by a
+// per-card useTransform recomputed every animation frame for every mounted
+// card — on mobile's weaker CPUs (per the "Minimize main-thread work: 3.5s"
+// / "5 long tasks" findings) that's real, measurable frame cost for an
+// effect that reads as a much smaller visual detail on a small screen.
+// Scaled down rather than zeroed so the row still feels alive.
+const MOBILE_WAVE_SCALE = 0.4
 
 function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
     // Deliberately NOT reading window.innerWidth in the initializer. Doing so
@@ -175,7 +191,11 @@ export default function ScrollVelocityGallery({
     // frame time for very little visual payoff on a small screen — turn it
     // down instead of off, so the row still feels alive but cheaper to
     // compute every frame.
-    const effectiveWaveIntensity = reduceMotion ? 0 : waveIntensity
+    const effectiveWaveIntensity = reduceMotion
+        ? 0
+        : isMobile
+          ? waveIntensity * MOBILE_WAVE_SCALE
+          : waveIntensity
 
     // Total input, in px, from wheel + drag combined — this is the single
     // source of truth for "how far through the list are we". It is
@@ -356,6 +376,9 @@ export default function ScrollVelocityGallery({
                             waveIntensity={effectiveWaveIntensity}
                             metrics={metrics}
                             isMobile={isMobile}
+                            isNearCenter={
+                                Math.abs(globalIndex - centerIndex) <= MOBILE_EAGER_RADIUS
+                            }
                         />
                     ))}
                 </motion.div>
@@ -393,6 +416,7 @@ interface PlaneProps {
     waveIntensity: number
     metrics: GalleryMetrics
     isMobile: boolean
+    isNearCenter: boolean
 }
 
 // Wrapped in memo(): with the fixed-size render window above, most cards
@@ -408,6 +432,7 @@ const Plane = memo(function Plane({
     waveIntensity,
     metrics,
     isMobile,
+    isNearCenter,
 }: PlaneProps) {
     const [hovered, setHovered] = useState(false)
     const Wrapper = motion.div
@@ -502,15 +527,20 @@ const Plane = memo(function Plane({
                             !hasStock && hovered && "blur-sm grayscale",
                             hovered ? "brightness-100" : "brightness-80"
                         )}
-                        // Intentionally NOT loading="lazy" here: the render
-                        // window above already keeps the mounted count small
-                        // and constant, so every mounted card's image is
-                        // close enough to view to be worth fetching right
-                        // away. `loading="lazy"` was adding an extra
-                        // near-viewport delay on top of that, which is what
-                        // caused the last few images to visibly pop in
-                        // after scrolling instead of being ready in time.
-                        loading="eager"
+                        // Intentionally NOT loading="lazy" for cards near the
+                        // centered index: the render window keeps the mounted
+                        // count small and constant, so those cards' images are
+                        // close enough to view to be worth fetching right away
+                        // — `loading="lazy"` was adding an extra near-viewport
+                        // delay on top of that, causing pop-in after scrolling.
+                        // On mobile the window (11 cards) is still wider than
+                        // what's near the viewport, so cards outside
+                        // MOBILE_EAGER_RADIUS fall back to lazy instead of
+                        // competing with the LCP image for bandwidth on slow
+                        // connections. Desktop bandwidth isn't the bottleneck,
+                        // so every desktop card stays eager.
+                        loading={!isMobile || isNearCenter ? "eager" : "lazy"}
+                        fetchPriority={isMobile && globalIndex === 0 ? "high" : "auto"}
                     />
                 </Link>
 
@@ -544,8 +574,15 @@ const Plane = memo(function Plane({
               (xl:) — mobile gets the always-on gradient caption above
               instead, since there's no hover on touch.
             */}
+            {/*
+              Desktop-only hover labels (xl: gated via CSS). Gating on
+              `isMobile` here as well — not just via the `hidden xl:` classes
+              below — skips mounting/animating these AnimatePresence children
+              on mobile entirely, instead of paying for opacity/scale
+              transitions on elements CSS was already hiding.
+            */}
             <AnimatePresence>
-                {hovered && (
+                {!isMobile && hovered && (
                     <>
                         {!hasStock ? (
                             <motion.div
