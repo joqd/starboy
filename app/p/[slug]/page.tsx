@@ -4,7 +4,7 @@ import { getProduct } from "@/lib/api/product"
 import ProductView from "@/components/product/product-view"
 
 
-export const revalidate = 5 * 60 // 10 min
+export const revalidate = 300
 
 type Props = {
     params: Promise<{

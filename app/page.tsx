@@ -6,7 +6,7 @@ import { getLatestPosts } from "@/lib/api/post"
 import { getCollections } from "@/lib/api/collection"
 
 // export const dynamic = "force-dynamic"
-export const revalidate = 5 * 60 // 10 min
+export const revalidate = 300
 
 export default async function Home() {
     const [latestProducts, featuredProducts, latestPosts, collections] = await Promise.all([
