@@ -3,7 +3,8 @@ import Link from "next/link"
 import { HeroImage } from "@/components/layout/hero-image"
 import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
-import { getFeaturedProducts, getCollections } from "@/lib/mock/home-mock-data"
+import type { CollectionListItem } from "@/types/collection"
+import { getFeaturedProducts } from "@/lib/mock/home-mock-data"
 import { cn, formatPrice } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
@@ -24,17 +25,19 @@ import { cn, formatPrice } from "@/lib/utils"
 interface MobileHomeProps {
     recentProducts: ProductListItem[]
     recentPosts: LatestPost[]
+    collections: CollectionListItem[]
     className?: string
 }
 
 export default async function MobileHome({
     recentProducts,
     recentPosts,
+    collections,
     className = "",
 }: MobileHomeProps) {
     // Mock sections resolve instantly today; kept as awaited calls so this
     // component doesn't change shape once they're real fetches.
-    const [featured, collections] = await Promise.all([getFeaturedProducts(), getCollections()])
+    const [featured] = await Promise.all([getFeaturedProducts()])
 
     return (
         // overflow-x-hidden here is a defensive backstop, not the fix for
@@ -121,7 +124,7 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
 
     return (
         <section className="mt-10">
-            <SectionHeader title="محصولات ویژه" href="/shop?featured=1" />
+            <SectionHeader title="محصولات ویژه" href="/shop" />
             <ScrollStrip>
                 {items.map((item, idx) => (
                     <li key={item.slug} className="w-36 shrink-0 snap-start">
@@ -133,12 +136,12 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
     )
 }
 
-function CollectionsSection({ items }: { items: CollectionItem[] }) {
+function CollectionsSection({ items }: { items: CollectionListItem[] }) {
     if (items.length === 0) return null
 
     return (
         <section className="mt-10">
-            <SectionHeader title="کالکشن‌ها" href="/collections" />
+            <SectionHeader title="کالکشن‌ها" />
             <ScrollStrip>
                 {items.map((collection, idx) => (
                     <li key={collection.slug} className="w-40 shrink-0 snap-start">
@@ -146,20 +149,19 @@ function CollectionsSection({ items }: { items: CollectionItem[] }) {
                             href={`/collections/${collection.slug}`}
                             className="relative block aspect-3/4 overflow-hidden rounded-2xl"
                         >
-                            <Image
-                                src={collection.image}
-                                alt={collection.title}
-                                fill
-                                sizes="160px"
-                                className="object-cover"
-                                loading={idx < 2 ? "eager" : "lazy"}
-                            />
+                            {collection.image && (
+                                <Image
+                                    src={collection.image}
+                                    alt={collection.title}
+                                    fill
+                                    sizes="160px"
+                                    className="object-cover"
+                                    loading={idx < 2 ? "eager" : "lazy"}
+                                />
+                            )}
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
                             <div className="absolute inset-x-0 bottom-0 p-3 text-neutral-50">
                                 <p className="text-sm font-semibold">{collection.title}</p>
-                                <p className="text-[11px] opacity-80">
-                                    {collection.productCount} محصول
-                                </p>
                             </div>
                         </Link>
                     </li>
@@ -309,7 +311,3 @@ function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean })
         </Link>
     )
 }
-
-// Local alias so this file doesn't need a direct import of the mock
-// module's type just for CollectionsSection.
-type CollectionItem = Awaited<ReturnType<typeof getCollections>>[number]

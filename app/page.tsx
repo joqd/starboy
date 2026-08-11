@@ -3,11 +3,16 @@ import ScrollVelocityGallery from "@/components/product/scroll-velocity-gallery"
 import MobileHome from "@/components/layout/mobile-home"
 import { getLatestProducts } from "@/lib/api/product"
 import { getLatestPosts } from "@/lib/api/post"
+import { getCollections } from "@/lib/api/collection"
 
 export const dynamic = "force-dynamic"
 
 export default async function Home() {
-    const [latestProducts, latestPosts] = await Promise.all([getLatestProducts(), getLatestPosts()])
+    const [latestProducts, latestPosts, collections] = await Promise.all([
+        getLatestProducts(),
+        getLatestPosts(),
+        getCollections(),
+    ])
 
     return (
         // h-screen + overflow-hidden only apply from lg up, where the
@@ -29,6 +34,7 @@ export default async function Home() {
             <MobileHome
                 recentProducts={latestProducts.results.slice(0, 4)}
                 recentPosts={latestPosts.results.slice(0, 4)}
+                collections={collections.results}
                 className="lg:hidden"
             />
             <div className="absolute bottom-0 left-0 hidden xl:block">
