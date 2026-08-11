@@ -25,20 +25,18 @@ import { cn, formatPrice } from "@/lib/utils"
 interface MobileHomeProps {
     recentProducts: ProductListItem[]
     recentPosts: LatestPost[]
+    featuredProducts: ProductListItem[]
     collections: CollectionListItem[]
     className?: string
 }
 
 export default async function MobileHome({
     recentProducts,
+    featuredProducts,
     recentPosts,
     collections,
     className = "",
 }: MobileHomeProps) {
-    // Mock sections resolve instantly today; kept as awaited calls so this
-    // component doesn't change shape once they're real fetches.
-    const [featured] = await Promise.all([getFeaturedProducts()])
-
     return (
         // overflow-x-hidden here is a defensive backstop, not the fix for
         // the horizontal-scroll bug itself — that was <main>'s w-screen in
@@ -47,7 +45,7 @@ export default async function MobileHome({
         // slightly won't reopen the same page-level scroll.
         <div className={cn("overflow-x-hidden pb-16", className)}>
             <MobileHero />
-            <FeaturedSection items={featured} />
+            <FeaturedSection items={featuredProducts} />
             <CollectionsSection items={collections} />
             <RecentProductsSection items={recentProducts} />
             <PostsSection items={recentPosts} />

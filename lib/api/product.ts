@@ -7,6 +7,12 @@ export function getLatestProducts(): Promise<ProductList> {
     })
 }
 
+export function getFeaturedProducts(): Promise<ProductList> {
+    return request<ProductList>("/api/products/?featured=true", {
+        method: "GET",
+    })
+}
+
 export function getProduct(slug: string): Promise<ProductDetail | null> {
     return request<ProductDetail>(`/api/products/${slug}/`, {
         method: "GET",
