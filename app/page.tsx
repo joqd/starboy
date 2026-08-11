@@ -27,8 +27,8 @@ export default async function Home() {
                 className="z-50 hidden lg:block"
             />
             <MobileHome
-                recentProducts={latestProducts.results}
-                recentPosts={latestPosts.results}
+                recentProducts={latestProducts.results.slice(0, 4)}
+                recentPosts={latestPosts.results.slice(0, 4)}
                 className="lg:hidden"
             />
             <div className="absolute bottom-0 left-0 hidden xl:block">
