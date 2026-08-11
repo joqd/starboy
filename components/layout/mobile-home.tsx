@@ -4,7 +4,6 @@ import { HeroImage } from "@/components/layout/hero-image"
 import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
 import type { CollectionListItem } from "@/types/collection"
-import { getFeaturedProducts } from "@/lib/mock/home-mock-data"
 import { cn, formatPrice } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
