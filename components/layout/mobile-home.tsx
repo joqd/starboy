@@ -2,7 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { HeroImage } from "@/components/layout/hero-image"
 import type { ProductListItem } from "@/types/product"
-import { getFeaturedProducts, getCollections, getRecentPosts } from "@/lib/mock/home-mock-data"
+import type { LatestPost } from "@/hooks/use-posts"
+import { getFeaturedProducts, getCollections } from "@/lib/mock/home-mock-data"
 import { cn, formatPrice } from "@/lib/utils"
 
 // ---------------------------------------------------------------------------
@@ -14,24 +15,26 @@ import { cn, formatPrice } from "@/lib/utils"
 // approach as the earlier grid.
 //
 // Sections: hero -> featured -> collections -> recent products -> recent
-// posts. Featured/collections/posts use mock data (see
+// posts. Featured/collections still use mock data (see
 // @/lib/mock/home-mock-data) since those endpoints don't exist yet; recent
-// products uses whatever the caller already fetched for real.
+// products and recent posts use whatever the caller already fetched for
+// real (see page.tsx: getLatestProducts / getLatestPosts).
 // ---------------------------------------------------------------------------
 
 interface MobileHomeProps {
     recentProducts: ProductListItem[]
+    recentPosts: LatestPost[]
     className?: string
 }
 
-export default async function MobileHome({ recentProducts, className = "" }: MobileHomeProps) {
+export default async function MobileHome({
+    recentProducts,
+    recentPosts,
+    className = "",
+}: MobileHomeProps) {
     // Mock sections resolve instantly today; kept as awaited calls so this
     // component doesn't change shape once they're real fetches.
-    const [featured, collections, posts] = await Promise.all([
-        getFeaturedProducts(),
-        getCollections(),
-        getRecentPosts(),
-    ])
+    const [featured, collections] = await Promise.all([getFeaturedProducts(), getCollections()])
 
     return (
         // overflow-x-hidden here is a defensive backstop, not the fix for
@@ -44,7 +47,7 @@ export default async function MobileHome({ recentProducts, className = "" }: Mob
             <FeaturedSection items={featured} />
             <CollectionsSection items={collections} />
             <RecentProductsSection items={recentProducts} />
-            <PostsSection items={posts} />
+            <PostsSection items={recentPosts} />
         </div>
     )
 }
@@ -183,7 +186,7 @@ function RecentProductsSection({ items }: { items: ProductListItem[] }) {
     )
 }
 
-function PostsSection({ items }: { items: PostItem[] }) {
+function PostsSection({ items }: { items: LatestPost[] }) {
     if (items.length === 0) return null
 
     return (
@@ -192,29 +195,56 @@ function PostsSection({ items }: { items: PostItem[] }) {
             <ScrollStrip>
                 {items.map((post, idx) => (
                     <li key={post.slug} className="w-60 shrink-0 snap-start">
-                        <Link href={`/blog/${post.slug}`} className="block">
-                            <div className="relative aspect-video overflow-hidden rounded-2xl">
-                                <Image
-                                    src={post.coverImage}
-                                    alt={post.title}
-                                    fill
-                                    sizes="240px"
-                                    className="object-cover"
-                                    loading={idx < 2 ? "eager" : "lazy"}
-                                />
-                            </div>
-                            <div className="mt-2 space-y-1">
-                                <p className="text-xs text-muted-foreground">{post.publishedAt}</p>
-                                <p className="line-clamp-2 text-sm font-medium text-foreground">
-                                    {post.title}
-                                </p>
-                            </div>
-                        </Link>
+                        <PostTile post={post} eager={idx < 2} />
                     </li>
                 ))}
             </ScrollStrip>
         </section>
     )
+}
+
+// Separate from ProductTile: the post card has its own fields (nullable
+// cover image, category badge, published date) and needs its own fallback
+// for posts with no featured_image rather than reusing the product tile's
+// stock/price logic.
+function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
+    return (
+        <Link href={`/blog/${post.slug}`} className="block">
+            <div className="relative aspect-video overflow-hidden rounded-2xl bg-muted">
+                {post.featured_image ? (
+                    <Image
+                        src={post.featured_image}
+                        alt={post.title}
+                        fill
+                        sizes="240px"
+                        className="object-cover"
+                        loading={eager ? "eager" : "lazy"}
+                    />
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[11px] text-muted-foreground">
+                        بدون تصویر
+                    </div>
+                )}
+                {/* {post.category && (
+                    <span className="absolute top-2 right-2 rounded-full border border-border bg-background/90 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm">
+                        {post.category}
+                    </span>
+                )} */}
+            </div>
+            <div className="mt-2 space-y-1">
+                <p className="text-xs text-muted-foreground">{formatPostDate(post.published_at)}</p>
+                <p className="line-clamp-2 text-sm font-medium text-foreground">{post.title}</p>
+            </div>
+        </Link>
+    )
+}
+
+function formatPostDate(isoDate: string) {
+    return new Intl.DateTimeFormat("fa-IR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    }).format(new Date(isoDate))
 }
 
 // ---------------------------------------------------------------------------
@@ -280,7 +310,6 @@ function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean })
     )
 }
 
-// Local aliases so this file doesn't need a direct import of the mock
-// module's types in three different places above.
+// Local alias so this file doesn't need a direct import of the mock
+// module's type just for CollectionsSection.
 type CollectionItem = Awaited<ReturnType<typeof getCollections>>[number]
-type PostItem = Awaited<ReturnType<typeof getRecentPosts>>[number]
