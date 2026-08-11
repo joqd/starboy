@@ -8,21 +8,33 @@ export function getCart(): Promise<Cart> {
 }
 
 export function addItemToCart(sku: string, quantity: number = 1): Promise<Cart> {
-    return request<Cart>("/api/cart/items/", {
-        method: "POST",
-        body: JSON.stringify({ sku, quantity }),
-    })
+    return request<Cart>(
+        "/api/cart/items/",
+        {
+            method: "POST",
+            body: JSON.stringify({ sku, quantity }),
+        },
+        { auth: true }
+    )
 }
 
 export function updateCartItemQuantity(sku: string, quantity: number): Promise<Cart> {
-    return request<Cart>(`/api/cart/items/${sku}/`, {
-        method: "PATCH",
-        body: JSON.stringify({ quantity }),
-    })
+    return request<Cart>(
+        `/api/cart/items/${sku}/`,
+        {
+            method: "PATCH",
+            body: JSON.stringify({ quantity }),
+        },
+        { auth: true }
+    )
 }
 
 export function removeItemFromCart(sku: string): Promise<Cart> {
-    return request<Cart>(`/api/cart/items/${sku}/`, {
-        method: "DELETE",
-    })
+    return request<Cart>(
+        `/api/cart/items/${sku}/`,
+        {
+            method: "DELETE",
+        },
+        { auth: true }
+    )
 }

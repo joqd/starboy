@@ -23,15 +23,23 @@ export function resendOtp(phone: string): Promise<void> {
 }
 
 export function logout(): Promise<{ detail: string }> {
-    return request<{ detail: string }>("/api/auth/logout/", {
-        method: "POST",
-    })
+    return request<{ detail: string }>(
+        "/api/auth/logout/",
+        {
+            method: "POST",
+        },
+        { auth: true }
+    )
 }
 
 export function fetchCurrentUser(): Promise<User> {
-    return request<User>("/api/auth/me/", {
-        method: "GET",
-    })
+    return request<User>(
+        "/api/auth/me/",
+        {
+            method: "GET",
+        },
+        { auth: true }
+    )
 }
 
 export function updateUserName(full_name: string): Promise<User> {
@@ -46,8 +54,12 @@ export function updateUserAvatar(file: File): Promise<User> {
 
     formData.append("avatar", file)
 
-    return request<User>("/api/auth/me/", {
-        method: "PATCH",
-        body: formData,
-    })
+    return request<User>(
+        "/api/auth/me/",
+        {
+            method: "PATCH",
+            body: formData,
+        },
+        { auth: true }
+    )
 }

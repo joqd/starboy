@@ -43,7 +43,16 @@ export class ApiError extends Error {
     }
 }
 
-export default async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+type RequestConfig = {
+    auth?: boolean
+}
+
+export default async function request<T>(
+    path: string,
+    options: RequestInit = {},
+    config: RequestConfig = {}
+): Promise<T> {
+    const { auth = false } = config
     const method = options.method?.toUpperCase() ?? "GET"
 
     const headers = new Headers(options.headers)
@@ -52,7 +61,7 @@ export default async function request<T>(path: string, options: RequestInit = {}
         headers.set("Content-Type", "application/json")
     }
 
-    if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+    if (auth && !["GET", "HEAD", "OPTIONS"].includes(method)) {
         await ensureCsrfCookie()
 
         const csrfToken = getCookie("csrftoken")
@@ -67,7 +76,7 @@ export default async function request<T>(path: string, options: RequestInit = {}
     try {
         response = await fetch(`${API_BASE_URL}${path}`, {
             ...options,
-            credentials: "include",
+            credentials: auth ? "include" : "omit",
             headers,
         })
     } catch {
