@@ -29,7 +29,7 @@ interface MobileHomeProps {
     className?: string
 }
 
-export default async function MobileHome({
+export default function MobileHome({
     recentProducts,
     featuredProducts,
     recentPosts,
@@ -136,27 +136,55 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
 function CollectionsSection({ items }: { items: CollectionListItem[] }) {
     if (items.length === 0) return null
 
+    const renderImage = (collection: CollectionListItem) => {
+        if (!collection.image && !collection.image_dark) return null
+
+        return (
+            <>
+                {collection.image && (
+                    <Image
+                        src={collection.image}
+                        alt={collection.title}
+                        fill
+                        sizes="160px"
+                        className={
+                            collection.image_dark ? "object-cover dark:hidden" : "object-cover"
+                        }
+                        loading={"eager"}
+                    />
+                )}
+
+                {collection.image_dark && (
+                    <Image
+                        src={collection.image_dark}
+                        alt={collection.title}
+                        fill
+                        sizes="160px"
+                        className={
+                            collection.image ? "hidden object-cover dark:block" : "object-cover"
+                        }
+                        loading={"eager"}
+                    />
+                )}
+            </>
+        )
+    }
+
     return (
         <section className="mt-10">
             <SectionHeader title="کالکشن‌ها" />
+
             <ScrollStrip>
-                {items.map((collection, idx) => (
+                {items.map((collection) => (
                     <li key={collection.slug} className="w-40 shrink-0 snap-start">
                         <Link
                             href={`/collections/${collection.slug}`}
                             className="relative block aspect-3/4 overflow-hidden rounded-2xl"
                         >
-                            {collection.image && (
-                                <Image
-                                    src={collection.image}
-                                    alt={collection.title}
-                                    fill
-                                    sizes="160px"
-                                    className="object-cover"
-                                    loading={idx < 2 ? "eager" : "lazy"}
-                                />
-                            )}
+                            {renderImage(collection)}
+
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
+
                             <div className="absolute inset-x-0 bottom-0 p-3 text-neutral-50">
                                 <p className="text-sm font-semibold">{collection.title}</p>
                             </div>

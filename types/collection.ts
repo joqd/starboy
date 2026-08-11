@@ -11,5 +11,6 @@ export type CollectionListItem = {
     slug: string
     short_description: string
     image: string | null
+    image_dark: string | null
     parent: CollectionListItem | null
 }

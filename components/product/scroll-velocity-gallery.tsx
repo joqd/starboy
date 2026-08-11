@@ -17,7 +17,7 @@ import {
 } from "motion/react"
 import { Lock } from "lucide-react"
 import type { MotionValue, PanInfo } from "motion/react"
-import { useScrollVelocityFactor } from "@/lib/use-scroll-velocity"
+import { useScrollVelocityFactor } from "@/hooks/use-scroll-velocity"
 import type { ScrollVelocityGalleryProps } from "@/types/gallery"
 import type { ProductListItem } from "@/types/product"
 import { cn, formatPrice } from "@/lib/utils"

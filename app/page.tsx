@@ -33,7 +33,7 @@ export default async function Home() {
                 className="z-50 hidden lg:block"
             />
             <MobileHome
-				featuredProducts={featuredProducts.results.slice(0, 4)}
+                featuredProducts={featuredProducts.results.slice(0, 4)}
                 recentProducts={latestProducts.results.slice(0, 4)}
                 recentPosts={latestPosts.results.slice(0, 5)}
                 collections={collections.results}
