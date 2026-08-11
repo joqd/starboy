@@ -112,7 +112,7 @@ export default function UserProfileDialog({ user, onNameChange, onAvatarChange, 
         <Dialog>
             <DialogTrigger>
                 <div
-                    className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-shadow outline-none hover:ring-2 hover:ring-primary/40 hover:ring-offset-2 hover:ring-offset-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="relative m-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-shadow outline-none hover:ring-2 hover:ring-primary/40 hover:ring-offset-2 hover:ring-offset-background focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     aria-label="حساب کاربری"
                 >
                     <Avatar className="h-9 w-9">
