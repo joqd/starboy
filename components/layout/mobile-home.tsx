@@ -5,6 +5,7 @@ import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
 import type { CollectionListItem } from "@/types/collection"
 import { cn, formatPrice } from "@/lib/utils"
+import Footer from "./footer"
 
 // ---------------------------------------------------------------------------
 // Mobile home page — a full, editorial storefront layout instead of a
@@ -42,12 +43,13 @@ export default function MobileHome({
         // page.tsx (100vw doesn't subtract the scrollbar's width). Keeping
         // this too means a future child that overflows its container
         // slightly won't reopen the same page-level scroll.
-        <div className={cn("overflow-x-hidden pb-16", className)}>
+        <div className={cn("overflow-x-hidden", className)}>
             <MobileHero />
             <FeaturedSection items={featuredProducts} />
             <CollectionsSection items={collections} />
             <RecentProductsSection items={recentProducts} />
             <PostsSection items={recentPosts} />
+            <Footer />
         </div>
     )
 }
