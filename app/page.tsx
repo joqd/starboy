@@ -5,7 +5,6 @@ import { getLatestProducts, getFeaturedProducts } from "@/lib/api/product"
 import { getLatestPosts } from "@/lib/api/post"
 import { getCollections } from "@/lib/api/collection"
 
-// export const dynamic = "force-dynamic"
 export const revalidate = 300
 
 export default async function Home() {

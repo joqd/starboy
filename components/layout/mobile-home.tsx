@@ -4,7 +4,7 @@ import { HeroImage } from "@/components/layout/hero-image"
 import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
 import type { CollectionListItem } from "@/types/collection"
-import { cn, formatPrice } from "@/lib/utils"
+import { cn, formatPostDate, formatPrice } from "@/lib/utils"
 import Footer from "./footer"
 
 // ---------------------------------------------------------------------------
@@ -266,14 +266,6 @@ function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
             </div>
         </Link>
     )
-}
-
-function formatPostDate(isoDate: string) {
-    return new Intl.DateTimeFormat("fa-IR", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-    }).format(new Date(isoDate))
 }
 
 // ---------------------------------------------------------------------------

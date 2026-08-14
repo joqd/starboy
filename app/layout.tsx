@@ -46,7 +46,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                         media="(prefers-color-scheme: dark)"
                     />
                 </head>
-                <body className={`${inter.variable} relative min-h-screen w-screen select-none`}>
+                <body className={`${inter.variable}`}>
                     <ThemeProvider
                         attribute="class"
                         defaultTheme="dark"
