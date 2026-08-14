@@ -1,52 +1,44 @@
 "use client"
 
-import { Music } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/layout/mode-toggle"
 import { LoginDialog } from "@/components/user/login-dialog"
 import { Rss } from "lucide-react"
 import Cart from "@/components/cart/cart"
 import { Button } from "@/components/ui/button"
-import { useAudio } from "@/hooks/use-audio"
-import { cn } from "@/lib/utils"
 import Link from "next/link"
 
-function Space() {
-    return <div className="w-1"></div>
-}
+// function PlayRandomButton() {
+//     const { currentAudio, random, setPlaying } = useAudio()
 
-function PlayRandomButton() {
-    const { currentAudio, random, setPlaying } = useAudio()
+//     const handleClick = async () => {
+//         const audio = await random()
+//         if (audio) setPlaying(true)
+//     }
 
-    const handleClick = async () => {
-        const audio = await random()
-        if (audio) setPlaying(true)
-    }
+//     const isVisible = !currentAudio
 
-    const isVisible = !currentAudio
-
-    return (
-        <div>
-            <div
-                className={cn(
-                    "flex transition-all duration-300",
-                    isVisible
-                        ? "w-9 scale-100 opacity-100"
-                        : "pointer-events-none w-0 scale-75 opacity-0"
-                )}
-            >
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleClick}
-                    aria-label="پخش موزیک تصادفی"
-                >
-                    <Music className="h-[1.2rem] w-[1.2rem]" />
-                </Button>
-            </div>
-        </div>
-    )
-}
+//     return (
+//         <div>
+//             <div
+//                 className={cn(
+//                     "flex transition-all duration-300",
+//                     isVisible
+//                         ? "w-9 scale-100 opacity-100"
+//                         : "pointer-events-none w-0 scale-75 opacity-0"
+//                 )}
+//             >
+//                 <Button
+//                     variant="ghost"
+//                     size="icon"
+//                     onClick={handleClick}
+//                     aria-label="پخش موزیک تصادفی"
+//                 >
+//                     <Music className="h-[1.2rem] w-[1.2rem]" />
+//                 </Button>
+//             </div>
+//         </div>
+//     )
+// }
 
 function BlogButton() {
     return (

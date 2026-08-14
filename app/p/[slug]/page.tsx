@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import { getProduct } from "@/lib/api/product"
 import ProductView from "@/components/product/product-view"
 
-
 export const revalidate = 300
 
 type Props = {

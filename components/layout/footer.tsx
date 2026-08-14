@@ -35,7 +35,7 @@ export default function Footer({ className = "" }: FooterProps) {
     const year = new Intl.DateTimeFormat("fa-IR", { year: "numeric" }).format(new Date())
 
     return (
-        <footer className={cn("border-t border-border bg-card px-4 py-8 mt-10", className)}>
+        <footer className={cn("mt-10 border-t border-border bg-card px-4 py-8", className)}>
             <div className="mb-6">
                 <p className="text-sm font-bold text-foreground">استاربوی</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">

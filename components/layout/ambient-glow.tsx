@@ -7,7 +7,7 @@ export function AmbientGlow() {
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden dark:hidden">
             {/* Top Left Glow */}
             <motion.div
-                className="absolute -top-48 -left-48 h-180 w-180 rounded-full bg-primary/10 lg:bg-primary/25 blur-[180px]"
+                className="absolute -top-48 -left-48 h-180 w-180 rounded-full bg-primary/10 blur-[180px] lg:bg-primary/25"
                 animate={{
                     x: [0, 40, -20, 0],
                     y: [0, 30, -10, 0],
@@ -23,7 +23,7 @@ export function AmbientGlow() {
 
             {/* Bottom Right Glow */}
             <motion.div
-                className="absolute -right-48 -bottom-48 h-180 w-180 rounded-full bg-primary/20 lg:bg-primary/40 blur-[180px]"
+                className="absolute -right-48 -bottom-48 h-180 w-180 rounded-full bg-primary/20 blur-[180px] lg:bg-primary/40"
                 animate={{
                     x: [0, -35, 20, 0],
                     y: [0, -25, 15, 0],
