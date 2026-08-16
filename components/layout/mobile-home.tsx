@@ -12,7 +12,7 @@ import Footer from "./footer"
 // ---------------------------------------------------------------------------
 // Mobile home page — v2, rebuilt to match the desktop redesign: brand
 // before catalogue, more air between sections, and product rails treated
-// as a taste rather than an attempt to replicate /shop (which is a fully
+// as a taste rather than an attempt to replicate /p (which is a fully
 // separate page).
 //
 // Still a plain server component tree — no client JS beyond <Reveal>
@@ -117,7 +117,7 @@ function MobileHero() {
                     هر تکه، روایتی از سلیقه‌ی توست.
                 </p>
                 <Link
-                    href="/shop"
+                    href="/p"
                     className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-4 py-2.5 text-xs font-semibold text-neutral-900"
                 >
                     مشاهده فروشگاه
@@ -220,7 +220,7 @@ function ScrollStrip({ children }: { children: React.ReactNode }) {
     )
 }
 
-// Capped at four — /shop is the catalogue; this is a taste, and the first
+// Capped at four — /p is the catalogue; this is a taste, and the first
 // card carries a small text badge instead of ever being drawn bigger.
 function FeaturedSection({ items }: { items: ProductListItem[] }) {
     if (items.length === 0) return null
@@ -229,7 +229,7 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
 
     return (
         <section className="mt-14">
-            <SectionHeader eyebrow="ویترین" title="محصولات ویژه" href="/shop" />
+            <SectionHeader eyebrow="ویترین" title="محصولات ویژه" href="/p" />
             <ScrollStrip>
                 {featured.map((item, idx) => (
                     <li key={item.slug} className="w-36 shrink-0 snap-start">
@@ -322,7 +322,7 @@ function RecentProductsSection({ items }: { items: ProductListItem[] }) {
 
     return (
         <section className="mt-14">
-            <SectionHeader eyebrow="تازه‌ترین‌ها" title="جدیدترین محصولات" href="/shop" />
+            <SectionHeader eyebrow="تازه‌ترین‌ها" title="جدیدترین محصولات" href="/p" />
             <ul role="list" className="grid grid-cols-2 gap-3 px-5">
                 {recent.map((item, idx) => (
                     <li key={item.slug}>
