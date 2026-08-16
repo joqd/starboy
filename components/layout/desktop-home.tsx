@@ -426,7 +426,7 @@ function ProductTile({
     return (
         <Link
             href={`p/${item.slug}`}
-            className="group block overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-shadow hover:shadow-sm"
+            className="group block overflow-hidden rounded-xl border border-border bg-card text-card-foreground"
         >
             <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
                 <Image
