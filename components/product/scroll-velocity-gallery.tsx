@@ -391,9 +391,9 @@ export default function ScrollVelocityGallery({
 
 function SectionHeading() {
     return (
-        <div dir="ltr" className="absolute top-20 left-20 hidden select-none lg:block">
+        <Link href={"/"} dir="ltr" className="absolute top-20 left-20 hidden select-none lg:block">
             <StarboyLogo className="w-120 text-primary" />
-        </div>
+        </Link>
     )
 }
 

@@ -9,10 +9,14 @@ export function requestLoginOtp(phone: string): Promise<void> {
 }
 
 export function verifyLoginOtp(phone: string, code: string): Promise<void> {
-    return request<void>("/api/auth/verify/", {
-        method: "POST",
-        body: JSON.stringify({ phone, code }),
-    })
+    return request<void>(
+        "/api/auth/verify/",
+        {
+            method: "POST",
+            body: JSON.stringify({ phone, code }),
+        },
+        { auth: true }
+    )
 }
 
 export function resendOtp(phone: string): Promise<void> {
@@ -43,10 +47,14 @@ export function fetchCurrentUser(): Promise<User> {
 }
 
 export function updateUserName(full_name: string): Promise<User> {
-    return request<User>("/api/auth/me/", {
-        method: "PATCH",
-        body: JSON.stringify({ full_name }),
-    })
+    return request<User>(
+        "/api/auth/me/",
+        {
+            method: "PATCH",
+            body: JSON.stringify({ full_name }),
+        },
+        { auth: true }
+    )
 }
 
 export function updateUserAvatar(file: File): Promise<User> {

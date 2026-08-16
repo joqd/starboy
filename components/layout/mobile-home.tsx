@@ -5,21 +5,27 @@ import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
 import type { CollectionListItem } from "@/types/collection"
 import { cn, formatPostDate, formatPrice } from "@/lib/utils"
+import { Reveal } from "./scroll-reveal"
+import { ArrowIcon, TruckIcon, ShieldIcon, RefreshIcon, HeadsetIcon } from "./home-icons"
 import Footer from "./footer"
 
 // ---------------------------------------------------------------------------
-// Mobile home page — a full, editorial storefront layout instead of a
-// single slider or a single grid. Every section below is a plain server
-// component: no "use client", no motion library, no per-frame work. The
-// only interactivity is native browser scroll (horizontal scroll-snap
-// strips) and next/font-level static rendering — the same "boring is fast"
-// approach as the earlier grid.
+// Mobile home page — v2, rebuilt to match the desktop redesign: brand
+// before catalogue, more air between sections, and product rails treated
+// as a taste rather than an attempt to replicate /shop (which is a fully
+// separate page).
 //
-// Sections: hero -> featured -> collections -> recent products -> recent
-// posts. Featured/collections still use mock data (see
-// @/lib/mock/home-mock-data) since those endpoints don't exist yet; recent
-// products and recent posts use whatever the caller already fetched for
-// real (see page.tsx: getLatestProducts / getLatestPosts).
+// Still a plain server component tree — no client JS beyond <Reveal>
+// (IntersectionObserver only, see ./scroll-reveal), no per-frame work.
+// Horizontal scroll-snap strips stay for Featured/Collections/Posts since
+// swipe is the natural mobile pattern for a rail — unlike desktop, which
+// had the width to lay them out as grids instead.
+//
+// Sections: hero -> brand values -> brand story -> featured -> collections
+// -> recent products -> recent posts. Featured/collections still use mock
+// data (see @/lib/mock/home-mock-data) since those endpoints don't exist
+// yet; recent products and recent posts use whatever the caller already
+// fetched for real (see page.tsx: getLatestProducts / getLatestPosts).
 // ---------------------------------------------------------------------------
 
 interface MobileHomeProps {
@@ -45,6 +51,8 @@ export default function MobileHome({
         // slightly won't reopen the same page-level scroll.
         <div className={cn("overflow-x-hidden", className)}>
             <MobileHero />
+            <BrandValues />
+            <BrandStory />
             <FeaturedSection items={featuredProducts} />
             <CollectionsSection items={collections} />
             <RecentProductsSection items={recentProducts} />
@@ -55,16 +63,35 @@ export default function MobileHome({
 }
 
 // ---------------------------------------------------------------------------
-// Shared section header: title + optional "view all" link, used by every
-// section below so spacing/typography stays consistent without repeating it.
+// Shared section header: eyebrow + title + optional "view all" link. Sized
+// down from v1 (smaller eyebrow, tighter title) so section headers read as
+// labels, not as competing headlines — the hero and the manifesto line are
+// the only two loud moments on the page now.
 // ---------------------------------------------------------------------------
-function SectionHeader({ title, href }: { title: string; href?: string }) {
+function SectionHeader({
+    eyebrow,
+    title,
+    href,
+}: {
+    eyebrow: string
+    title: string
+    href?: string
+}) {
     return (
-        <div className="mb-3 flex items-baseline justify-between px-4">
-            <h2 className="text-base font-bold tracking-tight text-foreground">{title}</h2>
+        <div className="mb-4 flex items-end justify-between px-5">
+            <div>
+                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                    {eyebrow}
+                </p>
+                <h2 className="mt-1.5 text-lg font-bold tracking-tight text-foreground">{title}</h2>
+            </div>
             {href && (
-                <Link href={href} className="text-xs font-medium text-muted-foreground">
+                <Link
+                    href={href}
+                    className="flex items-center gap-1 text-xs font-medium text-muted-foreground"
+                >
                     مشاهده همه
+                    <ArrowIcon className="size-3" />
                 </Link>
             )}
         </div>
@@ -72,28 +99,103 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Hero — the artistic use of the brand hero image. Wrapped in a rounded,
-// gradient-scrimmed panel instead of the desktop layout's small corner
-// placement, since on mobile this is the first thing a visitor sees and
-// should read as a proper banner, not an afterthought.
+// Hero — kept as a contained rounded panel (this was never the oversized
+// element on mobile; the desktop full-bleed banner was). Copy trimmed to
+// match the desktop hero's voice: eyebrow, headline, one short line.
 // ---------------------------------------------------------------------------
 function MobileHero() {
     return (
-        <section className="relative mx-4 mt-4 aspect-4/5 overflow-hidden rounded-[2rem]">
+        <section className="relative mx-5 mt-5 aspect-4/5 overflow-hidden rounded-[1.75rem]">
             <div className="absolute inset-0 *:h-full *:w-full *:object-cover">
                 <HeroImage />
             </div>
             <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-5 text-neutral-50">
-                <p className="text-xs tracking-[0.2em] uppercase opacity-80">کالکشن جدید</p>
-                <h1 className="mt-1 text-2xl leading-tight font-bold">استایل خودت رو بساز</h1>
+            <div className="absolute inset-x-0 bottom-0 p-6 text-neutral-50">
+                <p className="text-xs tracking-[0.25em] uppercase opacity-80">کالکشن جدید</p>
+                <h1 className="mt-2 text-[1.75rem] leading-tight font-bold">استایل خودت رو بساز</h1>
+                <p className="mt-2 max-w-[26ch] text-xs leading-relaxed text-neutral-200">
+                    هر تکه، روایتی از سلیقه‌ی توست.
+                </p>
                 <Link
                     href="/shop"
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-4 py-2 text-xs font-semibold text-neutral-900"
+                    className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-4 py-2.5 text-xs font-semibold text-neutral-900"
                 >
                     مشاهده فروشگاه
                 </Link>
             </div>
+        </section>
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Brand values — a quiet 2x2 trust bar, same four claims as desktop. This
+// is the first "brand, not product" beat on the page, right after the hero
+// and before anything is for sale.
+// ---------------------------------------------------------------------------
+function BrandValues() {
+    const items: { icon: typeof TruckIcon; title: string; desc: string }[] = [
+        { icon: TruckIcon, title: "ارسال سریع", desc: "سراسر کشور" },
+        { icon: ShieldIcon, title: "ضمانت اصالت", desc: "تمام محصولات" },
+        { icon: RefreshIcon, title: "۷ روز مهلت", desc: "بازگشت آسان" },
+        { icon: HeadsetIcon, title: "پشتیبانی", desc: "پاسخگوی همیشگی" },
+    ]
+
+    return (
+        <section className="mt-9 px-5">
+            <Reveal>
+                <ul role="list" className="grid grid-cols-2 gap-y-5 border-y border-border py-6">
+                    {items.map(({ icon: Icon, title, desc }) => (
+                        <li key={title} className="flex items-center gap-2.5">
+                            <Icon className="size-4.5 shrink-0 text-foreground" />
+                            <div>
+                                <p className="text-xs font-medium text-foreground">{title}</p>
+                                <p className="text-[11px] text-muted-foreground">{desc}</p>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </Reveal>
+        </section>
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Brand story — a short manifesto, pure typography. Same voice as the
+// desktop version, sized down for a phone screen.
+// ---------------------------------------------------------------------------
+function BrandStory() {
+    return (
+        <section className="mt-10 px-6 text-center">
+            <Reveal>
+                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                    چرا ما
+                </p>
+                <p className="mt-4 text-xl leading-[1.6] font-bold tracking-tight text-foreground">
+                    ما پوشاک نمی‌فروشیم؛ تکه‌هایی می‌سازیم که با کیفیت، سال‌ها کنارت می‌مونن.
+                </p>
+            </Reveal>
+            <Reveal delay={100}>
+                <ul role="list" className="mt-8 grid grid-cols-1 gap-6">
+                    <li>
+                        <p className="text-xs font-semibold text-foreground">مواد اولیه منتخب</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                            پارچه و دوخت هر محصول با دقت انتخاب و کنترل می‌شه.
+                        </p>
+                    </li>
+                    <li>
+                        <p className="text-xs font-semibold text-foreground">تولید محدود</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                            هر فصل در تیراژ کم، برای کیفیت و توجه بیشتر به جزئیات.
+                        </p>
+                    </li>
+                    <li>
+                        <p className="text-xs font-semibold text-foreground">طراحی داخل کشور</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                            از ایده تا برش و دوخت، همه‌چیز همین‌جا شکل می‌گیره.
+                        </p>
+                    </li>
+                </ul>
+            </Reveal>
         </section>
     )
 }
@@ -108,8 +210,8 @@ function ScrollStrip({ children }: { children: React.ReactNode }) {
         <ul
             role="list"
             className={cn(
-                "flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1",
-                "scroll-px-4 overscroll-x-contain",
+                "flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1",
+                "scroll-px-5 overscroll-x-contain",
                 "scrollbar-none [&::-webkit-scrollbar]:hidden"
             )}
         >
@@ -118,16 +220,26 @@ function ScrollStrip({ children }: { children: React.ReactNode }) {
     )
 }
 
+// Capped at four — /shop is the catalogue; this is a taste, and the first
+// card carries a small text badge instead of ever being drawn bigger.
 function FeaturedSection({ items }: { items: ProductListItem[] }) {
     if (items.length === 0) return null
 
+    const featured = items.slice(0, 6)
+
     return (
-        <section className="mt-10">
-            <SectionHeader title="محصولات ویژه" href="/shop" />
+        <section className="mt-14">
+            <SectionHeader eyebrow="ویترین" title="محصولات ویژه" href="/shop" />
             <ScrollStrip>
-                {items.map((item, idx) => (
+                {featured.map((item, idx) => (
                     <li key={item.slug} className="w-36 shrink-0 snap-start">
-                        <ProductTile item={item} eager={idx < 2} />
+                        <Reveal delay={idx * 60}>
+                            <ProductTile
+                                item={item}
+                                eager={idx < 2}
+                                badge={idx === 0 ? "پرفروش" : undefined}
+                            />
+                        </Reveal>
                     </li>
                 ))}
             </ScrollStrip>
@@ -137,6 +249,8 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
 
 function CollectionsSection({ items }: { items: CollectionListItem[] }) {
     if (items.length === 0) return null
+
+    const shown = items.slice(0, 6)
 
     const renderImage = (collection: CollectionListItem) => {
         if (!collection.image && !collection.image_dark) return null
@@ -148,7 +262,7 @@ function CollectionsSection({ items }: { items: CollectionListItem[] }) {
                         src={collection.image}
                         alt={collection.title}
                         fill
-                        sizes="160px"
+                        sizes="150px"
                         className={
                             collection.image_dark ? "object-cover dark:hidden" : "object-cover"
                         }
@@ -161,7 +275,7 @@ function CollectionsSection({ items }: { items: CollectionListItem[] }) {
                         src={collection.image_dark}
                         alt={collection.title}
                         fill
-                        sizes="160px"
+                        sizes="150px"
                         className={
                             collection.image ? "hidden object-cover dark:block" : "object-cover"
                         }
@@ -173,24 +287,26 @@ function CollectionsSection({ items }: { items: CollectionListItem[] }) {
     }
 
     return (
-        <section className="mt-10">
-            <SectionHeader title="کالکشن‌ها" />
+        <section className="mt-14">
+            <SectionHeader eyebrow="دنیای برند" title="کالکشن‌ها" />
 
             <ScrollStrip>
-                {items.map((collection) => (
-                    <li key={collection.slug} className="w-40 shrink-0 snap-start">
-                        <Link
-                            href={`/collections/${collection.slug}`}
-                            className="relative block aspect-3/4 overflow-hidden rounded-2xl"
-                        >
-                            {renderImage(collection)}
+                {shown.map((collection, idx) => (
+                    <li key={collection.slug} className="w-32 shrink-0 snap-start">
+                        <Reveal delay={idx * 60}>
+                            <Link
+                                href={`/collections/${collection.slug}`}
+                                className="relative block aspect-4/5 overflow-hidden rounded-xl"
+                            >
+                                {renderImage(collection)}
 
-                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/5 to-transparent" />
 
-                            <div className="absolute inset-x-0 bottom-0 p-3 text-neutral-50">
-                                <p className="text-sm font-semibold">{collection.title}</p>
-                            </div>
-                        </Link>
+                                <div className="absolute inset-x-0 bottom-0 p-2.5 text-neutral-50">
+                                    <p className="text-xs font-semibold">{collection.title}</p>
+                                </div>
+                            </Link>
+                        </Reveal>
                     </li>
                 ))}
             </ScrollStrip>
@@ -198,16 +314,21 @@ function CollectionsSection({ items }: { items: CollectionListItem[] }) {
     )
 }
 
+// Capped at four for the same reason as Featured — a taste, not the catalogue.
 function RecentProductsSection({ items }: { items: ProductListItem[] }) {
     if (items.length === 0) return null
 
+    const recent = items.slice(0, 4)
+
     return (
-        <section className="mt-10">
-            <SectionHeader title="جدیدترین محصولات" href="/shop" />
-            <ul role="list" className="grid grid-cols-2 gap-3 px-4">
-                {items.map((item, idx) => (
+        <section className="mt-14">
+            <SectionHeader eyebrow="تازه‌ترین‌ها" title="جدیدترین محصولات" href="/shop" />
+            <ul role="list" className="grid grid-cols-2 gap-3 px-5">
+                {recent.map((item, idx) => (
                     <li key={item.slug}>
-                        <ProductTile item={item} eager={idx < 2} />
+                        <Reveal delay={(idx % 2) * 60}>
+                            <ProductTile item={item} eager={idx < 2} />
+                        </Reveal>
                     </li>
                 ))}
             </ul>
@@ -218,13 +339,17 @@ function RecentProductsSection({ items }: { items: ProductListItem[] }) {
 function PostsSection({ items }: { items: LatestPost[] }) {
     if (items.length === 0) return null
 
+    const posts = items.slice(0, 4)
+
     return (
-        <section className="mt-10">
-            <SectionHeader title="آخرین مطالب" href="/blog" />
+        <section className="mt-14 mb-16">
+            <SectionHeader eyebrow="مجله" title="آخرین مطالب" href="/blog" />
             <ScrollStrip>
-                {items.map((post, idx) => (
-                    <li key={post.slug} className="w-60 shrink-0 snap-start">
-                        <PostTile post={post} eager={idx < 2} />
+                {posts.map((post, idx) => (
+                    <li key={post.slug} className="w-56 shrink-0 snap-start">
+                        <Reveal delay={idx * 60}>
+                            <PostTile post={post} eager={idx < 2} />
+                        </Reveal>
                     </li>
                 ))}
             </ScrollStrip>
@@ -239,13 +364,13 @@ function PostsSection({ items }: { items: LatestPost[] }) {
 function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
     return (
         <Link href={`/blog/${post.slug}`} className="block">
-            <div className="relative aspect-video overflow-hidden rounded-2xl bg-muted">
+            <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
                 {post.featured_image ? (
                     <Image
                         src={post.featured_image}
                         alt={post.title}
                         fill
-                        sizes="240px"
+                        sizes="224px"
                         className="object-cover"
                         loading={eager ? "eager" : "lazy"}
                     />
@@ -254,11 +379,6 @@ function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
                         بدون تصویر
                     </div>
                 )}
-                {/* {post.category && (
-                    <span className="absolute top-2 right-2 rounded-full border border-border bg-background/90 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm">
-                        {post.category}
-                    </span>
-                )} */}
             </div>
             <div className="mt-2 space-y-1">
                 <p className="text-xs text-muted-foreground">{formatPostDate(post.published_at)}</p>
@@ -271,14 +391,24 @@ function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
 // ---------------------------------------------------------------------------
 // Shared product tile — used by both the featured strip and the recent
 // products grid so the two sections look like one visual language.
+// Optional `badge` puts a short text label in the corner (used once, by
+// Featured's first card) instead of ever making a card bigger.
 // ---------------------------------------------------------------------------
-function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean }) {
+function ProductTile({
+    item,
+    eager,
+    badge,
+}: {
+    item: ProductListItem
+    eager: boolean
+    badge?: string
+}) {
     const hasStock = item.variants?.some((variant) => variant.stock > 0)
 
     return (
         <Link
             href={`p/${item.slug}`}
-            className="block overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm"
+            className="block overflow-hidden rounded-xl border border-border bg-card text-card-foreground"
         >
             <div className="relative aspect-3/4 w-full bg-muted">
                 <Image
@@ -295,8 +425,14 @@ function ProductTile({ item, eager }: { item: ProductListItem; eager: boolean })
                     fetchPriority={eager ? "high" : "auto"}
                 />
 
+                {badge && (
+                    <span className="absolute top-2 right-2 rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-background">
+                        {badge}
+                    </span>
+                )}
+
                 {!hasStock && (
-                    <span className="absolute top-2 right-2 rounded-full border border-border bg-background/90 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur-sm">
+                    <span className="absolute top-2 left-2 rounded-full border border-border bg-background/90 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur-sm">
                         ناموجود
                     </span>
                 )}

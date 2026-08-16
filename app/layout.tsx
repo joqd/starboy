@@ -49,7 +49,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                 <body className={`${inter.variable}`}>
                     <ThemeProvider
                         attribute="class"
-                        defaultTheme="dark"
+                        defaultTheme="system"
                         enableSystem
                         disableTransitionOnChange
                     >
