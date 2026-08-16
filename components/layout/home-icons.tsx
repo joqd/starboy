@@ -112,3 +112,49 @@ export function HeadsetIcon({ className }: { className?: string }) {
         </svg>
     )
 }
+
+export function InstagramIcon({ className }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+            <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+            />
+            <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.4" />
+            <circle cx="17.2" cy="6.8" r="1" fill="currentColor" />
+        </svg>
+    )
+}
+
+export function TelegramIcon({ className }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+            <path
+                d="M21 4 3 11.2l6 2.1M21 4 14.8 20l-5-6.7M21 4 9 14.5v5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    )
+}
+
+export function ChevronDownIcon({ className }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 16 16" fill="none" className={className} aria-hidden>
+            <path
+                d="M4 6l4 4 4-4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    )
+}
