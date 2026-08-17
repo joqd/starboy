@@ -8,6 +8,7 @@ import { cn, formatPostDate, formatPrice } from "@/lib/utils"
 import { Reveal } from "./scroll-reveal"
 import { ArrowIcon, TruckIcon, ShieldIcon, RefreshIcon, HeadsetIcon } from "./home-icons"
 import Footer from "./footer"
+import { PostCard } from "../blog/post-card"
 
 // ---------------------------------------------------------------------------
 // Desktop home page (lg and up) — v2. Reworked after the first pass ran too
@@ -366,44 +367,11 @@ function PostsSection({ items }: { items: LatestPost[] }) {
             <ul role="list" className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-3">
                 {items.slice(0, 3).map((post, idx) => (
                     <Reveal key={post.slug} as="li" delay={idx * 90}>
-                        <PostTile post={post} eager={idx < 3} />
+                        <PostCard post={post} eager={idx < 3} />
                     </Reveal>
                 ))}
             </ul>
         </section>
-    )
-}
-
-function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
-    return (
-        <Link href={`/blog/${post.slug}`} className="group block">
-            <div className="relative aspect-4/3 overflow-hidden rounded-xl bg-muted">
-                {post.featured_image ? (
-                    <Image
-                        src={post.featured_image}
-                        alt={post.title}
-                        fill
-                        sizes="380px"
-                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        loading={eager ? "eager" : "lazy"}
-                    />
-                ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                        بدون تصویر
-                    </div>
-                )}
-            </div>
-            <div className="mt-4 space-y-2">
-                <p className="text-xs tracking-wide text-muted-foreground">
-                    {formatPostDate(post.published_at)}
-                </p>
-                <p className="text-base leading-snug font-semibold text-foreground">
-                    <span className="bg-linear-to-r from-foreground to-foreground bg-size-[0%_1px] bg-bottom-left bg-no-repeat pb-1 transition-[background-size] duration-300 group-hover:bg-size-[100%_1px]">
-                        {post.title}
-                    </span>
-                </p>
-            </div>
-        </Link>
     )
 }
 

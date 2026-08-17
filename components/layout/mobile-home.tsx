@@ -8,6 +8,7 @@ import { cn, formatPostDate, formatPrice } from "@/lib/utils"
 import { Reveal } from "./scroll-reveal"
 import { ArrowIcon, TruckIcon, ShieldIcon, RefreshIcon, HeadsetIcon } from "./home-icons"
 import Footer from "./footer"
+import { PostCard } from "../blog/post-card"
 
 // ---------------------------------------------------------------------------
 // Mobile home page — v2, rebuilt to match the desktop redesign: brand
@@ -348,43 +349,12 @@ function PostsSection({ items }: { items: LatestPost[] }) {
                 {posts.map((post, idx) => (
                     <li key={post.slug} className="w-56 shrink-0 snap-start">
                         <Reveal delay={idx * 60}>
-                            <PostTile post={post} eager={idx < 2} />
+                            <PostCard post={post} eager={idx < 2} />
                         </Reveal>
                     </li>
                 ))}
             </ScrollStrip>
         </section>
-    )
-}
-
-// Separate from ProductTile: the post card has its own fields (nullable
-// cover image, category badge, published date) and needs its own fallback
-// for posts with no featured_image rather than reusing the product tile's
-// stock/price logic.
-function PostTile({ post, eager }: { post: LatestPost; eager: boolean }) {
-    return (
-        <Link href={`/blog/${post.slug}`} className="block">
-            <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
-                {post.featured_image ? (
-                    <Image
-                        src={post.featured_image}
-                        alt={post.title}
-                        fill
-                        sizes="224px"
-                        className="object-cover"
-                        loading={eager ? "eager" : "lazy"}
-                    />
-                ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] text-muted-foreground">
-                        بدون تصویر
-                    </div>
-                )}
-            </div>
-            <div className="mt-2 space-y-1">
-                <p className="text-xs text-muted-foreground">{formatPostDate(post.published_at)}</p>
-                <p className="line-clamp-2 text-sm font-medium text-foreground">{post.title}</p>
-            </div>
-        </Link>
     )
 }
 

@@ -85,7 +85,7 @@ export default function CollectionsGrid({ items, className = "" }: CollectionsGr
 function PageIntro({ count }: { count: number }) {
     return (
         <Reveal>
-            <p className="text-[10px] mt-15 font-medium tracking-[0.25em] text-muted-foreground uppercase">
+            <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
                 دنیای استاربوی
             </p>
             <div className="mt-1.5 flex items-end justify-between gap-3">

@@ -1,35 +1,46 @@
 import type { Metadata } from "next"
+import Image from "next/image"
+import Link from "next/link"
 import { notFound } from "next/navigation"
+import { cn, formatPostDate } from "@/lib/utils"
 import { getPost } from "@/lib/api/post"
-import { PostHeader } from "@/components/blog/post-header"
-import { PostContent } from "@/components/blog/post-content"
-import { RelatedProductsSection } from "@/components/blog/related-products-section"
-import Footer from "@/components/layout/footer"
+import { CopyLinkButton } from "@/components/blog/copy-link-button"
 
 // ---------------------------------------------------------------------------
-// /posts/{slug} — single blog post. Server component throughout (no
-// interactivity needed), so the article text and its metadata are fully
-// crawlable. SEO fields (title, description, canonical, OG/Twitter, robots)
-// and both JSON-LD blocks (BlogPosting + BreadcrumbList) come straight from
-// the backend via meta_tag / json_ld / breadcrumb_ld rather than being
-// re-derived here, so the API stays the single source of truth for them.
+// Single post page — app/blog/[slug]/page.tsx.
 //
-// Related products: see components/blog/post-content.tsx and
-// components/blog/inline-product-slot.tsx for how they're placed inside
-// the article, and components/blog/related-products-section.tsx for the
-// closing strip. Both currently read mock data from
-// lib/api/related-products.ts — swap that one file for the real endpoint
-// once it exists, nothing here needs to change.
+// Three things this file is answering for:
+//   - APPEARANCE: same voice as home (quiet type, border-border rules,
+//     generous vertical rhythm) but at a reading width (max-w-[720px])
+//     instead of the home page's browsing width — 720px is close to the
+//     line-length that's actually comfortable to read Persian body text at.
+//   - SPEED: this whole tree is a server component. The only "use client"
+//     is <CopyLinkButton>, isolated in its own file so it doesn't drag the
+//     rest of the page into the client bundle. The featured image is the
+//     LCP element and gets `priority` + explicit `sizes`; everything below
+//     the fold is plain server-rendered markup, no hydration needed to read
+//     the post.
+//   - SEO: generateMetadata maps the API's `meta_tag` object directly onto
+//     Next's Metadata (title, description, canonical, robots, OpenGraph,
+//     Twitter card), and the API's own `json_ld` / `breadcrumb_ld` are
+//     serialized straight into <script type="application/ld+json">
+//     instead of being reconstructed by hand — the backend already builds
+//     the exact structured data it wants search engines to see. Semantic
+//     markup throughout (<article>, <time dateTime>, a real breadcrumb
+//     <nav>) backs that up for anything that doesn't read JSON-LD.
 // ---------------------------------------------------------------------------
 
-interface PageProps {
-    // Next.js 15: route params are async.
+// Revalidate periodically rather than on every request — same pattern as
+// the store page (page.tsx: `export const revalidate = 300`).
+export const revalidate = 300
+
+interface PostPageProps {
     params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
     const { slug } = await params
-    const post = await getPost(slug)
+    const post = await getPost(slug).catch(() => null)
     if (!post) return {}
 
     const { meta_tag } = post
@@ -38,19 +49,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: meta_tag.title,
         description: meta_tag.description,
         alternates: { canonical: meta_tag.canonical_url },
-        robots: meta_tag.is_indexable ? undefined : { index: false, follow: false },
+        robots: {
+            index: meta_tag.is_indexable,
+            follow: meta_tag.is_indexable,
+        },
         openGraph: {
             type: "article",
             title: meta_tag.og_title,
             description: meta_tag.og_description,
-            images: meta_tag.og_image ? [{ url: meta_tag.og_image }] : undefined,
+            url: meta_tag.canonical_url,
             publishedTime: post.published_at,
             modifiedTime: post.updated_at,
             authors: [post.author.full_name],
+            images: meta_tag.og_image ? [{ url: meta_tag.og_image }] : undefined,
         },
         twitter: {
             card:
-                (meta_tag.twitter_card as "summary" | "summary_large_image") ??
+                (meta_tag.twitter_card as "summary" | "summary_large_image") ||
                 "summary_large_image",
             title: meta_tag.og_title,
             description: meta_tag.og_description,
@@ -59,32 +74,212 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 }
 
-export default async function PostPage({ params }: PageProps) {
+export default async function PostPage({ params }: PostPageProps) {
     const { slug } = await params
-    const post = await getPost(slug)
+    const post = await getPost(slug).catch(() => null)
 
     if (!post) notFound()
 
+    const readingMinutes = getReadingMinutes(post.content_html)
+
     return (
-        <main dir="rtl">
+        <>
+            {/* Structured data — passed through as-is from the API, which
+                already owns the shape search engines expect. */}
             <script
                 type="application/ld+json"
+                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(post.json_ld) }}
             />
             <script
                 type="application/ld+json"
+                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(post.breadcrumb_ld) }}
             />
 
-            <article className="mx-auto mt-17.5 max-w-2xl px-6 py-6">
-                <PostHeader post={post} />
-                <div className="mt-6">
-                    <PostContent content={post.content_html} postSlug={post.slug} />
-                </div>
-                {/* <RelatedProductsSection postSlug={post.slug} /> */}
-            </article>
+            <article dir="rtl" className="mx-auto max-w-180 px-5 pt-10 pb-24 sm:px-8">
+                <BreadcrumbNav items={post.breadcrumb_ld?.itemListElement} />
 
-            <Footer />
-        </main>
+                <header className="mt-6">
+                    {post.category && (
+                        <span className="inline-block rounded-full border border-border px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground">
+                            {post.category}
+                        </span>
+                    )}
+
+                    <h1 className="mt-4 text-3xl leading-tight font-bold tracking-tight text-foreground sm:text-4xl">
+                        {post.title}
+                    </h1>
+
+                    {post.excerpt && (
+                        <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                            {post.excerpt}
+                        </p>
+                    )}
+
+                    <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-border py-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2.5">
+                            {post.author.avatar ? (
+                                <Image
+                                    src={post.author.avatar}
+                                    alt={post.author.full_name}
+                                    width={36}
+                                    height={36}
+                                    className="size-9 rounded-full object-cover"
+                                />
+                            ) : (
+                                <span
+                                    aria-hidden
+                                    className="flex size-9 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground"
+                                >
+                                    {post.author.full_name.slice(0, 1)}
+                                </span>
+                            )}
+                            <span className="font-medium text-foreground">
+                                {post.author.full_name}
+                            </span>
+                        </div>
+                        <Dot />
+                        <time dateTime={post.published_at}>
+                            {formatPostDate(post.published_at)}
+                        </time>
+                        <Dot />
+                        <span>{toFa(readingMinutes)} دقیقه مطالعه</span>
+                        <Dot />
+                        <span>{toFa(post.view_count)} بازدید</span>
+                    </div>
+                </header>
+
+                {post.featured_image && (
+                    <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-2xl bg-muted">
+                        <Image
+                            src={post.featured_image}
+                            alt={post.title}
+                            fill
+                            priority
+                            sizes="(max-width: 768px) 100vw, 720px"
+                            className="object-cover"
+                        />
+                    </div>
+                )}
+
+                {/* eslint-disable-next-line react/no-danger */}
+                <div
+                    className={proseClassName}
+                    dangerouslySetInnerHTML={{ __html: post.content_html }}
+                />
+
+                <footer className="mt-16 flex items-center justify-between border-t border-border pt-8">
+                    <Link
+                        href="/blog"
+                        className="group flex items-center gap-2 text-sm font-medium text-foreground"
+                    >
+                        <ArrowIcon className="size-3.5 rotate-180 transition-transform group-hover:translate-x-1" />
+                        بازگشت به مجله
+                    </Link>
+                    <CopyLinkButton url={post.meta_tag.canonical_url} />
+                </footer>
+            </article>
+        </>
     )
 }
+
+// ---------------------------------------------------------------------------
+// Rendered breadcrumb — built from the same `breadcrumb_ld.itemListElement`
+// array that's serialized into JSON-LD above, so the visible trail and the
+// structured data can never drift apart from each other.
+// ---------------------------------------------------------------------------
+function BreadcrumbNav({ items }: { items?: { position: number; name: string; item: string }[] }) {
+    if (!items?.length) return null
+
+    return (
+        <nav
+            aria-label="breadcrumb"
+            className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+        >
+            {items
+                .slice()
+                .sort((a, b) => a.position - b.position)
+                .map((crumb, idx, arr) => (
+                    <span key={crumb.position} className="flex items-center gap-1.5">
+                        {idx > 0 && <span aria-hidden>/</span>}
+                        {idx === arr.length - 1 ? (
+                            <span aria-current="page" className="text-foreground">
+                                {crumb.name}
+                            </span>
+                        ) : (
+                            <a
+                                href={crumb.item}
+                                className="transition-colors hover:text-foreground"
+                            >
+                                {crumb.name}
+                            </a>
+                        )}
+                    </span>
+                ))}
+        </nav>
+    )
+}
+
+function Dot() {
+    return (
+        <span aria-hidden className="text-border">
+            ·
+        </span>
+    )
+}
+
+function ArrowIcon({ className }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 16 16" fill="none" className={className} aria-hidden>
+            <path
+                d="M12 4 4 12M4 12H11M4 12V5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    )
+}
+
+const faDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"]
+
+function toFa(n: number) {
+    return String(n)
+        .split("")
+        .map((d) => (d >= "0" && d <= "9" ? faDigits[Number(d)] : d))
+        .join("")
+}
+
+// Rough Persian reading speed (~180 wpm) off the plain-text length of the
+// rendered HTML. Good enough for a "N دقیقه مطالعه" label — not meant to be
+// precise, just directionally useful the way every blog's estimate is.
+function getReadingMinutes(html: string) {
+    const text = html.replace(/<[^>]+>/g, " ")
+    const words = text.trim().split(/\s+/).filter(Boolean).length
+    return Math.max(1, Math.round(words / 180))
+}
+
+// ---------------------------------------------------------------------------
+// Typography for `content_html` — hand-styled via Tailwind arbitrary child
+// selectors rather than assuming @tailwindcss/typography is installed.
+// Targets the flat block-level sequence a rich-text editor typically
+// outputs (p / h2 / h3 / ul / ol / blockquote / img / hr as top-level
+// siblings), plus `a` and `img` as descendants since those can also appear
+// inline inside a paragraph.
+// ---------------------------------------------------------------------------
+const proseClassName = cn(
+    "mt-10 text-foreground",
+    "[&>p]:mt-5 [&>p]:text-[15px] [&>p]:leading-[1.9] [&>p]:text-foreground/90",
+    "[&>h2]:mt-12 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-foreground",
+    "[&>h3]:mt-9 [&>h3]:text-xl [&>h3]:font-bold [&>h3]:tracking-tight [&>h3]:text-foreground",
+    "[&>ul]:mt-5 [&>ul]:list-disc [&>ul]:space-y-2 [&>ul]:pr-5 [&>ul]:text-[15px] [&>ul]:leading-[1.9] [&>ul]:text-foreground/90",
+    "[&>ol]:mt-5 [&>ol]:list-decimal [&>ol]:space-y-2 [&>ol]:pr-5 [&>ol]:text-[15px] [&>ol]:leading-[1.9] [&>ol]:text-foreground/90",
+    "[&>blockquote]:mt-8 [&>blockquote]:border-r-2 [&>blockquote]:border-foreground [&>blockquote]:pr-5 [&>blockquote]:text-lg [&>blockquote]:leading-relaxed [&>blockquote]:text-muted-foreground [&>blockquote]:italic",
+    "[&>img]:mt-8 [&>img]:w-full [&>img]:rounded-2xl",
+    "[&>figure]:mt-8 [&>figure_figcaption]:mt-2 [&>figure_figcaption]:text-center [&>figure_figcaption]:text-xs [&>figure_figcaption]:text-muted-foreground [&>figure_img]:w-full [&>figure_img]:rounded-2xl",
+    "[&>hr]:my-12 [&>hr]:border-border",
+    "[&_a]:underline [&_a]:decoration-border [&_a]:underline-offset-4 [&_a]:transition-colors hover:[&_a]:decoration-foreground",
+    "[&_strong]:font-semibold [&_strong]:text-foreground"
+)

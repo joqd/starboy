@@ -15,10 +15,12 @@ export default async function Products() {
 
     return (
         <main dir="rtl" className="relative w-full">
-            <ScrollVelocityGallery
-                items={latestProducts.results}
-                className="z-50 hidden lg:block"
-            />
+            <div>
+                <ScrollVelocityGallery
+                    items={latestProducts.results}
+                    className="z-50 hidden overflow-hidden lg:block"
+                />
+            </div>
             <div className="absolute bottom-0 left-0 hidden xl:block">
                 <HeroImage />
             </div>
