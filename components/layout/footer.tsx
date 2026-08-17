@@ -35,7 +35,7 @@ const helpLinks = [
 
 export default function Footer({ className = "" }: { className?: string }) {
     return (
-        <footer className={cn("border-t border-border bg-muted/30", className)}>
+        <footer className={cn("border-t border-border bg-muted/30 pb-10", className)}>
             <div className="mx-auto max-w-295 px-5 py-14 sm:px-8 lg:px-10 lg:py-16">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
                     <FooterColumn title="فروشگاه" links={shopLinks} />

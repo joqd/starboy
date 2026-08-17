@@ -86,7 +86,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                         مجله
                     </p>
                     <h1 className="mt-3 text-4xl font-bold tracking-tight text-foreground">
-                        یادداشت‌ها و روایت‌های برند
+                        یادداشت‌ها و روایت‌های استاربوی
                     </h1>
                     <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                         از پشت‌صحنه‌ی طراحی تا راهنمای نگهداری — هر چیزی که لازمه درباره‌ی دنیای ما

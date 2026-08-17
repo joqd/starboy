@@ -6,32 +6,6 @@ import { cn, formatPostDate } from "@/lib/utils"
 import { getPost } from "@/lib/api/post"
 import { CopyLinkButton } from "@/components/blog/copy-link-button"
 
-// ---------------------------------------------------------------------------
-// Single post page — app/blog/[slug]/page.tsx.
-//
-// Three things this file is answering for:
-//   - APPEARANCE: same voice as home (quiet type, border-border rules,
-//     generous vertical rhythm) but at a reading width (max-w-[720px])
-//     instead of the home page's browsing width — 720px is close to the
-//     line-length that's actually comfortable to read Persian body text at.
-//   - SPEED: this whole tree is a server component. The only "use client"
-//     is <CopyLinkButton>, isolated in its own file so it doesn't drag the
-//     rest of the page into the client bundle. The featured image is the
-//     LCP element and gets `priority` + explicit `sizes`; everything below
-//     the fold is plain server-rendered markup, no hydration needed to read
-//     the post.
-//   - SEO: generateMetadata maps the API's `meta_tag` object directly onto
-//     Next's Metadata (title, description, canonical, robots, OpenGraph,
-//     Twitter card), and the API's own `json_ld` / `breadcrumb_ld` are
-//     serialized straight into <script type="application/ld+json">
-//     instead of being reconstructed by hand — the backend already builds
-//     the exact structured data it wants search engines to see. Semantic
-//     markup throughout (<article>, <time dateTime>, a real breadcrumb
-//     <nav>) backs that up for anything that doesn't read JSON-LD.
-// ---------------------------------------------------------------------------
-
-// Revalidate periodically rather than on every request — same pattern as
-// the store page (page.tsx: `export const revalidate = 300`).
 export const revalidate = 300
 
 interface PostPageProps {
@@ -98,15 +72,9 @@ export default async function PostPage({ params }: PostPageProps) {
             />
 
             <article dir="rtl" className="mx-auto max-w-180 px-5 pt-10 pb-24 sm:px-8">
-                <BreadcrumbNav items={post.breadcrumb_ld?.itemListElement} />
+                {/* <BreadcrumbNav items={post.breadcrumb_ld?.itemListElement} /> */}
 
-                <header className="mt-6">
-                    {post.category && (
-                        <span className="inline-block rounded-full border border-border px-3 py-1 text-[11px] font-medium tracking-wide text-muted-foreground">
-                            {post.category}
-                        </span>
-                    )}
-
+                <header>
                     <h1 className="mt-4 text-3xl leading-tight font-bold tracking-tight text-foreground sm:text-4xl">
                         {post.title}
                     </h1>

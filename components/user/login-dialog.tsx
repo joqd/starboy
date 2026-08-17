@@ -184,8 +184,8 @@ export function LoginDialog() {
         <Dialog open={isLoginOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger
                 render={
-                    <Button variant="ghost" size="icon" disabled={checkingSession}>
-                        <User className="h-[1.2rem] w-[1.2rem]" />
+                    <Button className={"ghost"} variant="ghost" disabled={checkingSession}>
+                        <User className="h-[1.1rem] w-[1.1rem]" />
                     </Button>
                 }
             />

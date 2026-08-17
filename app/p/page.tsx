@@ -14,7 +14,7 @@ export default async function Products() {
     ])
 
     return (
-        <main dir="rtl" className="relative w-full">
+        <main dir="rtl" className="relative">
             <div>
                 <ScrollVelocityGallery
                     items={latestProducts.results}
@@ -36,7 +36,7 @@ export default async function Products() {
                 products={latestProducts.results}
                 featured={featuredProducts.results}
                 collections={collections.results}
-                className="lg:hidden"
+                className="lg:hidden mt-8"
             />
         </main>
     )

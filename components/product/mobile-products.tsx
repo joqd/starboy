@@ -63,7 +63,7 @@ export default function MobileProducts({
 // ---------------------------------------------------------------------------
 function PageIntro({ count }: { count: number }) {
     return (
-        <section className="mt-15 px-5 pt-6">
+        <section className="mt-15 px-5">
             <Reveal>
                 <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
                     فروشگاه
