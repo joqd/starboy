@@ -82,7 +82,7 @@ function TopHeader({ shopSection }: { shopSection: boolean }) {
                     <div className="flex space-x-10 text-foreground/80">
                         <Link href={"/p"}>فروشگاه</Link>
                         <Link href={"/blog"}>وبلاگ</Link>
-                        <Link href={"/blog"}>ارتباط با ما</Link>
+                        <Link href={"/contact"}>ارتباط با ما</Link>
                     </div>
                 </div>
 

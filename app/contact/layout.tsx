@@ -4,10 +4,11 @@ interface LayoutProps {
     children: React.ReactNode
 }
 
-export default function BlogLayout({ children }: LayoutProps) {
+export default function ContactLayout({ children }: LayoutProps) {
     return (
         <div className="mt-8">
-            {children} <Footer />
+            {children}
+            <Footer />
         </div>
     )
 }
