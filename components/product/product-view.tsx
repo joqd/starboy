@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Link } from "next-view-transitions"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
@@ -63,6 +64,8 @@ export default function ProductView({ product }: Props) {
             ? Math.round(((comparePrice - displayPrice) / comparePrice) * 100)
             : null
 
+    const router = useRouter()
+
     const { addItem, getItemQuantity, isPending } = useCart()
     const { currentAudio, isPlaying, setAudio, setPlaying } = useAudio()
 
@@ -89,13 +92,10 @@ export default function ProductView({ product }: Props) {
         setQuantity(1)
     }, [selectedVariantId, availableToAdd])
 
-    // Capture whether the player was already on *before* this product was
-    // opened, so we only auto-start audio for a player that was silent —
-    // we never want to hijack a track the user already has going.
-    const wasPlayingOnEntry = useRef(isPlaying)
-
+    // Always start this product's audio when the page is entered, replacing
+    // whatever track (if any) was already playing.
     useEffect(() => {
-        if (!product.audio || wasPlayingOnEntry.current) return
+        if (!product.audio) return
         setAudio(product.audio)
         setPlaying(true)
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,13 +162,14 @@ export default function ProductView({ product }: Props) {
                 )}
             >
                 <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-5 py-5 lg:mx-0 lg:flex-none lg:overflow-y-auto lg:px-8 lg:py-10">
-                    <Link
-                        href="/"
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
                         className="flex w-fit items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground"
                     >
                         <ArrowRight className="h-3 w-3" />
                         بازگشت
-                    </Link>
+                    </button>
 
                     {product.collections.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
@@ -320,6 +321,84 @@ export default function ProductView({ product }: Props) {
     )
 }
 
+function GalleryTile({
+    img,
+    i,
+    count,
+    hasStock,
+    isLastVisible,
+    remaining,
+    onZoom,
+}: {
+    img: ProductDetail["images"][number]
+    i: number
+    count: number
+    hasStock: boolean
+    isLastVisible: boolean
+    remaining: number
+    onZoom: (index: number) => void
+}) {
+    const [loaded, setLoaded] = useState(false)
+
+    return (
+        <motion.button
+            onClick={() => onZoom(i)}
+            aria-label={
+                isLastVisible && remaining > 0
+                    ? `نمایش همه‌ی ${count} تصویر`
+                    : "نمایش تصویر در سایز کامل"
+            }
+            initial={false}
+            whileTap={{ scale: 0.97 }}
+            className={cn("group relative overflow-hidden bg-muted", getTileSpan(count, i))}
+        >
+            {!loaded && (
+                <div className="absolute inset-0 overflow-hidden bg-muted">
+                    <motion.div
+                        className="absolute inset-y-0 w-1/2 bg-linear-to-l from-transparent via-foreground/10 to-transparent"
+                        animate={{ x: ["-100%", "200%"] }}
+                        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                </div>
+            )}
+
+            {img.image && (
+                <Image
+                    src={img.image}
+                    alt={img.alt_text || `تصویر محصول ${i + 1}`}
+                    fill
+                    sizes={
+                        count === 1
+                            ? "(min-width: 1024px) 60vw, 100vw"
+                            : "(min-width: 1024px) 30vw, 50vw"
+                    }
+                    quality={95}
+                    priority={i === 0}
+                    draggable={false}
+                    onLoad={() => setLoaded(true)}
+                    className={cn(
+                        "object-cover transition-all duration-500 ease-out select-none",
+                        !hasStock && "blur-sm brightness-75 grayscale",
+                        loaded ? "scale-100 opacity-100" : "scale-105 opacity-0"
+                    )}
+                />
+            )}
+
+            <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+
+            <div className="absolute bottom-2.5 left-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
+                <ZoomIn className="h-4 w-4" />
+            </div>
+
+            {isLastVisible && remaining > 0 && (
+                <div className="absolute inset-0 flex items-center justify-center bg-linear-to-t from-black/75 via-black/50 to-black/30 text-lg font-bold text-white backdrop-blur-[1px]">
+                    +{remaining}
+                </div>
+            )}
+        </motion.button>
+    )
+}
+
 function getTileSpan(count: number, i: number) {
     if (count === 3 && i === 0) return "col-span-1 row-span-2"
     if (count >= 5 && i === 0) return "col-span-2 row-span-2"
@@ -350,58 +429,18 @@ function Gallery({
                     count >= 5 && "grid-cols-4 grid-rows-2"
                 )}
             >
-                {images.slice(0, visibleCount).map((img, i) => {
-                    const isLastVisible = i === visibleCount - 1
-                    return (
-                        <motion.button
-                            key={img.id}
-                            onClick={() => onZoom(i)}
-                            aria-label={
-                                isLastVisible && remaining > 0
-                                    ? `نمایش همه‌ی ${count} تصویر`
-                                    : "نمایش تصویر در سایز کامل"
-                            }
-                            initial={false}
-                            whileTap={{ scale: 0.97 }}
-                            className={cn(
-                                "group relative overflow-hidden bg-muted",
-                                getTileSpan(count, i)
-                            )}
-                        >
-                            {img.image && (
-                                <Image
-                                    src={img.image}
-                                    alt={img.alt_text || `تصویر محصول ${i + 1}`}
-                                    fill
-                                    sizes={
-                                        count === 1
-                                            ? "(min-width: 1024px) 60vw, 100vw"
-                                            : "(min-width: 1024px) 30vw, 50vw"
-                                    }
-                                    quality={95}
-                                    priority={i === 0}
-                                    draggable={false}
-                                    className={cn(
-                                        "object-cover transition-transform duration-500 ease-out select-none",
-                                        !hasStock && "blur-sm brightness-75 grayscale"
-                                    )}
-                                />
-                            )}
-
-                            <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
-
-                            <div className="absolute bottom-2.5 left-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
-                                <ZoomIn className="h-4 w-4" />
-                            </div>
-
-                            {isLastVisible && remaining > 0 && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-linear-to-t from-black/75 via-black/50 to-black/30 text-lg font-bold text-white backdrop-blur-[1px]">
-                                    +{remaining}
-                                </div>
-                            )}
-                        </motion.button>
-                    )
-                })}
+                {images.slice(0, visibleCount).map((img, i) => (
+                    <GalleryTile
+                        key={img.id}
+                        img={img}
+                        i={i}
+                        count={count}
+                        hasStock={hasStock}
+                        isLastVisible={i === visibleCount - 1}
+                        remaining={remaining}
+                        onZoom={onZoom}
+                    />
+                ))}
             </div>
 
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-black/55 via-black/20 to-transparent lg:hidden" />
