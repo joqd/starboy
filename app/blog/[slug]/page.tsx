@@ -113,8 +113,8 @@ export default async function PostPage({ params }: PostPageProps) {
                         </time>
                         <Dot />
                         <span>{toFa(readingMinutes)} دقیقه مطالعه</span>
-                        <Dot />
-                        <span>{toFa(post.view_count)} بازدید</span>
+                        {/* <Dot />
+                        <span>{toFa(post.view_count)} بازدید</span> */}
                     </div>
                 </header>
 
