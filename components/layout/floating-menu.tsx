@@ -38,6 +38,23 @@ function Logo() {
     )
 }
 
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+    const pathname = usePathname()
+    const isActive = href === "/" ? pathname === "/" : pathname?.startsWith(href)
+
+    return (
+        <Link
+            href={href}
+            className={cn(
+                "transition-colors",
+                isActive ? "text-foreground" : "text-foreground/50 hover:text-foreground/80"
+            )}
+        >
+            {children}
+        </Link>
+    )
+}
+
 function MenuRow({
     label,
     href,
@@ -79,10 +96,10 @@ function TopHeader({ shopSection }: { shopSection: boolean }) {
 
                 {/* Desktop actions */}
                 <div dir="rtl" className="hidden items-center gap-1 lg:flex">
-                    <div className="flex space-x-10 text-foreground/80">
-                        <Link href={"/p"}>فروشگاه</Link>
-                        <Link href={"/blog"}>وبلاگ</Link>
-                        <Link href={"/contact"}>ارتباط با ما</Link>
+                    <div className="flex space-x-10">
+                        <NavLink href="/p">فروشگاه</NavLink>
+                        <NavLink href="/blog">وبلاگ</NavLink>
+                        <NavLink href="/contact">ارتباط با ما</NavLink>
                     </div>
                 </div>
 
@@ -157,42 +174,27 @@ function DesktopMenuIcon({ children }: { children: React.ReactNode }) {
     return <div className="flex size-9 shrink-0 items-center justify-center">{children}</div>
 }
 
-function DesktopMenuLabel({ children }: { children: React.ReactNode }) {
-    return (
-        <span className="flex h-9 items-center text-xs font-medium whitespace-nowrap text-muted-foreground/60">
-            {children}
-        </span>
-    )
-}
-
 function ShopFloatingDock() {
     return (
-        <div dir="rtl" className="fixed right-6 bottom-6 z-9999 hidden items-end gap-3 lg:flex">
-            <div className="flex flex-col items-stretch gap-1.5 rounded-xl bg-accent px-2 py-2 shadow-lg">
-                <DesktopMenuIcon>
-                    <Cart />
-                </DesktopMenuIcon>
-                <DesktopMenuIcon>
-                    <BlogButton />
-                </DesktopMenuIcon>
-                <DesktopMenuIcon>
-                    <HomeButton />
-                </DesktopMenuIcon>
-                <DesktopMenuIcon>
-                    <ModeToggle />
-                </DesktopMenuIcon>
-                <DesktopMenuIcon>
-                    <LoginDialog />
-                </DesktopMenuIcon>
-            </div>
-
-            <div className="flex flex-col items-start gap-1.5 py-2">
-                <DesktopMenuLabel>سبد خرید</DesktopMenuLabel>
-                <DesktopMenuLabel>مجله</DesktopMenuLabel>
-                <DesktopMenuLabel>خانه</DesktopMenuLabel>
-                <DesktopMenuLabel>حالت نمایش</DesktopMenuLabel>
-                <DesktopMenuLabel>حساب کاربری</DesktopMenuLabel>
-            </div>
+        <div
+            dir="ltr"
+            className="fixed right-6 bottom-6 z-9999 hidden items-center gap-1.5 rounded-xl bg-accent px-2 py-2 shadow-lg lg:flex"
+        >
+            <DesktopMenuIcon>
+                <Cart />
+            </DesktopMenuIcon>
+            <DesktopMenuIcon>
+                <BlogButton />
+            </DesktopMenuIcon>
+            <DesktopMenuIcon>
+                <HomeButton />
+            </DesktopMenuIcon>
+            <DesktopMenuIcon>
+                <ModeToggle />
+            </DesktopMenuIcon>
+            <DesktopMenuIcon>
+                <LoginDialog />
+            </DesktopMenuIcon>
         </div>
     )
 }

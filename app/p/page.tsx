@@ -36,7 +36,7 @@ export default async function Products() {
                 products={latestProducts.results}
                 featured={featuredProducts.results}
                 collections={collections.results}
-                className="lg:hidden mt-8"
+                className="mt-8 lg:hidden"
             />
         </main>
     )
