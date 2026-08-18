@@ -106,7 +106,7 @@ export default function ContactPage() {
                                 rel={
                                     item.href.startsWith("http") ? "noopener noreferrer" : undefined
                                 }
-                                className="flex items-center gap-3 rounded-xl border border-border/60 p-4 transition-colors hover:bg-accent/50"
+                                className="flex items-center gap-3 rounded-xl border border-border/60 p-4 transition-colors hover:bg-accent"
                             >
                                 {content}
                             </Link>
