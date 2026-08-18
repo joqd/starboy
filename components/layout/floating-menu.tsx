@@ -10,6 +10,7 @@ import StarboyLogo from "../common/starboy-logo"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Separator } from "../ui/separator"
+import { ScrollProgress } from "./scroll-progress"
 
 function BlogButton() {
     return (
@@ -162,6 +163,7 @@ function TopHeader({ shopSection }: { shopSection: boolean }) {
                     </nav>
                 </div>
             </div>
+			{/* <ScrollProgress /> */}
         </header>
     )
 }
@@ -178,7 +180,7 @@ function ShopFloatingDock() {
     return (
         <div
             dir="ltr"
-            className="fixed right-6 bottom-6 z-9999 hidden items-center gap-1.5 rounded-xl bg-accent px-2 py-2 shadow-lg lg:flex"
+            className="fixed right-6 bottom-6 z-9999 hidden items-center gap-1.5 rounded-xl bg-accent px-2 py-2  lg:flex"
         >
             <DesktopMenuIcon>
                 <Cart />

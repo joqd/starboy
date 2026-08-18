@@ -8,7 +8,6 @@ import FloatingMenu from "@/components/layout/floating-menu"
 import { AuthProvider } from "@/hooks/use-auth"
 import { Toaster } from "@/components/ui/toast"
 import { MusicPlayer } from "@/components/music/music-player"
-import { ScrollProgress } from "@/components/layout/scroll-progress"
 import { ViewTransitions } from "next-view-transitions"
 
 const YekanBakh = localFont({
@@ -55,7 +54,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                         disableTransitionOnChange
                     >
                         <AmbientGlow />
-                        <ScrollProgress />
+                        
                         <AuthProvider>
                             <FloatingMenu />
                             {children}
