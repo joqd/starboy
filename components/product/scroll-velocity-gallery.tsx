@@ -435,6 +435,7 @@ const Plane = memo(function Plane({
     isNearCenter,
 }: PlaneProps) {
     const [hovered, setHovered] = useState(false)
+    const [loaded, setLoaded] = useState(false)
     const Wrapper = motion.div
     const { planeW, planeH, step, rotateY, waveMaxYPx } = metrics
 
@@ -516,16 +517,23 @@ const Plane = memo(function Plane({
                 style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
             >
                 <Link href={`p/${item.slug}`} className="relative block h-full w-full">
+                    {!loaded && (
+                        <div className="absolute inset-0 overflow-hidden bg-neutral-800/40">
+                            <div className="absolute inset-0 animate-pulse bg-linear-to-br from-neutral-700/30 via-transparent to-transparent" />
+                        </div>
+                    )}
                     <Image
                         src={item.images[0]?.image}
                         alt={item.title}
                         fill
                         sizes={isMobile ? "190px" : "320px"}
                         draggable={false}
+                        onLoad={() => setLoaded(true)}
                         className={cn(
-                            "border border-neutral-400/30 object-cover transition duration-150 select-none",
+                            "border border-neutral-400/30 object-cover transition duration-300 select-none",
                             !hasStock && hovered && "blur-sm grayscale",
-                            hovered ? "brightness-100" : "brightness-80"
+                            hovered ? "brightness-100" : "brightness-80",
+                            loaded ? "opacity-100" : "opacity-0"
                         )}
                         // Intentionally NOT loading="lazy" for cards near the
                         // centered index: the render window keeps the mounted
