@@ -157,37 +157,37 @@ export default async function PostPage({ params }: PostPageProps) {
 // array that's serialized into JSON-LD above, so the visible trail and the
 // structured data can never drift apart from each other.
 // ---------------------------------------------------------------------------
-function BreadcrumbNav({ items }: { items?: { position: number; name: string; item: string }[] }) {
-    if (!items?.length) return null
+// function BreadcrumbNav({ items }: { items?: { position: number; name: string; item: string }[] }) {
+//     if (!items?.length) return null
 
-    return (
-        <nav
-            aria-label="breadcrumb"
-            className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
-        >
-            {items
-                .slice()
-                .sort((a, b) => a.position - b.position)
-                .map((crumb, idx, arr) => (
-                    <span key={crumb.position} className="flex items-center gap-1.5">
-                        {idx > 0 && <span aria-hidden>/</span>}
-                        {idx === arr.length - 1 ? (
-                            <span aria-current="page" className="text-foreground">
-                                {crumb.name}
-                            </span>
-                        ) : (
-                            <a
-                                href={crumb.item}
-                                className="transition-colors hover:text-foreground"
-                            >
-                                {crumb.name}
-                            </a>
-                        )}
-                    </span>
-                ))}
-        </nav>
-    )
-}
+//     return (
+//         <nav
+//             aria-label="breadcrumb"
+//             className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+//         >
+//             {items
+//                 .slice()
+//                 .sort((a, b) => a.position - b.position)
+//                 .map((crumb, idx, arr) => (
+//                     <span key={crumb.position} className="flex items-center gap-1.5">
+//                         {idx > 0 && <span aria-hidden>/</span>}
+//                         {idx === arr.length - 1 ? (
+//                             <span aria-current="page" className="text-foreground">
+//                                 {crumb.name}
+//                             </span>
+//                         ) : (
+//                             <a
+//                                 href={crumb.item}
+//                                 className="transition-colors hover:text-foreground"
+//                             >
+//                                 {crumb.name}
+//                             </a>
+//                         )}
+//                     </span>
+//                 ))}
+//         </nav>
+//     )
+// }
 
 function Dot() {
     return (

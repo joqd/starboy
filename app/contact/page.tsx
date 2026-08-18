@@ -1,7 +1,6 @@
 import { Clock, Mail, Rss, MapPin, MessageCircle, Phone, Send } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
-import Footer from "@/components/layout/footer"
 
 export const metadata: Metadata = {
     title: "ارتباط با ما",
