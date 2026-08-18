@@ -62,12 +62,12 @@ export default async function PostPage({ params }: PostPageProps) {
                 already owns the shape search engines expect. */}
             <script
                 type="application/ld+json"
-                 
+
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(post.json_ld) }}
             />
             <script
                 type="application/ld+json"
-                 
+
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(post.breadcrumb_ld) }}
             />
 
@@ -131,7 +131,7 @@ export default async function PostPage({ params }: PostPageProps) {
                     </div>
                 )}
 
-                { }
+                {}
                 <div
                     className={proseClassName}
                     dangerouslySetInnerHTML={{ __html: post.content_html }}
