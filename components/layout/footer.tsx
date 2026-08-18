@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils"
 const shopLinks = [
     { label: "همه محصولات", href: "/shop" },
     { label: "کالکشن‌ها", href: "/collections" },
-    { label: "جدیدترین‌ها", href: "/shop?sort=new" },
 ]
 
 const brandLinks = [
@@ -29,7 +28,6 @@ const brandLinks = [
 const helpLinks = [
     { label: "سوالات متداول", href: "/faq" },
     { label: "ارسال و مرجوعی", href: "/shipping-returns" },
-    { label: "حریم خصوصی", href: "/privacy" },
 ]
 
 export default function Footer({ className = "" }: { className?: string }) {
@@ -38,7 +36,7 @@ export default function Footer({ className = "" }: { className?: string }) {
             <div className="mx-auto max-w-295 px-5 py-14 sm:px-8 lg:px-10 lg:py-16">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
                     <FooterColumn title="فروشگاه" links={shopLinks} />
-                    <FooterColumn title="برند" links={brandLinks} />
+                    <FooterColumn title="استاربوی" links={brandLinks} />
                     <FooterColumn title="راهنما" links={helpLinks} />
                 </div>
 
