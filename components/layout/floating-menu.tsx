@@ -99,7 +99,7 @@ function TopHeader({ shopSection }: { shopSection: boolean }) {
                 <div dir="rtl" className="hidden items-center gap-1 lg:flex">
                     <div className="flex space-x-10">
                         <NavLink href="/p">فروشگاه</NavLink>
-                        <NavLink href="/blog">وبلاگ</NavLink>
+                        <NavLink href="/blog">مجله</NavLink>
                         <NavLink href="/contact">ارتباط با ما</NavLink>
                     </div>
                 </div>
