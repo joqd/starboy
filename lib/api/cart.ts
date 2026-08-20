@@ -2,9 +2,13 @@ import request from "@/lib/api/client"
 import type { Cart } from "@/types/cart"
 
 export function getCart(): Promise<Cart> {
-    return request<Cart>("/api/cart/", {
-        method: "GET",
-    })
+    return request<Cart>(
+        "/api/cart/",
+        {
+            method: "GET",
+        },
+        { auth: true }
+    )
 }
 
 export function addItemToCart(sku: string, quantity: number = 1): Promise<Cart> {
