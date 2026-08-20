@@ -7,13 +7,16 @@ import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import {
     ArrowRight,
+    ChevronDown,
     ChevronLeft,
     ChevronRight,
     Lock,
     Minus,
     Music,
-    Pause,
     Plus,
+    RotateCcw,
+    ShieldCheck,
+    Truck,
     X,
     ZoomIn,
 } from "lucide-react"
@@ -51,6 +54,7 @@ export default function ProductView({ product }: Props) {
         sortedVariants.find((v) => v.is_active && v.stock > 0)?.id ?? null
     )
     const [quantity, setQuantity] = useState(1)
+    const [activeImageIndex, setActiveImageIndex] = useState(0)
     const [zoomedIndex, setZoomedIndex] = useState<number | null>(null)
     const [addToCartError, setAddToCartError] = useState<string | null>(null)
 
@@ -92,15 +96,6 @@ export default function ProductView({ product }: Props) {
         setQuantity(1)
     }, [selectedVariantId, availableToAdd])
 
-    // Always start this product's audio when the page is entered, replacing
-    // whatever track (if any) was already playing.
-    useEffect(() => {
-        if (!product.audio) return
-        setAudio(product.audio)
-        setPlaying(true)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [product.id])
-
     const handleToggleAudio = () => {
         if (!product.audio) return
         if (isThisAudioPlaying) {
@@ -129,85 +124,199 @@ export default function ProductView({ product }: Props) {
         }
     }
 
+    const primaryCollection = product.collections[0]
+
     return (
         <div
             dir="rtl"
-            className="relative flex w-full flex-col lg:h-screen lg:flex-row lg:overflow-hidden"
+            className="relative mx-auto max-w-295 px-4 pt-20 pb-16 sm:px-6 lg:px-10 lg:pt-10 lg:pb-24 xl:px-10"
         >
-            <div className="relative order-1 h-[46vh] w-full shrink-0 lg:order-2 lg:h-full lg:flex-1">
-                <Gallery images={images} hasStock={productHasStock} onZoom={setZoomedIndex} />
+            {/* Breadcrumb ---------------------------------------------------- */}
+            {/* <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
+                <nav className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <Link href="/" className="shrink-0 transition-colors hover:text-foreground">
+                        خانه
+                    </Link>
+                    <ChevronLeft className="h-3 w-3 shrink-0" />
+                    <Link href="/p" className="shrink-0 transition-colors hover:text-foreground">
+                        فروشگاه
+                    </Link>
+                    {primaryCollection && (
+                        <>
+                            <ChevronLeft className="h-3 w-3 shrink-0" />
+                            <span className="hidden shrink-0 sm:inline">
+                                {primaryCollection.title}
+                            </span>
+                        </>
+                    )}
+                    <ChevronLeft className="h-3 w-3 shrink-0" />
+                    <span className="truncate text-foreground">{product.title}</span>
+                </nav>
 
-                {product.audio && (
-                    <button
-                        onClick={handleToggleAudio}
-                        aria-label={isThisAudioPlaying ? "توقف موزیک" : "پخش موزیک"}
-                        className="absolute top-4 left-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/80 text-foreground opacity-90 backdrop-blur-md transition hover:opacity-100 active:scale-90"
-                    >
-                        {isThisAudioPlaying && (
-                            <span className="absolute inset-0 animate-ping rounded-full bg-primary/25" />
-                        )}
-                        {isThisAudioPlaying ? (
-                            <Pause className="relative h-4 w-4" />
-                        ) : (
-                            <Music className="relative h-4 w-4" />
-                        )}
-                    </button>
-                )}
-            </div>
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+                >
+                    <ArrowRight className="h-3 w-3" />
+                    بازگشت
+                </button>
+            </div> */}
 
+            {/* Gallery + buy box ---------------------------------------------- */}
             <div
                 className={cn(
-                    "order-2 flex flex-col lg:order-1 lg:min-h-0 lg:flex-1",
-                    "border lg:h-full lg:w-105 lg:flex-none lg:justify-center lg:border-l xl:w-115"
+                    "grid gap-6 lg:items-start lg:gap-8 xl:gap-10",
+                    images.length > 1 ? "lg:grid-cols-[64px_1fr_400px]" : "lg:grid-cols-[1fr_400px]"
                 )}
             >
-                <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-5 py-5 lg:mx-0 lg:flex-none lg:overflow-y-auto lg:px-8 lg:py-10">
-                    <button
-                        type="button"
-                        onClick={() => router.back()}
-                        className="flex w-fit items-center gap-1.5 px-3 py-1.5 text-[11px] text-muted-foreground"
-                    >
-                        <ArrowRight className="h-3 w-3" />
-                        بازگشت
-                    </button>
+                {/* Thumbnail rail — desktop only */}
+                {images.length > 1 && (
+                    <div className="hidden lg:sticky lg:top-24 lg:flex lg:max-h-[72vh] lg:flex-col lg:gap-2 lg:overflow-y-auto">
+                        {images.map((img, i) => (
+                            <Thumbnail
+                                key={img.id}
+                                img={img}
+                                index={i}
+                                active={i === activeImageIndex}
+                                hasStock={productHasStock}
+                                onSelect={() => setActiveImageIndex(i)}
+                                className="h-16 w-16"
+                            />
+                        ))}
+                    </div>
+                )}
 
-                    {product.collections.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                            {product.collections.map((c) => (
-                                <span
-                                    key={c.id}
-                                    className="rounded-full border border-border/70 bg-muted/70 px-2.5 py-0.5 text-[9px] font-medium tracking-wide text-muted-foreground uppercase"
+                {/* Main image */}
+                <div className="lg:sticky lg:top-24">
+                    <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted">
+                        <button
+                            onClick={() => setZoomedIndex(activeImageIndex)}
+                            aria-label="نمایش تصویر در سایز کامل"
+                            className="group absolute inset-0 h-full w-full"
+                        >
+                            <MainImage
+                                image={images[activeImageIndex] ?? images[0]}
+                                hasStock={productHasStock}
+                            />
+                            <div className="absolute bottom-3 left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
+                                <ZoomIn className="h-4 w-4" />
+                            </div>
+                        </button>
+
+                        {product.audio && (
+                            <button
+                                onClick={handleToggleAudio}
+                                aria-label={isThisAudioPlaying ? "توقف موزیک" : "پخش موزیک"}
+                                title={isThisAudioPlaying ? "توقف موزیک محصول" : "پخش موزیک محصول"}
+                                className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground backdrop-blur-md transition hover:text-primary active:scale-90"
+                            >
+                                {isThisAudioPlaying ? (
+                                    <span className="flex h-3 items-end gap-[2px]">
+                                        <motion.span
+                                            className="w-[2px] rounded-full bg-primary"
+                                            animate={{ height: ["35%", "100%", "35%"] }}
+                                            transition={{
+                                                duration: 0.9,
+                                                repeat: Infinity,
+                                                ease: "easeInOut",
+                                            }}
+                                        />
+                                        <motion.span
+                                            className="w-[2px] rounded-full bg-primary"
+                                            animate={{ height: ["100%", "45%", "100%"] }}
+                                            transition={{
+                                                duration: 0.9,
+                                                repeat: Infinity,
+                                                ease: "easeInOut",
+                                                delay: 0.15,
+                                            }}
+                                        />
+                                        <motion.span
+                                            className="w-[2px] rounded-full bg-primary"
+                                            animate={{ height: ["55%", "90%", "55%"] }}
+                                            transition={{
+                                                duration: 0.9,
+                                                repeat: Infinity,
+                                                ease: "easeInOut",
+                                                delay: 0.3,
+                                            }}
+                                        />
+                                    </span>
+                                ) : (
+                                    <Music className="h-3.5 w-3.5" />
+                                )}
+                            </button>
+                        )}
+
+                        {!productHasStock && (
+                            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30">
+                                <div
+                                    className="flex flex-col items-center gap-1.5 text-white"
+                                    style={{
+                                        textShadow: `0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8), 0 0 16px rgba(0,0,0,.5)`,
+                                    }}
                                 >
-                                    {c.title}
-                                </span>
+                                    <Lock className="h-8 w-8" strokeWidth={1.8} />
+                                    <p className="text-sm font-medium tracking-wide">ناموجود</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Thumbnails — mobile only */}
+                    {images.length > 1 && (
+                        <div className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
+                            {images.map((img, i) => (
+                                <Thumbnail
+                                    key={img.id}
+                                    img={img}
+                                    index={i}
+                                    active={i === activeImageIndex}
+                                    hasStock={productHasStock}
+                                    onSelect={() => setActiveImageIndex(i)}
+                                    className="h-16 w-14 shrink-0"
+                                />
                             ))}
                         </div>
                     )}
+                </div>
 
+                {/* Buy box */}
+                <div className="flex flex-col gap-6 lg:sticky lg:top-24">
                     <div>
-                        <h1 className="text-[28px] leading-[1.05] font-bold tracking-tight text-primary uppercase lg:text-[32px]">
+                        {primaryCollection && (
+                            <span className="mb-2 inline-block text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                                {primaryCollection.title}
+                            </span>
+                        )}
+                        <h1 className="text-[26px] leading-[1.1] font-bold tracking-tight text-primary uppercase lg:text-[30px]">
                             {product.title}
                         </h1>
                         {product.short_description && (
-                            <p className="mt-3 text-[13px] leading-relaxed">
+                            <p className="mt-2.5 text-[13px] leading-relaxed text-muted-foreground">
                                 {product.short_description}
                             </p>
                         )}
                     </div>
 
                     <div className="flex items-baseline gap-2.5">
-                        <span className="text-xl font-bold">{formatPrice(displayPrice)} تومان</span>
+                        <span className="text-2xl font-bold">
+                            {formatPrice(displayPrice)} تومان
+                        </span>
                         {comparePrice && comparePrice > displayPrice && (
                             <>
-                                <span className="text-[12px] line-through">
+                                <span className="text-[12px] text-muted-foreground line-through">
                                     {formatPrice(comparePrice)}
                                 </span>
-                                <span className="rounded-full px-2 py-0.5 text-[10px] font-medium">
+                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                                     {discountPercent}٪-
                                 </span>
                             </>
                         )}
                     </div>
+
+                    <Separator />
 
                     {sortedVariants.length > 0 && (
                         <div>
@@ -298,17 +407,66 @@ export default function ProductView({ product }: Props) {
                     </div>
 
                     {addToCartError && (
-                        <p className="text-[11px] font-medium text-destructive">{addToCartError}</p>
+                        <p className="-mt-3 text-[11px] font-medium text-destructive">
+                            {addToCartError}
+                        </p>
                     )}
 
-                    {product.description && (
-                        <div className="border-t pt-4">
-                            <p className="text-[12.5px] leading-6 whitespace-pre-line">
-                                {product.description}
-                            </p>
+                    {/* Trust row */}
+                    <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/25 p-4">
+                        <Link
+                            href="/shipping-returns"
+                            className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            <Truck
+                                className="h-3.5 w-3.5 shrink-0 text-primary"
+                                strokeWidth={1.8}
+                            />
+                            ارسال سریع به سراسر کشور
+                        </Link>
+                        <Link
+                            href="/shipping-returns"
+                            className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            <RotateCcw
+                                className="h-3.5 w-3.5 shrink-0 text-primary"
+                                strokeWidth={1.8}
+                            />
+                            ۷ روز مهلت مرجوعی و تعویض
+                        </Link>
+                        <div className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground">
+                            <ShieldCheck
+                                className="h-3.5 w-3.5 shrink-0 text-primary"
+                                strokeWidth={1.8}
+                            />
+                            پرداخت امن و تضمین اصالت کالا
                         </div>
-                    )}
+                    </div>
                 </div>
+            </div>
+
+            {/* Details accordion ----------------------------------------------- */}
+            <div className="mx-auto mt-16 max-w-2xl lg:mt-24">
+                {product.description && (
+                    <AccordionSection title="توضیحات محصول" defaultOpen>
+                        <p className="text-[12.5px] leading-7 whitespace-pre-line text-foreground">
+                            {product.description}
+                        </p>
+                    </AccordionSection>
+                )}
+                <AccordionSection title="ارسال و مرجوعی">
+                    <p className="text-[12.5px] leading-7 text-muted-foreground">
+                        سفارش شما در کمتر از ۲۴ ساعت آماده و ارسال می‌شه و تا ۷ روز بعد از تحویل،
+                        امکان مرجوعی یا تعویض داری.{" "}
+                        <Link
+                            href="/shipping-returns"
+                            className="text-foreground underline underline-offset-2"
+                        >
+                            جزئیات کامل رو اینجا بخون
+                        </Link>
+                        .
+                    </p>
+                </AccordionSection>
             </div>
 
             <Lightbox
@@ -321,37 +479,66 @@ export default function ProductView({ product }: Props) {
     )
 }
 
-function GalleryTile({
-    img,
-    i,
-    count,
-    hasStock,
-    isLastVisible,
-    remaining,
-    onZoom,
+// ---------------------------------------------------------------------------
+function AccordionSection({
+    title,
+    defaultOpen = false,
+    children,
 }: {
-    img: ProductDetail["images"][number]
-    i: number
-    count: number
+    title: string
+    defaultOpen?: boolean
+    children: React.ReactNode
+}) {
+    const [open, setOpen] = useState(defaultOpen)
+
+    return (
+        <div className="border-b border-border/60">
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                aria-expanded={open}
+                className="flex w-full items-center justify-between gap-4 py-4 text-right text-[13px] font-bold text-foreground"
+            >
+                {title}
+                <ChevronDown
+                    className={cn(
+                        "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300",
+                        open && "rotate-180"
+                    )}
+                />
+            </button>
+            <div
+                className={cn(
+                    "grid transition-all duration-300 ease-in-out",
+                    open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                )}
+            >
+                <div className="overflow-hidden">
+                    <div className="pb-5">{children}</div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ---------------------------------------------------------------------------
+function MainImage({
+    image,
+    hasStock,
+}: {
+    image: ProductDetail["images"][number]
     hasStock: boolean
-    isLastVisible: boolean
-    remaining: number
-    onZoom: (index: number) => void
 }) {
     const [loaded, setLoaded] = useState(false)
 
+    // A new active image starts its own loading cycle.
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLoaded(false)
+    }, [image?.id])
+
     return (
-        <motion.button
-            onClick={() => onZoom(i)}
-            aria-label={
-                isLastVisible && remaining > 0
-                    ? `نمایش همه‌ی ${count} تصویر`
-                    : "نمایش تصویر در سایز کامل"
-            }
-            initial={false}
-            whileTap={{ scale: 0.97 }}
-            className={cn("group relative overflow-hidden bg-muted", getTileSpan(count, i))}
-        >
+        <>
             {!loaded && (
                 <div className="absolute inset-0 overflow-hidden bg-muted">
                     <motion.div
@@ -362,18 +549,14 @@ function GalleryTile({
                 </div>
             )}
 
-            {img.image && (
+            {image?.image && (
                 <Image
-                    src={img.image}
-                    alt={img.alt_text || `تصویر محصول ${i + 1}`}
+                    src={image.image}
+                    alt={image.alt_text || "تصویر محصول"}
                     fill
-                    sizes={
-                        count === 1
-                            ? "(min-width: 1024px) 60vw, 100vw"
-                            : "(min-width: 1024px) 30vw, 50vw"
-                    }
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     quality={95}
-                    priority={i === 0}
+                    priority
                     draggable={false}
                     onLoad={() => setLoaded(true)}
                     className={cn(
@@ -383,85 +566,63 @@ function GalleryTile({
                     )}
                 />
             )}
-
-            <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
-
-            <div className="absolute bottom-2.5 left-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
-                <ZoomIn className="h-4 w-4" />
-            </div>
-
-            {isLastVisible && remaining > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center bg-linear-to-t from-black/75 via-black/50 to-black/30 text-lg font-bold text-white backdrop-blur-[1px]">
-                    +{remaining}
-                </div>
-            )}
-        </motion.button>
+        </>
     )
 }
 
-function getTileSpan(count: number, i: number) {
-    if (count === 3 && i === 0) return "col-span-1 row-span-2"
-    if (count >= 5 && i === 0) return "col-span-2 row-span-2"
-    return "col-span-1 row-span-1"
-}
-
-function Gallery({
-    images,
+function Thumbnail({
+    img,
+    index,
+    active,
     hasStock,
-    onZoom,
+    onSelect,
+    className,
 }: {
-    images: ProductDetail["images"]
+    img: ProductDetail["images"][number]
+    index: number
+    active: boolean
     hasStock: boolean
-    onZoom: (index: number) => void
+    onSelect: () => void
+    className?: string
 }) {
-    const count = images.length
-    const visibleCount = Math.min(count, 5)
-    const remaining = count - visibleCount
+    const [loaded, setLoaded] = useState(false)
 
     return (
-        <div className="absolute inset-0 overflow-hidden bg-border">
-            <div
-                className={cn(
-                    "grid h-full w-full gap-px",
-                    count === 1 && "grid-cols-1 grid-rows-1",
-                    count === 2 && "grid-cols-2 grid-rows-1",
-                    (count === 3 || count === 4) && "grid-cols-2 grid-rows-2",
-                    count >= 5 && "grid-cols-4 grid-rows-2"
-                )}
-            >
-                {images.slice(0, visibleCount).map((img, i) => (
-                    <GalleryTile
-                        key={img.id}
-                        img={img}
-                        i={i}
-                        count={count}
-                        hasStock={hasStock}
-                        isLastVisible={i === visibleCount - 1}
-                        remaining={remaining}
-                        onZoom={onZoom}
-                    />
-                ))}
-            </div>
-
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-black/55 via-black/20 to-transparent lg:hidden" />
-
-            {!hasStock && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div
-                        className="flex flex-col items-center gap-1.5"
-                        style={{
-                            textShadow: `0 1px 2px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.8), 0 0 16px rgba(0,0,0,.5)`,
-                        }}
-                    >
-                        <Lock className="h-8 w-8" strokeWidth={1.8} />
-                        <p className="text-sm font-medium tracking-wide">ناموجود</p>
-                    </div>
-                </div>
+        <button
+            onClick={onSelect}
+            aria-label={`نمایش تصویر ${index + 1}`}
+            aria-current={active}
+            className={cn(
+                "relative shrink-0 overflow-hidden rounded-lg border bg-muted transition",
+                active ? "border-primary" : "border-border/60 opacity-70 hover:opacity-100",
+                className
             )}
-        </div>
+        >
+            {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" />}
+
+            {img.image && (
+                <Image
+                    src={img.image}
+                    alt={img.alt_text || `تصویر محصول ${index + 1}`}
+                    fill
+                    sizes="64px"
+                    quality={90}
+                    draggable={false}
+                    onLoad={() => setLoaded(true)}
+                    className={cn(
+                        "object-cover transition-opacity duration-500 select-none",
+                        !hasStock && "grayscale",
+                        loaded ? "opacity-100" : "opacity-0"
+                    )}
+                />
+            )}
+        </button>
     )
 }
 
+// ---------------------------------------------------------------------------
+// Lightbox — unchanged from before.
+// ---------------------------------------------------------------------------
 function Lightbox({
     images,
     index,

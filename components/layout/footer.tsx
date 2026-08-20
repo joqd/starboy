@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 // ---------------------------------------------------------------------------
 
 const shopLinks = [
-    { label: "همه محصولات", href: "/shop" },
+    { label: "همه محصولات", href: "/p" },
     { label: "کالکشن‌ها", href: "/collections" },
 ]
 
