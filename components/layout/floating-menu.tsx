@@ -33,7 +33,7 @@ function HomeButton() {
 function Logo() {
     return (
         <Link href="/" className="text-lg font-bold tracking-tight text-foreground">
-            <StarboyLogo width={130} />
+            <StarboyLogo className="w-35 h-auto" />
         </Link>
     )
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 
-export function HeroImage() {
+export function HeroImage({ priority = true }: { priority?: boolean }) {
     return (
         <>
             <Image
@@ -10,7 +10,7 @@ export function HeroImage() {
                 alt="Starboy"
                 width={657}
                 height={841}
-                loading="eager"
+                loading={priority ? "eager" : "lazy"}
                 draggable={false}
                 className="w-100 object-contain select-none dark:hidden"
             />
@@ -20,7 +20,7 @@ export function HeroImage() {
                     src="/images/baby-blue-movie.png"
                     alt="Starboy"
                     fill
-                    loading="eager"
+                    loading={priority ? "eager" : "lazy"}
                     draggable={false}
                     className="object-contain grayscale select-none"
                 />

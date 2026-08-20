@@ -2,6 +2,9 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
     output: "standalone",
+	experimental: {
+        optimizeCss: true,
+    },
     images: {
         dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
         unoptimized: process.env.NODE_ENV === "development",
@@ -17,15 +20,6 @@ const nextConfig: NextConfig = {
             },
         ],
     },
-    // async redirects() {
-    //     return [
-    //         {
-    //             source: "/p",
-    //             destination: "/",
-    //             permanent: true,
-    //         },
-    //     ]
-    // },
 }
 
 export default nextConfig
