@@ -46,7 +46,7 @@ export default function Footer({ className = "" }: { className?: string }) {
                         © {new Date().getFullYear()} استاربوی. تمام حقوق محفوظ است.
                     </p>
                     <div className="flex items-center gap-5">
-                        <Link
+                        {/* <Link
                             href="/privacy"
                             className="text-xs text-muted-foreground hover:text-foreground"
                         >
@@ -57,11 +57,33 @@ export default function Footer({ className = "" }: { className?: string }) {
                             className="text-xs text-muted-foreground hover:text-foreground"
                         >
                             قوانین و مقررات
-                        </Link>
+                        </Link> */}
+                        <EnamadSeal />
                     </div>
                 </div>
             </div>
         </footer>
+    )
+}
+
+function EnamadSeal() {
+    return (
+        <a
+            referrerPolicy="origin"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://trustseal.enamad.ir/?id=7349880&Code=dpydsLcz6JNaVkmJ9ZdbF1eZz8cKemzx"
+            className="shrink-0"
+        >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+                referrerPolicy="origin"
+                src="https://trustseal.enamad.ir/logo.aspx?id=7349880&Code=dpydsLcz6JNaVkmJ9ZdbF1eZz8cKemzx"
+                alt="نماد اعتماد الکترونیکی"
+                code="dpydsLcz6JNaVkmJ9ZdbF1eZz8cKemzx"
+                className="h-20 w-20 cursor-pointer"
+            />
+        </a>
     )
 }
 

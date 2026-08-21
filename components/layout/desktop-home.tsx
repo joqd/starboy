@@ -81,7 +81,7 @@ function SectionHeader({
     return (
         <div className="flex items-end justify-between gap-8 border-b border-border pb-5">
             <div>
-                <p className="text-[11px] font-medium tracking-[0.3em] text-muted-foreground uppercase">
+                <p className="text-[11px] font-medium tracking-[0.3em] text-muted-foreground">
                     {eyebrow}
                 </p>
                 <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">{title}</h2>
@@ -112,9 +112,7 @@ function DesktopHero() {
         <section className="mx-auto max-w-295 px-8 pt-20 xl:px-10">
             <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
                 <Reveal>
-                    <p className="text-xs tracking-[0.35em] text-muted-foreground uppercase">
-                        کالکشن جدید
-                    </p>
+                    <p className="text-xs tracking-[0.35em] text-muted-foreground">کالکشن جدید</p>
                     <h1 className="mt-5 text-5xl leading-[1.15] font-bold tracking-tight text-foreground xl:text-[3.25rem]">
                         استایل خودت رو بساز
                     </h1>
@@ -133,7 +131,7 @@ function DesktopHero() {
                     <dl className="mt-14 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
                         <div>
                             <dt className="text-xs text-muted-foreground">تجربه</dt>
-                            <dd className="mt-1 text-lg font-semibold text-foreground">+۸ سال</dd>
+                            <dd className="mt-1 text-lg font-semibold text-foreground">+۵ سال</dd>
                         </div>
                         <div>
                             <dt className="text-xs text-muted-foreground">تولید</dt>
@@ -141,7 +139,7 @@ function DesktopHero() {
                         </div>
                         <div>
                             <dt className="text-xs text-muted-foreground">طراحی</dt>
-                            <dd className="mt-1 text-lg font-semibold text-foreground">داخلی</dd>
+                            <dd className="mt-1 text-lg font-semibold text-foreground">اختصاصی</dd>
                         </div>
                     </dl>
                 </Reveal>
@@ -204,7 +202,7 @@ function BrandStory() {
     return (
         <section className="mx-auto mt-28 max-w-215 px-8 text-center xl:px-10">
             <Reveal>
-                <p className="text-[11px] font-medium tracking-[0.3em] text-muted-foreground uppercase">
+                <p className="text-[11px] font-medium tracking-[0.3em] text-muted-foreground">
                     چرا ما
                 </p>
                 <p className="mt-6 text-3xl leading-[1.55] font-bold tracking-tight text-foreground xl:text-4xl">
@@ -229,9 +227,9 @@ function BrandStory() {
                         </p>
                     </li>
                     <li>
-                        <p className="text-sm font-semibold text-foreground">طراحی داخل کشور</p>
+                        <p className="text-sm font-semibold text-foreground">طراحی اختصاصی</p>
                         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                            از ایده تا برش و دوخت، همه‌چیز همین‌جا شکل می‌گیره.
+                            از ایده تا طرح، همه‌چیز همین‌جا شکل می‌گیره.
                         </p>
                     </li>
                 </ul>
@@ -278,7 +276,7 @@ function CollectionsSection({ items }: { items: CollectionListItem[] }) {
 
     return (
         <section className="mx-auto mt-28 max-w-295 px-8 xl:px-10">
-            <SectionHeader eyebrow="دنیای برند" title="کالکشن‌ها" />
+            <SectionHeader eyebrow="دنیای استاربوی" title="کالکشن‌ها" />
             <ul role="list" className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-4">
                 {items.slice(0, 4).map((item, idx) => (
                     <Reveal key={item.slug} as="li" delay={idx * 70}>

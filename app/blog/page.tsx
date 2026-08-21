@@ -73,7 +73,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             {postList.next && <link rel="next" href={`/blog?page=${pageNumber + 1}`} />}
 
             {posts.length > 0 && (
-                 
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}

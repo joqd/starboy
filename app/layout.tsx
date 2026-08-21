@@ -28,42 +28,32 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
     return (
-        <ViewTransitions>
-            <html
-                lang="en"
-                suppressHydrationWarning
-                className={cn("antialiased", "font-sans", YekanBakh.className)}
-            >
-                <head>
-                    <link
-                        rel="icon"
-                        href="/favicon/red.svg"
-                        media="(prefers-color-scheme: light)"
-                    />
-                    <link
-                        rel="icon"
-                        href="/favicon/golden.svg"
-                        media="(prefers-color-scheme: dark)"
-                    />
-                </head>
-                <body className={`${inter.variable}`}>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
-                        <AmbientGlow />
-                        
-                        <AuthProvider>
-                            <FloatingMenu />
-                            {children}
-                        </AuthProvider>
-                        <MusicPlayer />
-                        <Toaster />
-                    </ThemeProvider>
-                </body>
-            </html>
-        </ViewTransitions>
+        <html
+            lang="en"
+            suppressHydrationWarning
+            className={cn("antialiased", "font-sans", YekanBakh.className)}
+        >
+            <head>
+                <link rel="icon" href="/favicon/red.svg" media="(prefers-color-scheme: light)" />
+                <link rel="icon" href="/favicon/golden.svg" media="(prefers-color-scheme: dark)" />
+            </head>
+            <body className={`${inter.variable}`}>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <AmbientGlow />
+
+                    <AuthProvider>
+                        <FloatingMenu />
+                        <ViewTransitions>{children}</ViewTransitions>
+                    </AuthProvider>
+                    <MusicPlayer />
+                    <Toaster />
+                </ThemeProvider>
+            </body>
+        </html>
     )
 }

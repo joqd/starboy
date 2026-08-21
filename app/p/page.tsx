@@ -4,6 +4,7 @@ import MobileProducts from "@/components/product/mobile-products"
 import { getLatestProducts, getFeaturedProducts } from "@/lib/api/product"
 import { getLatestPosts } from "@/lib/api/post"
 import { getCollections } from "@/lib/api/collection"
+import DesktopProducts from "@/components/product/desktop-products"
 
 export default async function Products() {
     const [latestProducts, featuredProducts, , collections] = await Promise.all([
@@ -15,16 +16,7 @@ export default async function Products() {
 
     return (
         <main dir="rtl" className="relative">
-            <div>
-                <ScrollVelocityGalleryWrapper
-                    items={latestProducts.results}
-                    className="z-50 hidden overflow-hidden lg:block"
-                />
-            </div>
-
-            <div className="absolute bottom-0 left-0 hidden xl:block">
-                <HeroImage priority={false} />
-            </div>
+            <DesktopProducts products={latestProducts.results} className="hidden lg:block" />
 
             <MobileProducts
                 products={latestProducts.results}

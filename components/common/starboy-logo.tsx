@@ -18,7 +18,7 @@ const StarboyLogo = ({ className, width = 225, height = 50, ...props }: StarboyL
                 width={width}
                 height={height}
                 priority
-                className={`block dark:hidden h-auto ${className ?? ""}`}
+                className={`block h-auto dark:hidden ${className ?? ""}`}
                 {...props}
             />
 

@@ -33,7 +33,7 @@ function HomeButton() {
 function Logo() {
     return (
         <Link href="/" className="text-lg font-bold tracking-tight text-foreground">
-            <StarboyLogo className="w-35 h-auto" />
+            <StarboyLogo className="h-auto w-35" />
         </Link>
     )
 }
@@ -97,9 +97,10 @@ function TopHeader({ shopSection }: { shopSection: boolean }) {
                 {/* Desktop actions */}
                 <div dir="rtl" className="hidden items-center gap-1 lg:flex">
                     <div className="flex space-x-10">
+                        <NavLink href="/">خانه</NavLink>
                         <NavLink href="/p">فروشگاه</NavLink>
                         <NavLink href="/blog">مجله</NavLink>
-                        <NavLink href="/contact">ارتباط با ما</NavLink>
+                        {/* <NavLink href="/contact">ارتباط با ما</NavLink> */}
                     </div>
                 </div>
 

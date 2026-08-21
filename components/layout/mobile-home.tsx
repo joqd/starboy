@@ -81,7 +81,7 @@ function SectionHeader({
     return (
         <div className="mb-4 flex items-end justify-between px-5">
             <div>
-                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground">
                     {eyebrow}
                 </p>
                 <h2 className="mt-1.5 text-lg font-bold tracking-tight text-foreground">{title}</h2>
@@ -112,7 +112,7 @@ function MobileHero() {
             </div>
             <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-neutral-50">
-                <p className="text-xs tracking-[0.25em] uppercase opacity-80">کالکشن جدید</p>
+                <p className="text-xs tracking-[0.25em] opacity-80">کالکشن جدید</p>
                 <h1 className="mt-2 text-[1.75rem] leading-tight font-bold">استایل خودت رو بساز</h1>
                 <p className="mt-2 max-w-[26ch] text-xs leading-relaxed text-neutral-200">
                     هر تکه، روایتی از سلیقه‌ی توست.
@@ -168,7 +168,7 @@ function BrandStory() {
     return (
         <section className="mt-10 px-6 text-center">
             <Reveal>
-                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground">
                     چرا ما
                 </p>
                 <p className="mt-4 text-xl leading-[1.6] font-bold tracking-tight text-foreground">
@@ -192,7 +192,7 @@ function BrandStory() {
                     <li>
                         <p className="text-xs font-semibold text-foreground">طراحی داخل کشور</p>
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                            از ایده تا برش و دوخت، همه‌چیز همین‌جا شکل می‌گیره.
+                            از ایده تا طرح، همه‌چیز همین‌جا شکل می‌گیره.
                         </p>
                     </li>
                 </ul>
@@ -289,7 +289,7 @@ function CollectionsSection({ items }: { items: CollectionListItem[] }) {
 
     return (
         <section className="mt-14">
-            <SectionHeader eyebrow="دنیای برند" title="کالکشن‌ها" />
+            <SectionHeader eyebrow="دنیای استاربوی" title="کالکشن‌ها" />
 
             <ScrollStrip>
                 {shown.map((collection, idx) => (

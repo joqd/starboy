@@ -146,9 +146,7 @@ export default function ShippingReturnsPage() {
                                 <span className="text-center text-muted-foreground">
                                     {rate.time}
                                 </span>
-                                <span className="text-left text-muted-foreground">
-                                    {rate.cost}
-                                </span>
+                                <span className="text-left text-muted-foreground">{rate.cost}</span>
                             </div>
                         ))}
                     </motion.div>
