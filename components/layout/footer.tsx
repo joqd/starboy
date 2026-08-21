@@ -80,7 +80,7 @@ function EnamadSeal() {
                 referrerPolicy="origin"
                 src="https://trustseal.enamad.ir/logo.aspx?id=7349880&Code=dpydsLcz6JNaVkmJ9ZdbF1eZz8cKemzx"
                 alt="نماد اعتماد الکترونیکی"
-                code="dpydsLcz6JNaVkmJ9ZdbF1eZz8cKemzx"
+                data-code="dpydsLcz6JNaVkmJ9ZdbF1eZz8cKemzx"
                 className="h-20 w-20 cursor-pointer"
             />
         </a>
