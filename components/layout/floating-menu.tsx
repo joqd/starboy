@@ -203,12 +203,12 @@ function ShopFloatingDock() {
 // ---------------------------------------------------------------------------
 export default function FloatingMenu() {
     const pathname = usePathname()
-    const shopSection = pathname === "/p" // || pathname?.startsWith("/p/")
+    const sliderSection = pathname === "/slider"
 
     return (
         <div>
-            <TopHeader shopSection={shopSection} />
-            {shopSection && <ShopFloatingDock />}
+            <TopHeader shopSection={sliderSection} />
+            {sliderSection && <ShopFloatingDock />}
         </div>
     )
 }

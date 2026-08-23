@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import ZarinpalSeal from "@/components/utils/zarinpal-seal"
 
 // ---------------------------------------------------------------------------
 // Footer — shared by both mobile-home.tsx and desktop-home.tsx (single
@@ -46,19 +47,8 @@ export default function Footer({ className = "" }: { className?: string }) {
                         © {new Date().getFullYear()} استاربوی. تمام حقوق محفوظ است.
                     </p>
                     <div className="flex items-center gap-5">
-                        {/* <Link
-                            href="/privacy"
-                            className="text-xs text-muted-foreground hover:text-foreground"
-                        >
-                            حریم خصوصی
-                        </Link>
-                        <Link
-                            href="/terms"
-                            className="text-xs text-muted-foreground hover:text-foreground"
-                        >
-                            قوانین و مقررات
-                        </Link> */}
                         <EnamadSeal />
+						<ZarinpalSeal />
                     </div>
                 </div>
             </div>
