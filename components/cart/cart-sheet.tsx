@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import {
     Sheet,
@@ -11,7 +12,6 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
-import { toast } from "@/components/ui/toast"
 import { formatPrice } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/hooks/use-auth"
@@ -37,6 +37,7 @@ export default function CartSheet({
     onRemove,
     trigger,
 }: Props) {
+    const router = useRouter()
     const { user, checkingSession, openLogin } = useAuth()
 
     const isEmpty = items.length === 0
@@ -47,12 +48,9 @@ export default function CartSheet({
     )
     const totalSaved = compareTotal - subtotal
 
-    const showCheckoutComingSoon = () => {
-        toast.add({
-            type: "success",
-            description:
-                "امکان تسویه‌حساب هنوز آماده نشده است. به محض تکمیل این بخش، به شما اطلاع‌رسانی خواهیم داد.",
-        })
+    const goToCheckout = () => {
+        onOpenChange(false)
+        router.push("/checkout")
     }
 
     const handleCheckout = () => {
@@ -60,11 +58,11 @@ export default function CartSheet({
         // checkout automatically the moment they finish logging in.
         if (!user) {
             onOpenChange(false)
-            openLogin(showCheckoutComingSoon)
+            openLogin(goToCheckout)
             return
         }
 
-        showCheckoutComingSoon()
+        goToCheckout()
     }
 
     return (
@@ -117,7 +115,7 @@ export default function CartSheet({
                     </div>
                 ) : (
                     <>
-                        <ScrollArea className="flex-1 px-4">
+                        <ScrollArea className="min-h-0 flex-1 px-4">
                             <div dir="rtl" className="flex flex-col divide-y divide-border/60 py-2">
                                 {items.map((item) => {
                                     const hasDiscount =
