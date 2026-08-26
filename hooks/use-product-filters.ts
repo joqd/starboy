@@ -121,6 +121,12 @@ export function useProductFilters() {
         // and re-writing it would drop any extra query params the page owns.
         if (!isFirstRun.current) syncUrl(filters)
         isFirstRun.current = false
+
+        // Abort the in-flight request if this effect re-runs (filters changed
+        // again quickly) or the component unmounts before it resolves.
+        return () => {
+            abortRef.current?.abort()
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filters.collections.join(","), filters.featured, filters.ordering, filters.search])
 
