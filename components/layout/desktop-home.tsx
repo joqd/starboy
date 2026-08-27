@@ -7,7 +7,6 @@ import type { CollectionListItem } from "@/types/collection"
 import { cn, formatPrice } from "@/lib/utils"
 import { Reveal } from "./scroll-reveal"
 import { ArrowIcon, TruckIcon, ShieldIcon, RefreshIcon, HeadsetIcon } from "./home-icons"
-import Footer from "./footer"
 import { PostCard } from "../blog/post-card"
 
 // ---------------------------------------------------------------------------
@@ -59,7 +58,6 @@ export default function DesktopHome({
             <CollectionsSection items={collections} />
             <RecentProductsSection items={recentProducts} />
             <PostsSection items={recentPosts} />
-            <Footer />
         </div>
     )
 }

@@ -48,7 +48,7 @@ export default function Footer({ className = "" }: { className?: string }) {
                     </p>
                     <div className="flex items-center gap-5">
                         <EnamadSeal />
-						<ZarinpalSeal />
+                        <ZarinpalSeal />
                     </div>
                 </div>
             </div>
