@@ -41,8 +41,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
 
     return (
-        <main dir="rtl" className="pt-8 pb-16">
-            <section className="mt-15 px-5 lg:mx-auto lg:max-w-6xl lg:px-8">
+        <main dir="rtl" className="mx-auto max-w-295 pt-16 pb-16">
+            <section className="px-5 lg:mx-auto lg:px-8">
                 <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
                     فروشگاه
                 </p>
@@ -54,7 +54,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
             </section>
 
-            <section className="mt-8 px-5 lg:mx-auto lg:max-w-6xl lg:px-8">
+            <section className="mt-8 px-5 lg:mx-auto lg:px-8">
                 {items.length === 0 ? (
                     <EmptyState />
                 ) : (
