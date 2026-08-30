@@ -42,6 +42,7 @@ type ProvinceOption = { id: number; name: string }
 type CityOption = { id: number; name: string }
 type DiscountStatus = "idle" | "loading" | "applied" | "error"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function applyDiscountCodeStub(_code: string): Promise<never> {
     await new Promise((resolve) => setTimeout(resolve, 700))
     throw new Error("امکان اعمال کد تخفیف به‌زودی فعال می‌شود")
@@ -90,7 +91,7 @@ function ToastStack({
     if (toasts.length === 0) return null
 
     return (
-        <div className="fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6">
+        <div className="fixed inset-x-0 bottom-4 z-60 flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6">
             {toasts.map((toast) => (
                 <div
                     key={toast.id}
