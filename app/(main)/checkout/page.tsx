@@ -1,8 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react"
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import {
+    AlertTriangle,
     ArrowRight,
     CheckCircle2,
     CreditCard,
@@ -23,12 +25,9 @@ import {
 } from "lucide-react"
 
 import { useCart } from "@/hooks/use-cart"
-import type { Cart } from "@/types/cart"
+import type { CartItem } from "@/types/cart"
 import type { Address, AddressListItem } from "@/types/address"
 import type { Gateway } from "@/types/gateway"
-// نکته: مسیر این دو ماژول بر اساس الگوی «types/address» و «types/gateway» حدس زده شده
-// (فایل‌های API آپلودشده به‌عنوان address_api.ts و gateway_api.ts نام‌گذاری شده بودند).
-// اگر مسیر واقعی در پروژه چیز دیگری است، همین دو ایمپورت را اصلاح کنید.
 import {
     createAddress,
     deleteAddress,
@@ -39,52 +38,94 @@ import {
 } from "@/lib/api/address"
 import { getGateways } from "@/lib/api/gateway"
 
-// نوع هر آیتم سبد خرید را از روی خود Cart استخراج می‌کنیم تا وابسته به
-// اسم دقیق تایپ export‌شده در types/cart نباشیم.
-type CartItem = Cart["items"][number]
-
 type ProvinceOption = { id: number; name: string }
 type CityOption = { id: number; name: string }
 type DiscountStatus = "idle" | "loading" | "applied" | "error"
 
-// -----------------------------------------------------------------------
-// TODO(backend): این بخش هنوز به بک‌اند وصل نیست. به محض آماده شدن
-// اندپوینت اعمال کد تخفیف، این تابع را با فراخوانی واقعی (مثلاً تابعی در
-// lib/api/cart به اسم applyDiscountCode) جایگزین کنید.
-// -----------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function applyDiscountCodeStub(_code: string): Promise<never> {
     await new Promise((resolve) => setTimeout(resolve, 700))
     throw new Error("امکان اعمال کد تخفیف به‌زودی فعال می‌شود")
-}
-
-// قیمت واحد و نام/تصویر هر آیتم را با احتیاط از فیلدهای رایج احتمالی
-// می‌خوانیم. اگر نوع Cart شما اسم فیلد دیگری برای اینها دارد
-// (مثلاً unit_price یا thumbnailUrl) همین‌جا اصلاح کنید.
-function getUnitPrice(item: CartItem): number {
-    const raw = item as unknown as Record<string, unknown>
-    const price = raw.price ?? raw.unitPrice ?? raw.salePrice ?? 0
-    return typeof price === "number" ? price : Number(price) || 0
-}
-
-function getItemName(item: CartItem): string {
-    const raw = item as unknown as Record<string, unknown>
-    return (raw.name as string) ?? (raw.title as string) ?? item.sku
-}
-
-function getItemImage(item: CartItem): string | undefined {
-    const raw = item as unknown as Record<string, unknown>
-    return (raw.image as string) ?? (raw.imageUrl as string) ?? (raw.thumbnail as string)
 }
 
 function formatToman(value: number) {
     return `${value.toLocaleString("fa-IR")} تومان`
 }
 
+// --- Toasts ------------------------------------------------------------
+// Small, dependency-free toast system for transient errors (e.g. a failed
+// quantity update) that shouldn't block or reload the whole page.
+
+type ToastVariant = "error" | "success"
+type ToastMessage = { id: number; message: string; variant: ToastVariant }
+
+const TOAST_DURATION_MS = 4000
+
+function useToasts() {
+    const [toasts, setToasts] = useState<ToastMessage[]>([])
+    const nextId = useRef(0)
+
+    const dismissToast = useCallback((id: number) => {
+        setToasts((prev) => prev.filter((toast) => toast.id !== id))
+    }, [])
+
+    const pushToast = useCallback(
+        (message: string, variant: ToastVariant = "error") => {
+            const id = nextId.current++
+            setToasts((prev) => [...prev, { id, message, variant }])
+            setTimeout(() => dismissToast(id), TOAST_DURATION_MS)
+        },
+        [dismissToast]
+    )
+
+    return { toasts, pushToast, dismissToast }
+}
+
+function ToastStack({
+    toasts,
+    onDismiss,
+}: {
+    toasts: ToastMessage[]
+    onDismiss: (id: number) => void
+}) {
+    if (toasts.length === 0) return null
+
+    return (
+        <div className="fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6">
+            {toasts.map((toast) => (
+                <div
+                    key={toast.id}
+                    role="alert"
+                    className={`flex w-full max-w-sm items-start gap-2 rounded-xl border p-3.5 text-sm shadow-lg backdrop-blur-sm sm:w-auto ${
+                        toast.variant === "error"
+                            ? "border-destructive/30 bg-background text-destructive"
+                            : "border-emerald-500/30 bg-background text-emerald-600"
+                    }`}
+                >
+                    {toast.variant === "error" ? (
+                        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                    ) : (
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                    )}
+                    <span className="flex-1 font-medium">{toast.message}</span>
+                    <button
+                        type="button"
+                        onClick={() => onDismiss(toast.id)}
+                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                        aria-label="بستن پیام"
+                    >
+                        <X className="size-3.5" />
+                    </button>
+                </div>
+            ))}
+        </div>
+    )
+}
+
 export default function CheckoutPage() {
     const { cart, isLoading, error, itemCount, updateQuantity, removeItem, isPending } = useCart()
+    const { toasts, pushToast, dismissToast } = useToasts()
 
-    // --- آدرس تحویل -----------------------------------------------------
+    // --- Addresses -----------------------------------------------------
     const [addresses, setAddresses] = useState<AddressListItem[]>([])
     const [addressesLoading, setAddressesLoading] = useState(true)
     const [addressesError, setAddressesError] = useState<string | null>(null)
@@ -94,13 +135,13 @@ export default function CheckoutPage() {
     const [addressModalOpen, setAddressModalOpen] = useState(false)
     const [editingAddress, setEditingAddress] = useState<AddressListItem | null>(null)
 
-    // --- درگاه پرداخت ------------------------------------------------------
+    // --- Payment gateways ------------------------------------------------------
     const [gateways, setGateways] = useState<Gateway[]>([])
     const [gatewaysLoading, setGatewaysLoading] = useState(true)
     const [gatewaysError, setGatewaysError] = useState<string | null>(null)
     const [selectedGatewayId, setSelectedGatewayId] = useState<number | null>(null)
 
-    // --- کد تخفیف (بدون تغییر نسبت به قبل) ---------------------------------
+    // --- Discount code ---------------------------------
     const [discountCode, setDiscountCode] = useState("")
     const [discountStatus, setDiscountStatus] = useState<DiscountStatus>("idle")
     const [discountMessage, setDiscountMessage] = useState<string | null>(null)
@@ -214,12 +255,42 @@ export default function CheckoutPage() {
 
     function handleSubmitOrder(e: FormEvent) {
         e.preventDefault()
-        // TODO(backend): اتصال به اندپوینت ثبت سفارش (با ارسال selectedAddressId و
-        // selectedGatewayId) و انتقال به درگاه پرداخت
+        // TODO(backend): wire up the order-submission endpoint (sending
+        // selectedAddressId and selectedGatewayId) and redirect to the payment gateway
+    }
+
+    async function handleIncreaseQuantity(item: CartItem) {
+        if (item.quantity >= item.available_stock) {
+            pushToast("موجودی این محصول کافی نیست")
+            return
+        }
+        try {
+            await updateQuantity(item.sku, item.quantity + 1)
+        } catch {
+            pushToast("بروزرسانی تعداد محصول با خطا مواجه شد")
+        }
+    }
+
+    async function handleDecreaseQuantity(item: CartItem) {
+        if (item.quantity <= 1) return
+
+        try {
+            await updateQuantity(item.sku, item.quantity - 1)
+        } catch {
+            pushToast("بروزرسانی تعداد محصول با خطا مواجه شد")
+        }
+    }
+
+    async function handleRemoveItem(item: CartItem) {
+        try {
+            await removeItem(item.sku)
+        } catch {
+            pushToast("حذف محصول از سبد خرید با خطا مواجه شد")
+        }
     }
 
     const items = cart?.items ?? []
-    const subtotal = items.reduce((sum, item) => sum + getUnitPrice(item) * item.quantity, 0)
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const canSubmit = !!selectedAddressId && !!selectedGatewayId
 
     return (
@@ -251,7 +322,7 @@ export default function CheckoutPage() {
                     <EmptyCart />
                 ) : (
                     <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
-                        {/* فرم انتخاب آدرس، درگاه پرداخت و توضیحات */}
+                        {/* Address, payment gateway, and order notes form */}
                         <form
                             id="checkout-form"
                             onSubmit={handleSubmitOrder}
@@ -386,7 +457,7 @@ export default function CheckoutPage() {
                             </button>
                         </form>
 
-                        {/* خلاصه سفارش */}
+                        {/* Order summary */}
                         <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:order-2">
                             <div className="rounded-xl border border-border/60 p-5 sm:p-6">
                                 <div className="flex items-center gap-2">
@@ -405,18 +476,14 @@ export default function CheckoutPage() {
                                             key={item.sku}
                                             item={item}
                                             pending={isPending(item.sku)}
-                                            onIncrease={() =>
-                                                updateQuantity(item.sku, item.quantity + 1)
-                                            }
-                                            onDecrease={() =>
-                                                updateQuantity(item.sku, item.quantity - 1)
-                                            }
-                                            onRemove={() => removeItem(item.sku)}
+                                            onIncrease={() => handleIncreaseQuantity(item)}
+                                            onDecrease={() => handleDecreaseQuantity(item)}
+                                            onRemove={() => handleRemoveItem(item)}
                                         />
                                     ))}
                                 </ul>
 
-                                {/* کد تخفیف */}
+                                {/* Discount code */}
                                 <form
                                     onSubmit={handleApplyDiscount}
                                     className="mt-6 border-t border-border/60 pt-5"
@@ -466,7 +533,7 @@ export default function CheckoutPage() {
                                     )}
                                 </form>
 
-                                {/* جمع کل */}
+                                {/* Grand total */}
                                 <div className="mt-6 flex flex-col gap-2 border-t border-border/60 pt-5 text-sm">
                                     <div className="flex items-center justify-between text-muted-foreground">
                                         <span>جمع جزء</span>
@@ -515,6 +582,8 @@ export default function CheckoutPage() {
                 }}
                 onSaved={handleAddressSaved}
             />
+
+            <ToastStack toasts={toasts} onDismiss={dismissToast} />
         </main>
     )
 }
@@ -552,8 +621,6 @@ function Field({
         </label>
     )
 }
-
-import Image from "next/image"
 
 function PaymentOption({
     icon: Icon,
@@ -839,7 +906,7 @@ function AddressFormModal({
     const [submitting, setSubmitting] = useState(false)
     const [formError, setFormError] = useState<string | null>(null)
 
-    // هر بار مودال باز می‌شود، فرم را بر اساس آدرس در حال ویرایش (یا خالی) مقداردهی می‌کنیم
+    // Every time the modal opens, initialize the form from the address being edited (or empty)
     useEffect(() => {
         if (!open) return
 
@@ -862,7 +929,7 @@ function AddressFormModal({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, initialAddress?.id])
 
-    // با تغییر استان، لیست شهرهای همان استان را می‌گیریم
+    // When the province changes, fetch the list of cities for that province
     useEffect(() => {
         if (!provinceId) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -1019,31 +1086,39 @@ function CartLine({
     onDecrease: () => void
     onRemove: () => void
 }) {
-    const name = getItemName(item)
-    const image = getItemImage(item)
-    const unitPrice = getUnitPrice(item)
+    const canIncrease = !pending && item.quantity < item.available_stock
+    const canDecrease = !pending && item.quantity > 1
 
     return (
         <li className="flex items-center gap-3">
-            <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent">
-                {image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={image} alt={name} className="size-full object-cover" />
+            <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent">
+                {item.image ? (
+                    <Image
+                        src={item.image}
+                        alt={item.product_title}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                    />
                 ) : (
                     <ShoppingBag className="size-5 text-muted-foreground" />
                 )}
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <span className="truncate text-sm font-medium text-foreground">{name}</span>
-                <span className="text-xs text-muted-foreground">{formatToman(unitPrice)}</span>
+                <span className="truncate text-sm font-medium text-foreground">
+                    {item.product_title}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                    {item.size} · {formatToman(item.price)}
+                </span>
 
                 <div className="mt-1 flex items-center gap-2">
                     <div className="flex items-center gap-1 rounded-lg border border-border/60">
                         <button
                             type="button"
                             onClick={onDecrease}
-                            disabled={pending}
+                            disabled={!canDecrease}
                             className="flex size-7 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
                             aria-label="کاهش تعداد"
                         >
@@ -1059,7 +1134,7 @@ function CartLine({
                         <button
                             type="button"
                             onClick={onIncrease}
-                            disabled={pending}
+                            disabled={!canIncrease}
                             className="flex size-7 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
                             aria-label="افزایش تعداد"
                         >
@@ -1080,7 +1155,7 @@ function CartLine({
             </div>
 
             <span className="shrink-0 text-sm font-bold text-foreground">
-                {formatToman(unitPrice * item.quantity)}
+                {formatToman(item.price * item.quantity)}
             </span>
         </li>
     )
