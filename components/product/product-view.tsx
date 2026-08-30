@@ -1,12 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { Link } from "next-view-transitions"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import {
-    ArrowRight,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -67,8 +65,6 @@ export default function ProductView({ product }: Props) {
         comparePrice && comparePrice > displayPrice
             ? Math.round(((comparePrice - displayPrice) / comparePrice) * 100)
             : null
-
-    const router = useRouter()
 
     const { addItem, getItemQuantity, isPending } = useCart()
     const { currentAudio, isPlaying, setAudio, setPlaying } = useAudio()

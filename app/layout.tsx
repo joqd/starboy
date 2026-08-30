@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils"
 import { AmbientGlow } from "@/components/layout/ambient-glow"
 import localFont from "next/font/local"
 import { Inter } from "next/font/google"
-import FloatingMenu from "@/components/layout/floating-menu"
 import { AuthProvider } from "@/hooks/use-auth"
 import { Toaster } from "@/components/ui/toast"
 import { MusicPlayer } from "@/components/music/music-player"
@@ -47,7 +46,6 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                     <AmbientGlow />
 
                     <AuthProvider>
-                        <FloatingMenu />
                         <ViewTransitions>{children}</ViewTransitions>
                     </AuthProvider>
                     <MusicPlayer />
