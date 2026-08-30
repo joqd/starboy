@@ -2,23 +2,12 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { getLatestPosts } from "@/lib/api/post"
 import { PostCard } from "@/components/blog/post-card"
+import { PageContainer } from "@/components/layout/page-container"
 
 // ---------------------------------------------------------------------------
-// Blog index — app/blog/page.tsx. Same server-first, brand-first approach
-// as the rest of the site: quiet eyebrow+title header, a plain uniform
-// grid of posts (no per-card size tricks, that's the home page's job, not
-// a listing page's), and pagination done via `?page=` search params so
-// this stays a fully server-rendered, cacheable route with no client JS
-// at all.
-//
-// `getLatestPosts` is assumed to take an optional page number the way it's
-// called here — `getLatestPosts(pageNumber)`. If the real signature takes
-// an options object instead (e.g. `getLatestPosts({ page })`), that's a
-// one-line change in both generateMetadata and the page component below.
-//
-// PostList["results"][number] is used instead of importing a
-// `PostListItem` type directly, since post.ts only exports `PostList` and
-// `Post` — the per-item interface itself isn't exported.
+// Blog index — app/blog/page.tsx. Width/top-spacing now comes from
+// PageContainer (shared with the products page and any other top-level
+// page) instead of being hand-written here.
 // ---------------------------------------------------------------------------
 
 export const revalidate = 300
@@ -79,7 +68,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 />
             )}
 
-            <main dir="rtl" className="mx-auto max-w-295 px-5 pt-16 pb-24 sm:px-8 xl:px-10">
+            <PageContainer className="pb-24">
                 <header className="max-w-xl">
                     <p className="text-[11px] font-medium tracking-[0.3em] text-muted-foreground uppercase">
                         مجله
@@ -113,7 +102,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                     hasNext={Boolean(postList.next)}
                     hasPrevious={Boolean(postList.previous)}
                 />
-            </main>
+            </PageContainer>
         </>
     )
 }

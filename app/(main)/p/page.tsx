@@ -3,28 +3,21 @@ import Link from "next/link"
 import { getProducts } from "@/lib/api/product"
 import type { ProductListItem } from "@/types/product"
 import { cn, formatPrice } from "@/lib/utils"
+import { PageContainer } from "@/components/layout/page-container"
 
 // ---------------------------------------------------------------------------
-// Products page — plain, filter-free product listing. Everything lives here
-// (no ProductsExplorer, no useProductFilters, no client-side fetching).
-//
-// This is a plain server component: the product list is fetched on the
-// server for every request and rendered directly, so there's no client
-// fetch/abort/race to get wrong, no loading spinner state, and no JS bundle
-// shipped just to show a grid of products — page load *is* the loading
-// state. Paging is done with plain ?page=N links (still server-rendered,
-// no client JS needed).
-//
-// NOTE: adjust ORDERING below to whatever /api/products/ accepts as the
-// default `ordering` value, and PAGE_SIZE to taste.
+// Products page — plain, filter-free product listing. Width/top-spacing now
+// comes from PageContainer (shared with the blog page and any other
+// top-level page) instead of being hand-written here — this is also what
+// fixes the width mismatch: the old version put horizontal padding on the
+// inner <section>s instead of <main>, with different breakpoints than the
+// blog page used.
 // ---------------------------------------------------------------------------
 
 const PAGE_SIZE = 16
 const ORDERING = "-created_at"
 
 interface ProductsPageProps {
-    // Next.js (15+) passes searchParams as a Promise; awaiting a plain object
-    // works too, so this is safe either way.
     searchParams: Promise<{ page?: string }>
 }
 
@@ -41,8 +34,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
 
     return (
-        <main dir="rtl" className="mx-auto max-w-295 pt-16 pb-16">
-            <section className="px-5 lg:mx-auto lg:px-8">
+        <PageContainer className="pb-16">
+            <section>
                 <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
                     فروشگاه
                 </p>
@@ -54,7 +47,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
             </section>
 
-            <section className="mt-8 px-5 lg:mx-auto lg:px-8">
+            <section className="mt-8">
                 {items.length === 0 ? (
                     <EmptyState />
                 ) : (
@@ -72,18 +65,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </section>
 
             {totalPages > 1 && <Pagination page={page} totalPages={totalPages} />}
-        </main>
+        </PageContainer>
     )
 }
 
 // ---------------------------------------------------------------------------
 // Product card — image, title, price. Nothing else.
 //
-// FIX carried over from the previous version: `item.images` can be missing
-// entirely for some products. `item.images[0]` (without the `?.` on the
-// index itself) throws in that case and used to crash the whole grid.
-// `item.images?.[0]?.image` guards it; a product with no photo just gets a
-// plain muted placeholder instead of an <Image>.
+// `item.images?.[0]?.image` guards against products with no `images` array;
+// a product with no photo just gets a plain muted placeholder.
 // ---------------------------------------------------------------------------
 function ProductCard({ item, eager }: { item: ProductListItem; eager: boolean }) {
     const variant = item.variants?.[0]
@@ -161,7 +151,7 @@ function Pagination({ page, totalPages }: { page: number; totalPages: number }) 
     const nextHref = page < totalPages ? `?page=${page + 1}` : null
 
     return (
-        <div className="mt-10 flex items-center justify-center gap-3 px-5">
+        <div className="mt-10 flex items-center justify-center gap-3">
             {prevHref ? (
                 <Link
                     href={prevHref}
@@ -200,7 +190,7 @@ function Pagination({ page, totalPages }: { page: number; totalPages: number }) 
 // ---------------------------------------------------------------------------
 function EmptyState() {
     return (
-        <div className="px-5 py-24 text-center">
+        <div className="py-24 text-center">
             <p className="text-sm font-medium text-foreground">فعلاً محصولی موجود نیست</p>
             <p className="mt-1.5 text-xs text-muted-foreground">
                 به‌زودی محصولات جدید اینجا نمایش داده می‌شن.
