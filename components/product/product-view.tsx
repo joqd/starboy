@@ -109,7 +109,7 @@ export default function ProductView({ product }: Props) {
     return (
         <div
             dir="rtl"
-            className="relative mx-auto max-w-295 px-4 pt-20 pb-16 sm:px-6 lg:px-10 lg:pt-10 lg:pb-24 xl:px-10"
+            className=""
         >
             {/* Breadcrumb ---------------------------------------------------- */}
             {/* <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getProduct } from "@/lib/api/product"
 import ProductView from "@/components/product/product-view"
+import { PageContainer } from "@/components/layout/page-container"
 
 export const revalidate = 300
 
@@ -37,8 +38,8 @@ export default async function ProductPage({ params }: Props) {
     if (!product) notFound()
 
     return (
-        <div>
+        <PageContainer>
             <ProductView product={product} />
-        </div>
+        </PageContainer>
     )
 }
