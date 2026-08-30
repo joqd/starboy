@@ -10,7 +10,6 @@ import {
     ChevronRight,
     Lock,
     Minus,
-    Music,
     Plus,
     RotateCcw,
     ShieldCheck,
@@ -24,7 +23,6 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useCart } from "@/hooks/use-cart"
-import { useAudio } from "@/hooks/use-audio"
 import SizeGuide from "./size-guide"
 
 type Props = {
@@ -67,10 +65,6 @@ export default function ProductView({ product }: Props) {
             : null
 
     const { addItem, getItemQuantity, isPending } = useCart()
-    const { currentAudio, isPlaying, setAudio, setPlaying } = useAudio()
-
-    const isThisAudio = currentAudio?.id === product.audio?.id
-    const isThisAudioPlaying = isThisAudio && isPlaying
 
     // The cart is managed server-side, so "how many can I add" has to account
     // for whatever quantity of this exact variant is already in the cart.
@@ -91,16 +85,6 @@ export default function ProductView({ product }: Props) {
         setAddToCartError(null)
         setQuantity(1)
     }, [selectedVariantId, availableToAdd])
-
-    const handleToggleAudio = () => {
-        if (!product.audio) return
-        if (isThisAudioPlaying) {
-            setPlaying(false)
-            return
-        }
-        if (!isThisAudio) setAudio(product.audio)
-        setPlaying(true)
-    }
 
     const handleAddToCart = async () => {
         if (!selectedVariant || isVariantPending) return
@@ -199,51 +183,6 @@ export default function ProductView({ product }: Props) {
                                 <ZoomIn className="h-4 w-4" />
                             </div>
                         </button>
-
-                        {product.audio && (
-                            <button
-                                onClick={handleToggleAudio}
-                                aria-label={isThisAudioPlaying ? "توقف موزیک" : "پخش موزیک"}
-                                title={isThisAudioPlaying ? "توقف موزیک محصول" : "پخش موزیک محصول"}
-                                className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground backdrop-blur-md transition hover:text-primary active:scale-90"
-                            >
-                                {isThisAudioPlaying ? (
-                                    <span className="flex h-3 items-end gap-[2px]">
-                                        <motion.span
-                                            className="w-[2px] rounded-full bg-primary"
-                                            animate={{ height: ["35%", "100%", "35%"] }}
-                                            transition={{
-                                                duration: 0.9,
-                                                repeat: Infinity,
-                                                ease: "easeInOut",
-                                            }}
-                                        />
-                                        <motion.span
-                                            className="w-[2px] rounded-full bg-primary"
-                                            animate={{ height: ["100%", "45%", "100%"] }}
-                                            transition={{
-                                                duration: 0.9,
-                                                repeat: Infinity,
-                                                ease: "easeInOut",
-                                                delay: 0.15,
-                                            }}
-                                        />
-                                        <motion.span
-                                            className="w-[2px] rounded-full bg-primary"
-                                            animate={{ height: ["55%", "90%", "55%"] }}
-                                            transition={{
-                                                duration: 0.9,
-                                                repeat: Infinity,
-                                                ease: "easeInOut",
-                                                delay: 0.3,
-                                            }}
-                                        />
-                                    </span>
-                                ) : (
-                                    <Music className="h-3.5 w-3.5" />
-                                )}
-                            </button>
-                        )}
 
                         {!productHasStock && (
                             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/30">

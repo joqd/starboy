@@ -6,7 +6,6 @@ import localFont from "next/font/local"
 import { Inter } from "next/font/google"
 import { AuthProvider } from "@/hooks/use-auth"
 import { Toaster } from "@/components/ui/toast"
-import { MusicPlayer } from "@/components/music/music-player"
 import { ViewTransitions } from "next-view-transitions"
 
 const YekanBakh = localFont({
@@ -48,7 +47,6 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                     <AuthProvider>
                         <ViewTransitions>{children}</ViewTransitions>
                     </AuthProvider>
-                    <MusicPlayer />
                     <Toaster />
                 </ThemeProvider>
             </body>
