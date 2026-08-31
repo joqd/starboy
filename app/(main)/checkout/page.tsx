@@ -1092,7 +1092,7 @@ function CartLine({
 
     return (
         <li className="flex items-center gap-3">
-            <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent">
+            <div className="relative flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent">
                 {item.image ? (
                     <Image
                         src={item.image}
@@ -1111,7 +1111,7 @@ function CartLine({
                     {item.product_title}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                    {item.size} · {formatToman(item.price)}
+                    {item.size}
                 </span>
 
                 <div className="mt-1 flex items-center gap-2">
