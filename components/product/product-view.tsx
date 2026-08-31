@@ -107,10 +107,7 @@ export default function ProductView({ product }: Props) {
     const primaryCollection = product.collections[0]
 
     return (
-        <div
-            dir="rtl"
-            className=""
-        >
+        <div dir="rtl" className="">
             {/* Breadcrumb ---------------------------------------------------- */}
             {/* <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
                 <nav className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">

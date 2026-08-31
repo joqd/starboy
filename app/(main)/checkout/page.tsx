@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { PageContainer } from "@/components/layout/page-container"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -15,8 +16,6 @@ import {
     Pencil,
     Plus,
     ShoppingBag,
-    StickyNote,
-    Tag,
     Trash2,
     Wallet,
     X,
@@ -40,13 +39,6 @@ import { getGateways } from "@/lib/api/gateway"
 
 type ProvinceOption = { id: number; name: string }
 type CityOption = { id: number; name: string }
-type DiscountStatus = "idle" | "loading" | "applied" | "error"
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function applyDiscountCodeStub(_code: string): Promise<never> {
-    await new Promise((resolve) => setTimeout(resolve, 700))
-    throw new Error("امکان اعمال کد تخفیف به‌زودی فعال می‌شود")
-}
 
 function formatToman(value: number) {
     return `${value.toLocaleString("fa-IR")} تومان`
@@ -142,11 +134,6 @@ export default function CheckoutPage() {
     const [gatewaysError, setGatewaysError] = useState<string | null>(null)
     const [selectedGatewayId, setSelectedGatewayId] = useState<number | null>(null)
 
-    // --- Discount code ---------------------------------
-    const [discountCode, setDiscountCode] = useState("")
-    const [discountStatus, setDiscountStatus] = useState<DiscountStatus>("idle")
-    const [discountMessage, setDiscountMessage] = useState<string | null>(null)
-
     const fetchAddresses = useCallback(async (preferId?: number) => {
         setAddressesLoading(true)
         setAddressesError(null)
@@ -238,22 +225,6 @@ export default function CheckoutPage() {
         }
     }
 
-    async function handleApplyDiscount(e: FormEvent) {
-        e.preventDefault()
-        const code = discountCode.trim()
-        if (!code) return
-
-        setDiscountStatus("loading")
-        setDiscountMessage(null)
-        try {
-            await applyDiscountCodeStub(code)
-            setDiscountStatus("applied")
-        } catch (err) {
-            setDiscountStatus("error")
-            setDiscountMessage(err instanceof Error ? err.message : "کد تخفیف نامعتبر است")
-        }
-    }
-
     function handleSubmitOrder(e: FormEvent) {
         e.preventDefault()
         // TODO(backend): wire up the order-submission endpoint (sending
@@ -295,331 +266,240 @@ export default function CheckoutPage() {
     const canSubmit = !!selectedAddressId && !!selectedGatewayId
 
     return (
-        <main dir="rtl" className="min-h-screen pt-16">
-            <div className="mx-auto max-w-295 px-4 py-14 sm:px-6 sm:py-20 xl:px-10">
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                    <ArrowRight className="size-3.5" />
-                    بازگشت به فروشگاه
-                </Link>
+        <PageContainer>
+            <main dir="rtl" className="min-h-screen">
+                <div className="">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                        <ArrowRight className="size-3.5" />
+                        بازگشت به فروشگاه
+                    </Link>
 
-                <div className="mt-4 mb-12 max-w-xl sm:mb-16">
-                    <span className="text-xs font-medium text-muted-foreground">تکمیل خرید</span>
-                    <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                        نهایی کردن سفارش
-                    </h1>
-                    <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
-                        یک آدرس تحویل و یک درگاه پرداخت انتخاب کنید تا سفارش شما ثبت شود.
-                    </p>
-                </div>
+                    <div className="mt-4 mb-12 max-w-xl sm:mb-16">
+                        <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                            نهایی کردن سفارش
+                        </h1>
+                        <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
+                            یک آدرس تحویل و یک درگاه پرداخت انتخاب کنید تا سفارش شما ثبت شود.
+                        </p>
+                    </div>
 
-                {isLoading && !cart ? (
-                    <CheckoutSkeleton />
-                ) : error && !cart ? (
-                    <ErrorState message={error} />
-                ) : items.length === 0 ? (
-                    <EmptyCart />
-                ) : (
-                    <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
-                        {/* Address, payment gateway, and order notes form */}
-                        <form
-                            id="checkout-form"
-                            onSubmit={handleSubmitOrder}
-                            className="flex flex-col gap-8 lg:order-1"
-                        >
-                            <section className="rounded-xl border border-border/60 p-5 sm:p-6">
-                                <div className="flex items-center gap-2">
-                                    <MapPin className="size-4 text-muted-foreground" />
-                                    <h2 className="text-base font-bold text-foreground">
-                                        آدرس تحویل
-                                    </h2>
-                                </div>
+                    {isLoading && !cart ? (
+                        <CheckoutSkeleton />
+                    ) : error && !cart ? (
+                        <ErrorState message={error} />
+                    ) : items.length === 0 ? (
+                        <EmptyCart />
+                    ) : (
+                        <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
+                            {/* Address, payment gateway, and order notes form */}
+                            <form
+                                id="checkout-form"
+                                onSubmit={handleSubmitOrder}
+                                className="flex flex-col gap-8 lg:order-1"
+                            >
+                                <section className="rounded-xl border border-border/60 p-5 sm:p-6">
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="size-4 text-muted-foreground" />
+                                        <h2 className="text-base font-bold text-foreground">
+                                            آدرس تحویل
+                                        </h2>
+                                    </div>
 
-                                <div className="mt-5 flex flex-col gap-3">
-                                    {addressesLoading ? (
-                                        <>
-                                            <div className="h-20 animate-pulse rounded-xl bg-accent/60" />
-                                            <div className="h-20 animate-pulse rounded-xl bg-accent/60" />
-                                        </>
-                                    ) : addressesError ? (
-                                        <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                                            <XCircle className="size-3.5" />
-                                            {addressesError}
-                                        </p>
-                                    ) : addresses.length === 0 ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setEditingAddress(null)
-                                                setAddressModalOpen(true)
-                                            }}
-                                            className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border/60 px-6 py-10 text-center transition-colors hover:border-foreground/40"
-                                        >
-                                            <MapPin className="size-5 text-muted-foreground" />
-                                            <span className="text-sm font-medium text-foreground">
-                                                هنوز آدرسی ثبت نکرده‌اید
-                                            </span>
-                                            <span className="text-xs text-muted-foreground">
-                                                برای ادامه، یک آدرس تحویل اضافه کنید
-                                            </span>
-                                        </button>
-                                    ) : (
-                                        <>
-                                            {addresses.map((address) => (
-                                                <AddressCard
-                                                    key={address.id}
-                                                    address={address}
-                                                    selected={selectedAddressId === address.id}
-                                                    deleting={deletingAddressId === address.id}
-                                                    onSelect={() =>
-                                                        setSelectedAddressId(address.id)
-                                                    }
-                                                    onEdit={() => {
-                                                        setEditingAddress(address)
-                                                        setAddressModalOpen(true)
-                                                    }}
-                                                    onDelete={() => handleDeleteAddress(address.id)}
-                                                />
-                                            ))}
+                                    <div className="mt-5 flex flex-col gap-3">
+                                        {addressesLoading ? (
+                                            <>
+                                                <div className="h-20 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
+                                                <div className="h-20 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
+                                            </>
+                                        ) : addressesError ? (
+                                            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                                <XCircle className="size-3.5" />
+                                                {addressesError}
+                                            </p>
+                                        ) : addresses.length === 0 ? (
                                             <button
                                                 type="button"
                                                 onClick={() => {
                                                     setEditingAddress(null)
                                                     setAddressModalOpen(true)
                                                 }}
-                                                className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/60 p-3.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                                                className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border/60 px-6 py-10 text-center transition-colors hover:border-foreground/40"
                                             >
-                                                <Plus className="size-3.5" />
-                                                افزودن آدرس جدید
+                                                <MapPin className="size-5 text-muted-foreground" />
+                                                <span className="text-sm font-medium text-foreground">
+                                                    هنوز آدرسی ثبت نکرده‌اید
+                                                </span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    برای ادامه، یک آدرس تحویل اضافه کنید
+                                                </span>
                                             </button>
-                                        </>
-                                    )}
-                                </div>
-                            </section>
-
-                            <section className="rounded-xl border border-border/60 p-5 sm:p-6">
-                                <div className="flex items-center gap-2">
-                                    <Wallet className="size-4 text-muted-foreground" />
-                                    <h2 className="text-base font-bold text-foreground">
-                                        درگاه پرداخت
-                                    </h2>
-                                </div>
-                                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                                    {gatewaysLoading ? (
-                                        <>
-                                            <div className="h-20 animate-pulse rounded-xl bg-accent/60" />
-                                            <div className="h-20 animate-pulse rounded-xl bg-accent/60" />
-                                        </>
-                                    ) : gatewaysError ? (
-                                        <p className="col-span-full flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                                            <XCircle className="size-3.5" />
-                                            {gatewaysError}
-                                        </p>
-                                    ) : gateways.length === 0 ? (
-                                        <p className="col-span-full text-xs text-muted-foreground">
-                                            در حال حاضر درگاه پرداختی موجود نیست
-                                        </p>
-                                    ) : (
-                                        gateways.map((gateway) => (
-                                            <PaymentOption
-                                                key={gateway.id}
-                                                icon={CreditCard}
-                                                title={gateway.title}
-                                                description={gateway.description}
-                                                badge={gateway.badge}
-                                                selected={selectedGatewayId === gateway.id}
-                                                onSelect={() => setSelectedGatewayId(gateway.id)}
-                                            />
-                                        ))
-                                    )}
-                                </div>
-                            </section>
-
-                            <section className="rounded-xl border border-border/60 p-5 sm:p-6">
-                                <div className="flex items-center gap-2">
-                                    <StickyNote className="size-4 text-muted-foreground" />
-                                    <h2 className="text-base font-bold text-foreground">
-                                        توضیحات سفارش
-                                    </h2>
-                                </div>
-                                <div className="mt-5">
-                                    <Field label="توضیحات (اختیاری)" name="notes" as="textarea" />
-                                </div>
-                            </section>
-
-                            <button
-                                type="submit"
-                                disabled={!canSubmit}
-                                className="hidden items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 lg:inline-flex"
-                            >
-                                ثبت سفارش و پرداخت
-                            </button>
-                        </form>
-
-                        {/* Order summary */}
-                        <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:order-2">
-                            <div className="rounded-xl border border-border/60 p-5 sm:p-6">
-                                <div className="flex items-center gap-2">
-                                    <ShoppingBag className="size-4 text-muted-foreground" />
-                                    <h2 className="text-base font-bold text-foreground">
-                                        خلاصه سفارش
-                                        <span className="mr-1 text-xs font-normal text-muted-foreground">
-                                            ({itemCount.toLocaleString("fa-IR")} کالا)
-                                        </span>
-                                    </h2>
-                                </div>
-
-                                <ul className="mt-5 flex flex-col gap-4">
-                                    {items.map((item) => (
-                                        <CartLine
-                                            key={item.sku}
-                                            item={item}
-                                            pending={isPending(item.sku)}
-                                            onIncrease={() => handleIncreaseQuantity(item)}
-                                            onDecrease={() => handleDecreaseQuantity(item)}
-                                            onRemove={() => handleRemoveItem(item)}
-                                        />
-                                    ))}
-                                </ul>
-
-                                {/* Discount code */}
-                                <form
-                                    onSubmit={handleApplyDiscount}
-                                    className="mt-6 border-t border-border/60 pt-5"
-                                >
-                                    <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                                        <Tag className="size-3.5" />
-                                        کد تخفیف
-                                    </label>
-                                    <div className="mt-2 flex gap-2">
-                                        <input
-                                            value={discountCode}
-                                            onChange={(e) => {
-                                                setDiscountCode(e.target.value)
-                                                if (discountStatus !== "idle") {
-                                                    setDiscountStatus("idle")
-                                                    setDiscountMessage(null)
-                                                }
-                                            }}
-                                            placeholder="مثلاً STAR20"
-                                            className="min-w-0 flex-1 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm text-foreground transition-colors outline-none placeholder:text-muted-foreground/70 focus:border-foreground/40"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={
-                                                discountStatus === "loading" || !discountCode.trim()
-                                            }
-                                            className="flex shrink-0 items-center justify-center rounded-lg bg-accent px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent/70 disabled:cursor-not-allowed disabled:opacity-50"
-                                        >
-                                            {discountStatus === "loading" ? (
-                                                <Loader2 className="size-4 animate-spin" />
-                                            ) : (
-                                                "اعمال"
-                                            )}
-                                        </button>
+                                        ) : (
+                                            <>
+                                                {addresses.map((address) => (
+                                                    <AddressCard
+                                                        key={address.id}
+                                                        address={address}
+                                                        selected={selectedAddressId === address.id}
+                                                        deleting={deletingAddressId === address.id}
+                                                        onSelect={() =>
+                                                            setSelectedAddressId(address.id)
+                                                        }
+                                                        onEdit={() => {
+                                                            setEditingAddress(address)
+                                                            setAddressModalOpen(true)
+                                                        }}
+                                                        onDelete={() =>
+                                                            handleDeleteAddress(address.id)
+                                                        }
+                                                    />
+                                                ))}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEditingAddress(null)
+                                                        setAddressModalOpen(true)
+                                                    }}
+                                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/60 p-3.5 text-xs font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                                                >
+                                                    <Plus className="size-3.5" />
+                                                    افزودن آدرس جدید
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
-                                    {discountStatus === "applied" && (
-                                        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                                            <CheckCircle2 className="size-3.5" />
-                                            کد تخفیف با موفقیت اعمال شد
-                                        </p>
-                                    )}
-                                    {discountStatus === "error" && discountMessage && (
-                                        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                                            <XCircle className="size-3.5" />
-                                            {discountMessage}
-                                        </p>
-                                    )}
-                                </form>
+                                </section>
 
-                                {/* Grand total */}
-                                <div className="mt-6 flex flex-col gap-2 border-t border-border/60 pt-5 text-sm">
-                                    <div className="flex items-center justify-between text-muted-foreground">
-                                        <span>جمع جزء</span>
-                                        <span className="text-foreground">
-                                            {formatToman(subtotal)}
-                                        </span>
+                                <section className="rounded-xl border border-border/60 p-5 sm:p-6">
+                                    <div className="flex items-center gap-2">
+                                        <Wallet className="size-4 text-muted-foreground" />
+                                        <h2 className="text-base font-bold text-foreground">
+                                            درگاه پرداخت
+                                        </h2>
                                     </div>
-                                    <div className="flex items-center justify-between text-muted-foreground">
-                                        <span>هزینه ارسال</span>
-                                        <span className="text-xs">
-                                            پس از ثبت سفارش محاسبه می‌شود
-                                        </span>
+                                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                                        {gatewaysLoading ? (
+                                            <>
+                                                <div className="h-20 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
+                                                <div className="h-20 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
+                                            </>
+                                        ) : gatewaysError ? (
+                                            <p className="col-span-full flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                                <XCircle className="size-3.5" />
+                                                {gatewaysError}
+                                            </p>
+                                        ) : gateways.length === 0 ? (
+                                            <p className="col-span-full text-xs text-muted-foreground">
+                                                در حال حاضر درگاه پرداختی موجود نیست
+                                            </p>
+                                        ) : (
+                                            gateways.map((gateway) => (
+                                                <PaymentOption
+                                                    key={gateway.id}
+                                                    icon={CreditCard}
+                                                    title={gateway.title}
+                                                    description={gateway.description}
+                                                    badge={gateway.badge}
+                                                    selected={selectedGatewayId === gateway.id}
+                                                    onSelect={() =>
+                                                        setSelectedGatewayId(gateway.id)
+                                                    }
+                                                />
+                                            ))
+                                        )}
                                     </div>
-                                    <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-3 text-base font-bold text-foreground">
-                                        <span>مبلغ قابل پرداخت</span>
-                                        <span>{formatToman(subtotal)}</span>
-                                    </div>
-                                </div>
-
-                                {!canSubmit && (
-                                    <p className="mt-4 text-center text-xs text-muted-foreground">
-                                        برای ثبت سفارش، آدرس تحویل و درگاه پرداخت را انتخاب کنید
-                                    </p>
-                                )}
+                                </section>
 
                                 <button
                                     type="submit"
-                                    form="checkout-form"
                                     disabled={!canSubmit}
-                                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 lg:hidden"
+                                    className="hidden items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 lg:inline-flex"
                                 >
                                     ثبت سفارش و پرداخت
                                 </button>
-                            </div>
-                        </aside>
-                    </div>
-                )}
-            </div>
+                            </form>
 
-            <AddressFormModal
-                open={addressModalOpen}
-                initialAddress={editingAddress}
-                onClose={() => {
-                    setAddressModalOpen(false)
-                    setEditingAddress(null)
-                }}
-                onSaved={handleAddressSaved}
-            />
+                            {/* Order summary */}
+                            <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:order-2">
+                                <div className="rounded-xl border border-border/60 p-5 sm:p-6">
+                                    <div className="flex items-center gap-2">
+                                        <ShoppingBag className="size-4 text-muted-foreground" />
+                                        <h2 className="text-base font-bold text-foreground">
+                                            خلاصه سفارش
+                                            <span className="mr-1 text-xs font-normal text-muted-foreground">
+                                                ({itemCount.toLocaleString("fa-IR")} کالا)
+                                            </span>
+                                        </h2>
+                                    </div>
 
-            <ToastStack toasts={toasts} onDismiss={dismissToast} />
-        </main>
-    )
-}
+                                    <ul className="mt-5 flex flex-col gap-4">
+                                        {items.map((item) => (
+                                            <CartLine
+                                                key={item.sku}
+                                                item={item}
+                                                pending={isPending(item.sku)}
+                                                onIncrease={() => handleIncreaseQuantity(item)}
+                                                onDecrease={() => handleDecreaseQuantity(item)}
+                                                onRemove={() => handleRemoveItem(item)}
+                                            />
+                                        ))}
+                                    </ul>
 
-function Field({
-    label,
-    name,
-    type = "text",
-    required,
-    as = "input",
-    icon: Icon,
-}: {
-    label: string
-    name: string
-    type?: string
-    required?: boolean
-    as?: "input" | "textarea"
-    icon?: LucideIcon
-}) {
-    const sharedClassName =
-        "w-full rounded-lg border border-border/60 bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-foreground/40"
+                                    {/* Grand total */}
+                                    <div className="mt-6 flex flex-col gap-2 border-t border-border/60 pt-5 text-sm">
+                                        <div className="flex items-center justify-between text-muted-foreground">
+                                            <span>جمع جزء</span>
+                                            <span className="text-foreground">
+                                                {formatToman(subtotal)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-muted-foreground">
+                                            <span>هزینه ارسال</span>
+                                            <span className="text-xs">
+                                                پس از ثبت سفارش محاسبه می‌شود
+                                            </span>
+                                        </div>
+                                        <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-3 text-base font-bold text-foreground">
+                                            <span>مبلغ قابل پرداخت</span>
+                                            <span>{formatToman(subtotal)}</span>
+                                        </div>
+                                    </div>
 
-    return (
-        <label className="flex flex-col gap-1.5">
-            <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                {Icon && <Icon className="size-3.5" />}
-                {label}
-                {required && <span className="text-foreground/60">*</span>}
-            </span>
-            {as === "textarea" ? (
-                <textarea name={name} required={required} rows={3} className={sharedClassName} />
-            ) : (
-                <input name={name} type={type} required={required} className={sharedClassName} />
-            )}
-        </label>
+                                    {!canSubmit && (
+                                        <p className="mt-4 text-center text-xs text-muted-foreground">
+                                            برای ثبت سفارش، آدرس تحویل و درگاه پرداخت را انتخاب کنید
+                                        </p>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        form="checkout-form"
+                                        disabled={!canSubmit}
+                                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 lg:hidden"
+                                    >
+                                        ثبت سفارش و پرداخت
+                                    </button>
+                                </div>
+                            </aside>
+                        </div>
+                    )}
+                </div>
+
+                <AddressFormModal
+                    open={addressModalOpen}
+                    initialAddress={editingAddress}
+                    onClose={() => {
+                        setAddressModalOpen(false)
+                        setEditingAddress(null)
+                    }}
+                    onSaved={handleAddressSaved}
+                />
+
+                <ToastStack toasts={toasts} onDismiss={dismissToast} />
+            </main>
+        </PageContainer>
     )
 }
 
@@ -643,7 +523,9 @@ function PaymentOption({
             type="button"
             onClick={onSelect}
             className={`flex items-start gap-3 rounded-xl border p-4 text-right transition-colors ${
-                selected ? "border-foreground/60 bg-accent" : "border-border/60 hover:bg-accent/60"
+                selected
+                    ? "border-foreground/60 bg-white/80 dark:bg-accent"
+                    : "hover:dark bg-white/80:bg-accent/60 border-border/60"
             }`}
         >
             {badge ? (
@@ -697,7 +579,9 @@ function AddressCard({
                 }
             }}
             className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-right transition-colors ${
-                selected ? "border-foreground/60 bg-accent" : "border-border/60 hover:bg-accent/60"
+                selected
+                    ? "border-foreground/60 bg-white/80 dark:bg-accent"
+                    : "hover:dark bg-white/80:bg-accent/60 border-border/60"
             }`}
         >
             <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-background">
@@ -708,7 +592,7 @@ function AddressCard({
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-foreground">{address.title}</span>
                     {address.is_default && (
-                        <span className="rounded-full bg-accent px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
+                        <span className="rounded-full bg-white/80 px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground dark:bg-accent">
                             پیش‌فرض
                         </span>
                     )}
@@ -776,7 +660,7 @@ function Modal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        className="hover:dark bg-white/80:bg-accent flex size-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground"
                         aria-label="بستن"
                     >
                         <X className="size-4" />
@@ -1064,7 +948,7 @@ function AddressFormModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-xl border border-border/60 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                        className="hover:dark bg-white/80:bg-accent rounded-xl border border-border/60 px-4 py-2.5 text-sm font-medium text-foreground transition-colors"
                     >
                         انصراف
                     </button>
@@ -1092,27 +976,29 @@ function CartLine({
 
     return (
         <li className="flex items-center gap-3">
-            <div className="relative flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent">
+            <div className="relative flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white/80 dark:bg-accent">
                 {item.image ? (
-                    <Image
-                        src={item.image}
-                        alt={item.product_title}
-                        fill
-                        sizes="64px"
-                        className="object-cover"
-                    />
+                    <Link href={`/p/${item.slug}`}>
+                        <Image
+                            src={item.image}
+                            alt={item.product_title}
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                        />
+                    </Link>
                 ) : (
                     <ShoppingBag className="size-5 text-muted-foreground" />
                 )}
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <span className="truncate text-sm font-medium text-foreground">
-                    {item.product_title}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                    {item.size}
-                </span>
+                <Link href={`/p/${item.slug}`}>
+                    <span className="truncate text-sm font-medium text-foreground">
+                        {item.product_title}
+                    </span>
+                </Link>
+                <span className="text-xs text-muted-foreground">{item.size}</span>
 
                 <div className="mt-1 flex items-center gap-2">
                     <div className="flex items-center gap-1 rounded-lg border border-border/60">
@@ -1165,7 +1051,7 @@ function CartLine({
 function EmptyCart() {
     return (
         <div className="flex flex-col items-center gap-4 rounded-xl border border-border/60 px-6 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-full bg-accent">
+            <div className="flex size-14 items-center justify-center rounded-full bg-white/80 dark:bg-accent">
                 <PackageOpen className="size-6 text-muted-foreground" />
             </div>
             <div>
@@ -1197,10 +1083,10 @@ function CheckoutSkeleton() {
     return (
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
             <div className="flex flex-col gap-8">
-                <div className="h-56 animate-pulse rounded-xl bg-accent/60" />
-                <div className="h-32 animate-pulse rounded-xl bg-accent/60" />
+                <div className="h-56 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
+                <div className="h-32 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
             </div>
-            <div className="h-96 animate-pulse rounded-xl bg-accent/60" />
+            <div className="h-96 animate-pulse rounded-xl bg-white/80 dark:bg-accent/60" />
         </div>
     )
 }

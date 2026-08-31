@@ -8,6 +8,7 @@ export interface Cart {
 export interface CartItem {
     id: number
     sku: string
+    slug: string
     quantity: number
     product_title: string
     available_stock: number
