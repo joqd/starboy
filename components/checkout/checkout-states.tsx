@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { PackageOpen, XCircle } from "lucide-react"
+import { Button } from "../ui/button"
 
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -7,7 +8,7 @@ export function EmptyCart() {
     return (
         <div className="flex flex-col items-center gap-4 rounded-xl border border-border/60 px-6 py-20 text-center">
             <div className="flex size-14 items-center justify-center rounded-full bg-white/80 dark:bg-accent">
-                <PackageOpen className="size-6 text-muted-foreground" />
+                <PackageOpen className="size-10 text-muted-foreground" />
             </div>
             <div>
                 <p className="text-sm font-medium text-foreground">سبد خرید شما خالی است</p>
@@ -15,11 +16,8 @@ export function EmptyCart() {
                     برای ادامه، ابتدا چند محصول به سبد خرید خود اضافه کنید.
                 </p>
             </div>
-            <Link
-                href="/"
-                className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-foreground px-5 py-2.5 text-sm font-bold text-background transition-opacity hover:opacity-90"
-            >
-                مشاهده محصولات
+            <Link href="/">
+                <Button>مشاهده محصولات</Button>
             </Link>
         </div>
     )
