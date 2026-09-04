@@ -121,7 +121,7 @@ function CartLine({
                 )}
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div className="flex h-24 min-w-0 flex-1 flex-col justify-between gap-1.5">
                 <Link href={`/p/${item.slug}`}>
                     <span className="truncate text-sm font-medium text-foreground">
                         {item.product_title}
