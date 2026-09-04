@@ -1,6 +1,6 @@
 import request from "@/lib/api/client"
 import type { AddressList, AddressListItem, Address } from "@/types/address"
-import type { ProvinceList, CityList } from "@/types/address"
+import type { City, Province } from "@/types/address"
 
 export function getAddressList(): Promise<AddressList> {
     return request<AddressList>(
@@ -32,14 +32,14 @@ export function deleteAddress(id: number): Promise<void> {
     )
 }
 
-export function getProvinces(): Promise<ProvinceList> {
-    return request<ProvinceList>(`/api/auth/provinces/`, {
+export function getProvinces(): Promise<Province[]> {
+    return request<Province[]>(`/api/auth/provinces/`, {
         method: "GET",
     })
 }
 
-export function getCities(province_id: number): Promise<CityList> {
-    return request<CityList>(`/api/auth/provinces/${province_id}/cities/`, {
+export function getCities(province_id: number): Promise<City[]> {
+    return request<City[]>(`/api/auth/provinces/${province_id}/cities/`, {
         method: "GET",
     })
 }

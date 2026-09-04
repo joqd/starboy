@@ -23,6 +23,16 @@ import {
     type LucideIcon,
 } from "lucide-react"
 
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
 import { useCart } from "@/hooks/use-cart"
 import type { CartItem } from "@/types/cart"
 import type { Address, AddressListItem } from "@/types/address"
@@ -36,6 +46,7 @@ import {
     updateAddress,
 } from "@/lib/api/address"
 import { getGateways } from "@/lib/api/gateway"
+import { Button } from "@/components/ui/button"
 
 type ProvinceOption = { id: number; name: string }
 type CityOption = { id: number; name: string }
@@ -412,13 +423,9 @@ export default function CheckoutPage() {
                                     </div>
                                 </section>
 
-                                <button
-                                    type="submit"
-                                    disabled={!canSubmit}
-                                    className="hidden items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3.5 text-sm font-bold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 lg:inline-flex"
-                                >
+                                <Button disabled={!canSubmit} className={"text-md h-11"}>
                                     ثبت سفارش و پرداخت
-                                </button>
+                                </Button>
                             </form>
 
                             {/* Order summary */}
@@ -591,11 +598,11 @@ function AddressCard({
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-foreground">{address.title}</span>
-                    {address.is_default && (
+                    {/* {address.is_default && (
                         <span className="rounded-full bg-white/80 px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground dark:bg-accent">
                             پیش‌فرض
                         </span>
-                    )}
+                    )} */}
                 </div>
                 <span className="text-xs text-muted-foreground">
                     {address.recipient_name} · {address.phone}
@@ -808,7 +815,7 @@ function AddressFormModal({
 
         setProvincesLoading(true)
         getProvinces()
-            .then((res) => setProvinces(res.results))
+            .then((res) => setProvinces(res))
             .catch(() => setFormError("خطا در دریافت لیست استان‌ها"))
             .finally(() => setProvincesLoading(false))
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -823,7 +830,7 @@ function AddressFormModal({
         }
         setCitiesLoading(true)
         getCities(provinceId)
-            .then((res) => setCities(res.results))
+            .then((res) => setCities(res))
             .catch(() => setFormError("خطا در دریافت لیست شهرها"))
             .finally(() => setCitiesLoading(false))
     }, [provinceId])
@@ -889,26 +896,35 @@ function AddressFormModal({
                     />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                    <SelectField
-                        label="استان"
-                        value={provinceId}
-                        onChange={(v) => {
-                            setProvinceId(v)
-                            setCityId("")
-                        }}
-                        options={provinces.map((p) => ({ value: p.id, label: p.name }))}
-                        loading={provincesLoading}
-                        required
-                    />
-                    <SelectField
-                        label="شهر"
-                        value={cityId}
-                        onChange={setCityId}
-                        options={cities.map((c) => ({ value: c.id, label: c.name }))}
-                        loading={citiesLoading}
-                        disabled={!provinceId}
-                        required
-                    />
+                    <Select items={provinces.map((p) => ({ value: p.id, label: p.name }))}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="استان" />
+                        </SelectTrigger>
+                        <SelectContent dir="rtl">
+                            <SelectGroup>
+                                {provinces.map((item) => (
+                                    <SelectItem key={item.id} value={item.name}>
+                                        {item.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+
+                    <Select items={cities.map((p) => ({ value: p.id, label: p.name }))}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="شهر" />
+                        </SelectTrigger>
+                        <SelectContent dir="rtl">
+                            <SelectGroup>
+                                {cities.map((item) => (
+                                    <SelectItem key={item.id} value={item.name}>
+                                        {item.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <ModalField label="کد پستی" value={postalCode} onChange={setPostalCode} required />
                 <ModalField

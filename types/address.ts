@@ -10,8 +10,8 @@ export interface AddressListItem {
     title: string
     recipient_name: string
     phone: string
-    province: ProvinceListItem
-    city: CityListItem
+    province: Province
+    city: City
     postal_code: string
     address_line: string
     is_default: boolean
@@ -30,26 +30,12 @@ export interface Address {
     is_default: boolean
 }
 
-export interface ProvinceList {
-    count: number
-    next: string | null
-    previous: string | null
-    results: ProvinceListItem[]
-}
-
-interface ProvinceListItem {
+export interface Province {
     id: number
     name: string
 }
 
-export interface CityList {
-    count: number
-    next: string | null
-    previous: string | null
-    results: CityListItem[]
-}
-
-interface CityListItem {
+export interface City {
     id: number
     name: string
 }
