@@ -174,7 +174,7 @@ export default function CheckoutPage() {
     return (
         <PageContainer>
             <main dir="rtl" className="min-h-screen">
-                <div className="">
+                <div>
                     <Link
                         href="/"
                         className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
