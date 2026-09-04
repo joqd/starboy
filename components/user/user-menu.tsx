@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { LogOut, Loader2, Package, Search } from "lucide-react"
+import { LogOut, Loader2, Package, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import EditableProfileName from "@/components/user/editable-profile-name"
 import AvatarUploader from "@/components/user/avatar-uploader"
 import { useLogout } from "@/hooks/use-logout"
 import { User } from "@/types/user"
+import Link from "next/link"
 
 type Props = {
     user: User
@@ -162,7 +163,9 @@ export default function UserProfileDialog({ user, onNameChange, onAvatarChange, 
                             <MenuItem icon={Package} label="لیست سفارشات" />
                         </motion.div>
                         <motion.div variants={itemVariants}>
-                            <MenuItem icon={Search} label="پیگیری سفارش" />
+                            <Link href="/orders">
+                                <MenuItem icon={MapPin} label="آدرس ها" />
+                            </Link>
                         </motion.div>
                     </motion.nav>
 
