@@ -160,12 +160,12 @@ export default function UserProfileDialog({ user, onNameChange, onAvatarChange, 
 
                     <motion.nav variants={listVariants} className="flex flex-col gap-0.5 p-2">
                         <motion.div variants={itemVariants}>
-                            <MenuItem icon={Package} label="لیست سفارشات" />
+                            <Link href="/orders">
+                                <MenuItem icon={Package} label="لیست سفارشات" />
+                            </Link>
                         </motion.div>
                         <motion.div variants={itemVariants}>
-                            <Link href="/orders">
-                                <MenuItem icon={MapPin} label="آدرس ها" />
-                            </Link>
+                            <MenuItem icon={MapPin} label="آدرس ها" />
                         </motion.div>
                     </motion.nav>
 
