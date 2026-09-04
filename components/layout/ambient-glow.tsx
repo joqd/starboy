@@ -23,7 +23,7 @@ export function AmbientGlow() {
 
             {/* Bottom Right Glow */}
             <motion.div
-                className="absolute -right-48 -bottom-48 h-180 w-180 rounded-full bg-primary/20 blur-[180px] lg:bg-primary/40"
+                className="absolute -right-48 -bottom-48 h-180 w-180 rounded-full bg-primary/20 blur-[180px] lg:bg-primary/20"
                 animate={{
                     x: [0, -35, 20, 0],
                     y: [0, -25, 15, 0],

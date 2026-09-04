@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { CreditCard } from "lucide-react"
 
+import { cn } from "cn"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -51,11 +52,17 @@ export function PaymentSection({
         >
             {gateways.map((gateway) => {
                 const fieldId = `gateway-${gateway.id}`
+                const selected = selectedGatewayId === gateway.id
                 return (
                     <Label
                         key={gateway.id}
                         htmlFor={fieldId}
-                        className="flex items-start gap-3 rounded-xl border border-border/60 p-4 font-normal transition-colors has-[[data-state=checked]]:border-foreground/60 has-[[data-state=checked]]:bg-white/80 dark:has-[[data-state=checked]]:bg-accent"
+                        className={cn(
+                            "flex cursor-pointer items-start gap-3 rounded-xl border p-4 font-normal transition-colors",
+                            selected
+                                ? "border-foreground/70 bg-white/80 dark:bg-accent"
+                                : "border-border/60 hover:border-foreground/30"
+                        )}
                     >
                         <RadioGroupItem
                             value={String(gateway.id)}

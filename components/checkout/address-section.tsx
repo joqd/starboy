@@ -1,5 +1,6 @@
 import { MapPin, Pencil, Plus, Trash2 } from "lucide-react"
 
+import { cn } from "cn"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -70,6 +71,7 @@ export function AddressSection({
                     <AddressCard
                         key={address.id}
                         address={address}
+                        selected={selectedAddressId === address.id}
                         deleting={deletingAddressId === address.id}
                         onEdit={() => onEdit(address)}
                         onDelete={() => onDelete(address.id)}
@@ -91,11 +93,13 @@ export function AddressSection({
 
 function AddressCard({
     address,
+    selected,
     deleting,
     onEdit,
     onDelete,
 }: {
     address: AddressListItem
+    selected: boolean
     deleting: boolean
     onEdit: () => void
     onDelete: () => void
@@ -105,7 +109,12 @@ function AddressCard({
     return (
         <Label
             htmlFor={fieldId}
-            className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 p-4 font-normal transition-colors has-[[data-state=checked]]:border-foreground/60 has-[[data-state=checked]]:bg-white/80 dark:has-[[data-state=checked]]:bg-accent"
+            className={cn(
+                "flex cursor-pointer items-start gap-3 rounded-xl border p-4 font-normal transition-colors",
+                selected
+                    ? "border-foreground/70 bg-white/80 ring-1 ring-foreground/15 dark:bg-accent"
+                    : "border-border/60 hover:border-foreground/30"
+            )}
         >
             <RadioGroupItem value={String(address.id)} id={fieldId} className="sr-only" />
 
@@ -122,6 +131,17 @@ function AddressCard({
                     {address.province.name}، {address.city.name} — {address.address_line}
                 </span>
             </div>
+
+            {/* visible selection indicator, since the actual radio input is sr-only */}
+            {/* <div
+                className={cn(
+                    "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+                    selected ? "border-foreground bg-foreground" : "border-border"
+                )}
+                aria-hidden="true"
+            >
+                {selected && <span className="size-1.5 rounded-full bg-background" />}
+            </div> */}
 
             <div className="flex shrink-0 items-center gap-1">
                 <button
