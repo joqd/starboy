@@ -1,5 +1,5 @@
 import request from "@/lib/api/client"
-import type { OrderList, Order } from "@/types/orders"
+import type { OrderList, Order } from "@/types/order"
 
 export function getOrders(status: string | null = null): Promise<OrderList> {
     let path = "/api/orders/"
