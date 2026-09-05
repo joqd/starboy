@@ -9,7 +9,7 @@ export function OrderListSkeleton() {
     return (
         <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-18 rounded-xl" />
+                <Skeleton key={i} className="h-24 rounded-2xl" />
             ))}
         </div>
     )
@@ -17,7 +17,7 @@ export function OrderListSkeleton() {
 
 export function OrderListError({ message }: { message: string }) {
     return (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-border/60 px-6 py-16 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-background px-6 py-16 text-center">
             <PackageX className="size-6 text-muted-foreground" />
             <p className="text-sm font-medium text-foreground">{message}</p>
         </div>
@@ -26,7 +26,7 @@ export function OrderListError({ message }: { message: string }) {
 
 export function EmptyOrders({ filtered }: { filtered: boolean }) {
     return (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 px-6 py-16 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border/60 px-6 py-16 text-center">
             <Package className="size-6 text-muted-foreground" />
             <div>
                 <p className="text-sm font-medium text-foreground">
@@ -49,26 +49,26 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                 <li key={order.token}>
                     <Link
                         href={`/orders/${order.token}`}
-                        className="flex items-center gap-3 rounded-xl border border-border/60 p-4 transition-colors hover:border-foreground/30 hover:bg-white/60 dark:hover:bg-accent/60"
+                        className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-background p-4 transition-colors hover:border-foreground/30 hover:bg-white/60 sm:p-5 dark:hover:bg-accent/60"
                     >
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-background">
-                            <Package className="size-[1.15rem] text-foreground" />
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent">
+                            <Package className="size-5 text-foreground" />
                         </div>
 
-                        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
                             <span
-                                className="font-inter text-sm font-medium text-foreground"
+                                className="font-inter text-sm font-semibold text-foreground"
                                 dir="ltr"
                             >
                                 {order.order_number}
                             </span>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                                 <OrderStatusBadge status={order.status} />
                                 <ShippingStatusBadge status={order.shipping_status} />
                             </div>
                         </div>
 
-                        <ChevronLeft className="size-4 shrink-0 text-muted-foreground" />
+                        <ChevronLeft className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-x-0.5 group-hover:text-foreground" />
                     </Link>
                 </li>
             ))}

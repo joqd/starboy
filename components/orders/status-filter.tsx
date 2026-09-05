@@ -1,6 +1,14 @@
-import { cn } from "@/lib/utils"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { ORDER_STATUS_OPTIONS } from "@/components/orders/order-status-badge"
 import type { OrderStatus } from "@/types/order"
+
+const ALL_VALUE = "all"
 
 export function StatusFilter({
     value,
@@ -9,33 +17,29 @@ export function StatusFilter({
     value: OrderStatus | null
     onChange: (value: OrderStatus | null) => void
 }) {
-    const options: { value: OrderStatus | null; label: string }[] = [
-        { value: null, label: "همه سفارش‌ها" },
-        ...ORDER_STATUS_OPTIONS,
-    ]
+    const selectedLabel =
+        value === null
+            ? "همه سفارش‌ها"
+            : ORDER_STATUS_OPTIONS.find((option) => option.value === value)?.label
 
     return (
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist">
-            {options.map((option) => {
-                const active = option.value === value
-                return (
-                    <button
-                        key={option.label}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        onClick={() => onChange(option.value)}
-                        className={cn(
-                            "shrink-0 rounded-full border px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
-                            active
-                                ? "border-foreground bg-foreground text-background"
-                                : "border-border/60 text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-                        )}
-                    >
+        <Select
+            value={value ?? ALL_VALUE}
+            onValueChange={(next) => onChange(next === ALL_VALUE ? null : (next as OrderStatus))}
+        >
+            <SelectTrigger className="w-full sm:w-60">
+                <SelectValue placeholder="وضعیت سفارش">{selectedLabel}</SelectValue>
+            </SelectTrigger>
+
+            <SelectContent dir="rtl">
+                <SelectItem value={ALL_VALUE}>همه سفارش‌ها</SelectItem>
+
+                {ORDER_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                    </button>
-                )
-            })}
-        </div>
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
     )
 }

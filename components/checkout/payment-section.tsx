@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { CreditCard } from "lucide-react"
 
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Skeleton } from "@/components/ui/skeleton"

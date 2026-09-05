@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { PageContainer } from "@/components/layout/page-container"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
@@ -32,6 +32,12 @@ export default function OrdersPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    // Whether we've already picked the initial filter for this session
+    // (see the effect below). Guards the normal fetch effect so it doesn't
+    // re-fetch data the init step already loaded.
+    const [initialized, setInitialized] = useState(false)
+    const lastFetchedKey = useRef<string | null>(null)
+
     // Once we know for sure there's no active session, prompt the global
     // login dialog automatically so the user isn't left on an empty page.
     // If they dismiss it, the <LoginRequired> card below still lets them
@@ -43,11 +49,67 @@ export default function OrdersPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [checkingSession, user])
 
-    const fetchOrders = useCallback(async () => {
+    // Reset local state on logout so a subsequent login re-runs the
+    // initial-filter logic below instead of reusing a stale result.
+    useEffect(() => {
+        if (user) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setInitialized(false)
+        setOrders([])
+        setCount(0)
+        setStatus(null)
+        setPage(1)
+        lastFetchedKey.current = null
+    }, [user])
+
+    // Decide the starting filter: if the user has any order still awaiting
+    // payment, open the list on that filter so it's front and center;
+    // otherwise show everything. Runs once per login.
+    useEffect(() => {
+        if (!user || initialized) return
+
+        let cancelled = false
+
+        async function determineInitialFilter() {
+            setLoading(true)
+            setError(null)
+            try {
+                const pendingRes = await getOrders("pending_payment", 1, PAGE_SIZE)
+                if (cancelled) return
+
+                if (pendingRes.count > 0) {
+                    lastFetchedKey.current = "pending_payment-1"
+                    setStatus("pending_payment")
+                    setOrders(pendingRes.results)
+                    setCount(pendingRes.count)
+                } else {
+                    const allRes = await getOrders(null, 1, PAGE_SIZE)
+                    if (cancelled) return
+                    lastFetchedKey.current = "null-1"
+                    setOrders(allRes.results)
+                    setCount(allRes.count)
+                }
+            } catch {
+                if (!cancelled) setError("خطا در دریافت لیست سفارش‌ها")
+            } finally {
+                if (!cancelled) {
+                    setLoading(false)
+                    setInitialized(true)
+                }
+            }
+        }
+
+        determineInitialFilter()
+        return () => {
+            cancelled = true
+        }
+    }, [user, initialized])
+
+    const fetchOrders = useCallback(async (s: OrderStatus | null, p: number) => {
         setLoading(true)
         setError(null)
         try {
-            const res = await getOrders(status, page, PAGE_SIZE)
+            const res = await getOrders(s, p, PAGE_SIZE)
             setOrders(res.results)
             setCount(res.count)
         } catch {
@@ -55,15 +117,16 @@ export default function OrdersPage() {
         } finally {
             setLoading(false)
         }
-    }, [status, page])
+    }, [])
 
+    // Handles every filter/page change made *after* the initial load above.
     useEffect(() => {
-        if (!user) return
-        // This also re-runs right after a successful login (once `user`
-        // switches from null to a value), so no extra wiring is needed there.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchOrders()
-    }, [user, fetchOrders])
+        if (!user || !initialized) return
+        const key = `${status ?? "null"}-${page}`
+        if (lastFetchedKey.current === key) return
+        lastFetchedKey.current = key
+        fetchOrders(status, page)
+    }, [user, initialized, status, page, fetchOrders])
 
     function handleStatusChange(next: OrderStatus | null) {
         setStatus(next)
