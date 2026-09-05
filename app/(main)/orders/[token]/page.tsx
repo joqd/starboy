@@ -8,6 +8,7 @@ import { ArrowRight, MapPin, Package as PackageIcon, StickyNote, Truck } from "l
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { getOrderByToken } from "@/lib/api/order"
+import { pay } from "@/lib/api/checkout"
 import type { Order } from "@/types/order"
 
 import { OrderHeader } from "@/components/orders/order-header"
@@ -24,6 +25,7 @@ export default function OrderDetailPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [paying, setPaying] = useState(false)
+    const [payError, setPayError] = useState<string | null>(null)
 
     const fetchOrder = useCallback(async () => {
         setLoading(true)
@@ -43,13 +45,16 @@ export default function OrderDetailPage() {
         fetchOrder()
     }, [fetchOrder])
 
-    function handlePay(gatewayId: number) {
+    async function handlePay(gatewayId: number) {
         setPaying(true)
-        // TODO(backend): call the "start payment" endpoint with
-        // { token, gatewayId } and redirect the user to the returned
-        // payment gateway URL. Left as a stub, same as the checkout page.
-        setPaying(false)
-        void gatewayId
+        setPayError(null)
+        try {
+            const { redirect_url } = await pay(token, gatewayId)
+            window.location.href = redirect_url
+        } catch {
+            setPayError("پرداخت با خطا مواجه شد. لطفاً دوباره تلاش کنید")
+            setPaying(false)
+        }
     }
 
     const canPay = !!order && order.is_payable && !order.is_expired
@@ -154,10 +159,17 @@ export default function OrderDetailPage() {
                                         )}
 
                                         {canPay && (
-                                            <OrderPaymentPanel
-                                                onSubmit={handlePay}
-                                                submitting={paying}
-                                            />
+                                            <div className="flex flex-col gap-2">
+                                                <OrderPaymentPanel
+                                                    onSubmit={handlePay}
+                                                    submitting={paying}
+                                                />
+                                                {payError && (
+                                                    <p className="text-xs text-destructive">
+                                                        {payError}
+                                                    </p>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
 

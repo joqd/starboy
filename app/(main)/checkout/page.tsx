@@ -12,6 +12,7 @@ import type { AddressListItem } from "@/types/address"
 import type { Gateway } from "@/types/gateway"
 import { deleteAddress, getAddressList } from "@/lib/api/address"
 import { getGateways } from "@/lib/api/gateway"
+import { createOrder, pay } from "@/lib/api/checkout"
 
 import { useToasts, ToastStack } from "@/components/checkout/toast-stack"
 import { AddressSection } from "@/components/checkout/address-section"
@@ -39,6 +40,12 @@ export default function CheckoutPage() {
     const [gatewaysLoading, setGatewaysLoading] = useState(true)
     const [gatewaysError, setGatewaysError] = useState<string | null>(null)
     const [selectedGatewayId, setSelectedGatewayId] = useState<number | null>(null)
+
+    // --- Order notes ------------------------------------------------------
+    const [customerNote, setCustomerNote] = useState("")
+
+    // --- Order submission ------------------------------------------------------
+    const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
 
     const fetchAddresses = useCallback(async (preferId?: number) => {
         setAddressesLoading(true)
@@ -131,10 +138,23 @@ export default function CheckoutPage() {
         }
     }
 
-    function handleSubmitOrder(e: FormEvent) {
+    async function handleSubmitOrder(e: FormEvent) {
         e.preventDefault()
-        // TODO(backend): wire up the order-submission endpoint (sending
-        // selectedAddressId and selectedGatewayId) and redirect to the payment gateway
+
+        if (!selectedAddressId || !selectedGatewayId || isSubmittingOrder) return
+
+        setIsSubmittingOrder(true)
+        try {
+            const order = await createOrder({
+                address_id: selectedAddressId,
+                customer_note: customerNote,
+            })
+            const { redirect_url } = await pay(order.token, selectedGatewayId)
+            window.location.href = redirect_url
+        } catch {
+            pushToast("ثبت سفارش با خطا مواجه شد. لطفاً دوباره تلاش کنید")
+            setIsSubmittingOrder(false)
+        }
     }
 
     async function handleIncreaseQuantity(item: CartItem) {
@@ -253,8 +273,29 @@ export default function CheckoutPage() {
                                     </div>
                                 </section>
 
-                                <Button disabled={!canSubmit} className="text-md h-11">
-                                    ثبت سفارش و پرداخت
+                                <section className="rounded-xl border border-border/60 p-5 sm:p-6">
+                                    <h2 className="text-base font-bold text-foreground">
+                                        یادداشت سفارش
+                                    </h2>
+                                    <div className="mt-5">
+                                        <textarea
+                                            value={customerNote}
+                                            onChange={(e) => setCustomerNote(e.target.value)}
+                                            placeholder="در صورت تمایل، توضیحی برای سفارش خود بنویسید (اختیاری)"
+                                            rows={3}
+                                            className="w-full resize-none rounded-md border border-border/60 bg-transparent p-3 text-sm outline-none focus:border-foreground/40"
+                                        />
+                                    </div>
+                                </section>
+
+                                <Button
+                                    type="submit"
+                                    disabled={!canSubmit || isSubmittingOrder}
+                                    className="text-md h-11"
+                                >
+                                    {isSubmittingOrder
+                                        ? "در حال انتقال به درگاه پرداخت..."
+                                        : "ثبت سفارش و پرداخت"}
                                 </Button>
                             </form>
 
