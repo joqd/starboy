@@ -1,15 +1,22 @@
 import request from "@/lib/api/client"
 import type { OrderList, Order } from "@/types/order"
 
-export function getOrders(status: string | null = null): Promise<OrderList> {
-    let path = "/api/orders/"
+export function getOrders(
+    status: string | null = null,
+    page: number = 1,
+    pageSize: number = 20
+): Promise<OrderList> {
+    const params = new URLSearchParams()
 
     if (status !== null) {
-        path = `/api/orders/?status=${status}`
+        params.set("status", status)
     }
 
+    params.set("page", page.toString())
+    params.set("page_size", pageSize.toString())
+
     return request<OrderList>(
-        path,
+        `/api/orders/?${params.toString()}`,
         {
             method: "GET",
         },
