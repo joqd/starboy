@@ -56,11 +56,9 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                         </div>
 
                         <div className="flex min-w-0 flex-1 flex-col gap-2">
-                            <span
-                                className="font-inter text-sm font-semibold text-foreground"
-                                dir="ltr"
-                            >
-                                {order.order_number}
+                            <span className="text-sm font-semibold text-foreground">
+                                شماره سفارش:{" "}
+                                <span className="font-inter">{order.order_number}</span>
                             </span>
                             <div className="flex flex-wrap items-center gap-1.5">
                                 <OrderStatusBadge status={order.status} />
