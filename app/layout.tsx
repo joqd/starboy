@@ -8,9 +8,9 @@ import { AuthProvider } from "@/hooks/use-auth"
 import { Toaster } from "@/components/ui/toast"
 import { ViewTransitions } from "next-view-transitions"
 
-const YekanBakh = localFont({
-    src: "./assets/fonts/YekanBakh-Regular.woff2",
-    variable: "--font-yekanbakh",
+const MainFont = localFont({
+    src: "./assets/fonts/YekanBakh-Bold.woff2",
+    variable: "--font-main",
     display: "swap",
 })
 
@@ -29,7 +29,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
         <html
             lang="en"
             suppressHydrationWarning
-            className={cn("antialiased", "font-sans", YekanBakh.className)}
+            className={cn("antialiased", "font-sans", MainFont.className)}
         >
             <head>
                 <link rel="icon" href="/favicon/red.svg" media="(prefers-color-scheme: light)" />
