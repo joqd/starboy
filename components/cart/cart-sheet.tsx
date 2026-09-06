@@ -163,11 +163,11 @@ export default function CartSheet({
                             </div>
 
                             <Button
-                                className={"h-11 w-full"}
+                                className={"h-11 w-full text-lg"}
                                 onClick={handleCheckout}
                                 disabled={checkingSession}
                             >
-                                تسویه حساب
+                                ثبت سفارش
                             </Button>
                         </div>
                     </>
