@@ -12,6 +12,7 @@ import {
     ShieldCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 // ---------------------------------------------------------------------------
 // Content — edit here, layout below stays untouched. Prices/times are
@@ -212,11 +213,8 @@ export default function ShippingReturnsPage() {
                     <p className="max-w-sm text-[12.5px] leading-6 text-muted-foreground">
                         سوالات پرتکرار درباره‌ی خرید و ارسال رو یک‌جا جمع کردیم.
                     </p>
-                    <Link
-                        href="/faq"
-                        className="mt-1 flex items-center justify-center rounded-lg border bg-primary px-6 py-2.5 text-[13px] font-bold text-primary-foreground transition active:scale-[0.98]"
-                    >
-                        سوالات متداول
+                    <Link href="/faq">
+                        <Button>سوالات متداول</Button>
                     </Link>
                 </motion.div>
             </section>
