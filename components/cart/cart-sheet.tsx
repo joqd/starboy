@@ -149,7 +149,7 @@ export default function CartSheet({
                                                         size="icon"
                                                         onClick={() => onRemove(item.sku)}
                                                         aria-label="حذف محصول"
-                                                        className="h-6 w-6 shrink-0 text-muted-foreground/70 hover:bg-destructive/10 hover:text-destructive"
+                                                        className="h-6 w-6 shrink-0 hover:bg-transparent text-muted-foreground/70 hover:text-destructive"
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
                                                     </Button>
@@ -258,19 +258,11 @@ export default function CartSheet({
                             </div>
 
                             <Button
-                                className={"w-full"}
+                                className={"h-11 w-full"}
                                 onClick={handleCheckout}
                                 disabled={checkingSession}
                             >
                                 تسویه حساب
-                            </Button>
-
-                            <Button
-                                variant="secondary"
-                                className={"w-full"}
-                                onClick={() => onOpenChange(false)}
-                            >
-                                ادامه‌ی خرید
                             </Button>
                         </div>
                     </>
