@@ -44,7 +44,7 @@ export function EmptyOrders({ filtered }: { filtered: boolean }) {
 
 export function OrderList({ orders }: { orders: OrderListItem[] }) {
     return (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {orders.map((order) => (
                 <li key={order.token}>
                     <Link
@@ -60,6 +60,7 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                                 شماره سفارش:{" "}
                                 <span className="font-inter">{order.order_number}</span>
                             </span>
+
                             <div className="flex flex-wrap items-center gap-1.5">
                                 <OrderStatusBadge status={order.status} />
                                 <ShippingStatusBadge status={order.shipping_status} />
