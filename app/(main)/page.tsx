@@ -156,8 +156,8 @@ function DesktopHero() {
                         استایل خودت رو بساز
                     </h1>
                     <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                        هر تکه از این کالکشن، روایتی از سلیقه‌ی توست؛ طراحی‌شده برای کسی که سبک خودش
-                        رو داره.
+                        از انتخاب پارچه شروع می‌کنیم، فرم لباس را خودمان تعیین می‌کنیم و در نهایت با
+                        طرحی اختصاصی، چیزی می‌سازیم که شبیه لباس‌های معمول بازار نباشد.
                     </p>
                     <Link
                         href="/p"
@@ -169,16 +169,18 @@ function DesktopHero() {
 
                     <dl className="mt-14 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
                         <div>
-                            <dt className="text-xs text-muted-foreground">تجربه</dt>
-                            <dd className="mt-1 text-lg font-semibold text-foreground">+۵ سال</dd>
+                            <dt className="text-xs text-muted-foreground">پارچه</dt>
+                            <dd className="mt-1 text-lg font-semibold text-foreground">
+                                انتخاب‌شده
+                            </dd>
                         </div>
                         <div>
                             <dt className="text-xs text-muted-foreground">تولید</dt>
-                            <dd className="mt-1 text-lg font-semibold text-foreground">محدود</dd>
+                            <dd className="mt-1 text-lg font-semibold text-foreground">اختصاصی</dd>
                         </div>
                         <div>
                             <dt className="text-xs text-muted-foreground">طراحی</dt>
-                            <dd className="mt-1 text-lg font-semibold text-foreground">اختصاصی</dd>
+                            <dd className="mt-1 text-lg font-semibold text-foreground">متفاوت</dd>
                         </div>
                     </dl>
                 </div>
@@ -274,36 +276,37 @@ function BrandStory() {
     return (
         <section className="mt-10 px-6 text-center lg:mx-auto lg:mt-28 lg:max-w-215 lg:px-8 xl:px-10">
             <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground lg:text-[11px] lg:tracking-[0.3em]">
-                چرا ما
+                داستان ما
             </p>
+
             <p className="mt-4 text-xl leading-[1.6] font-bold tracking-tight text-foreground lg:mt-6 lg:text-3xl lg:leading-[1.55] xl:text-4xl">
-                ما پوشاک نمی‌فروشیم؛ تکه‌هایی می‌سازیم که با کیفیت، سال‌ها کنارت می‌مونن.
+                از انتخاب پارچه شروع می‌کنیم؛
+                <br className="hidden lg:block" />
+                تا لباسی بسازیم که شبیه بقیه نباشد.
             </p>
+
             <ul
                 role="list"
                 className="mt-8 grid grid-cols-1 gap-6 lg:mt-14 lg:grid-cols-3 lg:gap-10"
             >
                 <li>
-                    <p className="text-xs font-semibold text-foreground lg:text-sm">
-                        مواد اولیه منتخب
-                    </p>
+                    <p className="text-xs font-semibold text-foreground lg:text-sm">پارچه منتخب</p>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground lg:mt-2 lg:text-sm">
-                        پارچه و دوخت هر محصول با دقت انتخاب و کنترل می‌شه.
+                        برای هر مدل، پارچه‌ای را انتخاب می‌کنیم که کیفیت و فرم مناسبی داشته باشد.
                     </p>
                 </li>
+
                 <li>
-                    <p className="text-xs font-semibold text-foreground lg:text-sm">تولید محدود</p>
+                    <p className="text-xs font-semibold text-foreground lg:text-sm">فرم اختصاصی</p>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground lg:mt-2 lg:text-sm">
-                        هر فصل در تیراژ کم، برای کیفیت و توجه بیشتر به جزئیات.
+                        لباس‌ها با الگو و اندازه‌های مخصوص خودمان تولید می‌شوند.
                     </p>
                 </li>
+
                 <li>
-                    <p className="text-xs font-semibold text-foreground lg:text-sm">
-                        <span className="lg:hidden">طراحی داخل کشور</span>
-                        <span className="hidden lg:inline">طراحی اختصاصی</span>
-                    </p>
+                    <p className="text-xs font-semibold text-foreground lg:text-sm">طراحی متفاوت</p>
                     <p className="mt-1 text-xs leading-relaxed text-muted-foreground lg:mt-2 lg:text-sm">
-                        از ایده تا طرح، همه‌چیز همین‌جا شکل می‌گیره.
+                        طرح‌ها با چاپ یا دوخت، آخرین جزئیات هر لباس را شکل می‌دهند.
                     </p>
                 </li>
             </ul>
