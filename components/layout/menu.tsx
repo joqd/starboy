@@ -8,6 +8,7 @@ import { Menu, Rss, Store, X, User, Package, LogOut, CircleUserRound } from "luc
 import Cart from "@/components/cart/cart"
 import StarboyLogo from "../common/starboy-logo"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 import Link from "next/link"
 import { Separator } from "../ui/separator"
 import {
@@ -107,8 +108,13 @@ function ProfileMenu() {
                 className="flex size-9 items-center justify-center rounded-full text-foreground transition-colors outline-none hover:bg-accent"
             >
                 {user.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatar} alt="" className="size-7 rounded-full object-cover" />
+                    <Image
+                        src={user.avatar}
+                        alt=""
+                        width={28}
+                        height={28}
+                        className="size-7 rounded-full object-cover"
+                    />
                 ) : initial ? (
                     <span className="flex size-7 items-center justify-center rounded-full bg-accent text-xs font-medium">
                         {initial}
@@ -117,7 +123,7 @@ function ProfileMenu() {
                     <CircleUserRound className="size-[1.1rem]" />
                 )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent dir="rtl" align="end" className="z-10000 w-48 mt-4">
+            <DropdownMenuContent dir="rtl" align="end" className="z-10000 mt-4 w-48">
                 <DropdownMenuGroup>
                     <DropdownMenuLabel className="font-normal text-foreground/60">
                         {user.full_name || user.phone}

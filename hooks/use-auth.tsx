@@ -19,6 +19,11 @@ type PendingAction = () => void
 type AuthContextValue = {
     /** The current authenticated user, or null if signed out. */
     user: User | null
+    /**
+     * Directly overwrite the current user — used after actions like editing
+     * the profile (name/avatar) that return a fresh User but aren't a login.
+     */
+    setUser: (user: User | null) => void
     /** True while the initial session check (on app load) is in flight. */
     checkingSession: boolean
     /** Whether the global login dialog is currently open. */
@@ -124,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const value = useMemo<AuthContextValue>(
         () => ({
             user,
+            setUser,
             checkingSession,
             isLoginOpen,
             setLoginOpen,
@@ -134,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
         [
             user,
+            setUser,
             checkingSession,
             isLoginOpen,
             setLoginOpen,
