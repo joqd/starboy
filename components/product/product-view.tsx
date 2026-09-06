@@ -5,6 +5,7 @@ import { Link } from "next-view-transitions"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import {
+    ArrowRight,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -64,7 +65,7 @@ export default function ProductView({ product }: Props) {
             ? Math.round(((comparePrice - displayPrice) / comparePrice) * 100)
             : null
 
-    const { addItem, getItemQuantity, isPending } = useCart()
+    const { addItem, getItemQuantity, isPending, itemCount } = useCart()
 
     // The cart is managed server-side, so "how many can I add" has to account
     // for whatever quantity of this exact variant is already in the cart.
@@ -108,37 +109,14 @@ export default function ProductView({ product }: Props) {
 
     return (
         <div dir="rtl" className="">
-            {/* Breadcrumb ---------------------------------------------------- */}
-            {/* <div className="mb-6 flex items-center justify-between gap-4 lg:mb-8">
-                <nav className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-                    <Link href="/" className="shrink-0 transition-colors hover:text-foreground">
-                        خانه
-                    </Link>
-                    <ChevronLeft className="h-3 w-3 shrink-0" />
-                    <Link href="/p" className="shrink-0 transition-colors hover:text-foreground">
-                        فروشگاه
-                    </Link>
-                    {primaryCollection && (
-                        <>
-                            <ChevronLeft className="h-3 w-3 shrink-0" />
-                            <span className="hidden shrink-0 sm:inline">
-                                {primaryCollection.title}
-                            </span>
-                        </>
-                    )}
-                    <ChevronLeft className="h-3 w-3 shrink-0" />
-                    <span className="truncate text-foreground">{product.title}</span>
-                </nav>
-
-                <button
-                    type="button"
-                    onClick={() => router.back()}
-                    className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
-                >
-                    <ArrowRight className="h-3 w-3" />
-                    بازگشت
-                </button>
-            </div> */}
+            {/* Back to shop */}
+            <Link
+                href="/p"
+                className="mb-6 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground lg:mb-8"
+            >
+                <ArrowRight className="size-3.5" />
+                بازگشت به فروشگاه
+            </Link>
 
             {/* Gallery + buy box ---------------------------------------------- */}
             <div
@@ -286,63 +264,79 @@ export default function ProductView({ product }: Props) {
                         </div>
                     )}
 
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center rounded-lg border border-border bg-background">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center rounded-lg border border-border bg-background">
+                                <Button
+                                    variant={"ghost"}
+                                    disabled={quantity <= 1}
+                                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                                    className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90 disabled:opacity-40"
+                                    aria-label="کاهش تعداد"
+                                >
+                                    <Minus className="h-3.5 w-3.5" />
+                                </Button>
+                                <span className="w-5 text-center text-[12px] font-bold text-foreground tabular-nums">
+                                    {formatPrice(quantity)}
+                                </span>
+                                <Button
+                                    variant={"ghost"}
+                                    disabled={quantity >= availableToAdd}
+                                    onClick={() =>
+                                        setQuantity((q) => Math.min(availableToAdd, q + 1))
+                                    }
+                                    className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90 disabled:opacity-40"
+                                    aria-label="افزایش تعداد"
+                                >
+                                    <Plus className="h-3.5 w-3.5" />
+                                </Button>
+                            </div>
+
                             <Button
-                                variant={"ghost"}
-                                disabled={quantity <= 1}
-                                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90 disabled:opacity-40"
-                                aria-label="کاهش تعداد"
+                                disabled={!canAddToCart}
+                                onClick={handleAddToCart}
+                                className={cn(
+                                    "flex flex-1 items-center justify-center border px-4 font-bold transition active:scale-[0.98]",
+                                    canAddToCart
+                                        ? ""
+                                        : "cursor-not-allowed bg-muted text-muted-foreground"
+                                )}
                             >
-                                <Minus className="h-3.5 w-3.5" />
-                            </Button>
-                            <span className="w-5 text-center text-[12px] font-bold text-foreground tabular-nums">
-                                {formatPrice(quantity)}
-                            </span>
-                            <Button
-                                variant={"ghost"}
-                                disabled={quantity >= availableToAdd}
-                                onClick={() => setQuantity((q) => Math.min(availableToAdd, q + 1))}
-                                className="ghost flex w-9 items-center justify-center text-muted-foreground active:scale-90 disabled:opacity-40"
-                                aria-label="افزایش تعداد"
-                            >
-                                <Plus className="h-3.5 w-3.5" />
+                                {isVariantPending ? (
+                                    "در حال افزودن..."
+                                ) : canAddToCart ? (
+                                    "افزودن به سبد خرید"
+                                ) : (
+                                    <>
+                                        <Lock className="h-3.5 w-3.5" strokeWidth={1.8} />
+                                        {selectedVariant &&
+                                        quantityInCart > 0 &&
+                                        selectedVariant.stock > 0
+                                            ? "همه‌ی موجودی در سبد شماست"
+                                            : "ناموجود"}
+                                    </>
+                                )}
                             </Button>
                         </div>
 
-                        <Button
-                            disabled={!canAddToCart}
-                            onClick={handleAddToCart}
-                            className={cn(
-                                "flex flex-1 items-center justify-center border px-4 font-bold transition active:scale-[0.98]",
-                                canAddToCart
-                                    ? ""
-                                    : "cursor-not-allowed bg-muted text-muted-foreground"
-                            )}
-                        >
-                            {isVariantPending ? (
-                                "در حال افزودن..."
-                            ) : canAddToCart ? (
-                                "افزودن به سبد خرید"
-                            ) : (
-                                <>
-                                    <Lock className="h-3.5 w-3.5" strokeWidth={1.8} />
-                                    {selectedVariant &&
-                                    quantityInCart > 0 &&
-                                    selectedVariant.stock > 0
-                                        ? "همه‌ی موجودی در سبد شماست"
-                                        : "ناموجود"}
-                                </>
-                            )}
-                        </Button>
-                    </div>
+                        {itemCount > 0 && (
+                            <Link href="/checkout">
+                                <Button
+                                    variant="outline"
+                                    className="flex w-full items-center justify-center gap-2 border font-bold"
+                                >
+                                    رفتن به تسویه‌حساب
+                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                </Button>
+                            </Link>
+                        )}
 
-                    {addToCartError && (
-                        <p className="-mt-3 text-[11px] font-medium text-destructive">
-                            {addToCartError}
-                        </p>
-                    )}
+                        {addToCartError && (
+                            <p className="-mt-3 text-[11px] font-medium text-destructive">
+                                {addToCartError}
+                            </p>
+                        )}
+                    </div>
 
                     {/* Trust row */}
                     <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/25 p-4">
