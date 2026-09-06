@@ -34,10 +34,10 @@ import {
 // each one is just another { href, label, icon } entry.
 const ACCOUNT_LINKS = [
     { href: "/orders", label: "سفارش‌های من", icon: Package },
-    { href: "/addresses", label: "آدرس‌های من", icon: MapPin },
-    { href: "/transactions", label: "تاریخچه پرداخت‌ها", icon: MapPin },
-    { href: "/favorites", label: "علاقه‌مندی‌ها", icon: Heart },
-    { href: "/notifications", label: "اعلان‌ها", icon: Bell },
+    // { href: "/addresses", label: "آدرس‌های من", icon: MapPin },
+    // { href: "/transactions", label: "تاریخچه پرداخت‌ها", icon: MapPin },
+    // { href: "/favorites", label: "علاقه‌مندی‌ها", icon: Heart },
+    // { href: "/notifications", label: "اعلان‌ها", icon: Bell },
 ]
 
 export default function ProfilePage() {
