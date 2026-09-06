@@ -5,6 +5,7 @@ import { Link } from "next-view-transitions"
 import { motion } from "motion/react"
 import { ChevronDown, CreditCard, Package, Ruler, RotateCcw, MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 // ---------------------------------------------------------------------------
 // Content — edit here, layout below stays untouched.
@@ -208,11 +209,8 @@ export default function FaqPage() {
                     <p className="max-w-sm text-[12.5px] leading-6 text-muted-foreground">
                         تیم پشتیبانی استاربوی همیشه در دسترسه.
                     </p>
-                    <Link
-                        href="/contact"
-                        className="mt-1 flex items-center justify-center rounded-lg border bg-primary px-6 py-2.5 text-[13px] font-bold text-primary-foreground transition active:scale-[0.98]"
-                    >
-                        ارتباط با ما
+                    <Link href="/contact">
+                        <Button variant="secondary">ارتباط با ما</Button>
                     </Link>
                 </div>
             </section>

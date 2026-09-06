@@ -214,7 +214,7 @@ export default function ShippingReturnsPage() {
                         سوالات پرتکرار درباره‌ی خرید و ارسال رو یک‌جا جمع کردیم.
                     </p>
                     <Link href="/faq">
-                        <Button>سوالات متداول</Button>
+                        <Button variant="secondary">سوالات متداول</Button>
                     </Link>
                 </motion.div>
             </section>

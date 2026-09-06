@@ -2,43 +2,47 @@
 
 import { motion } from "motion/react"
 import { Link } from "next-view-transitions"
-import { Sparkles, Users, Shirt } from "lucide-react"
+import { Sparkles, Shirt, Scissors } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
 
 // ---------------------------------------------------------------------------
-// Content — edit here, layout below stays untouched.
+// Content
 // ---------------------------------------------------------------------------
+
 const VALUES = [
     {
         icon: Sparkles,
-        title: "مواد درجه‌یک",
+        title: "پارچه منتخب",
         description:
-            "هر پارچه قبل از تولید تست می‌شه؛ چیزی که رو تنت میره باید هم خوب بدوزه هم سال‌ها دوام بیاره.",
+            "کار هر لباس از انتخاب پارچه شروع می‌شه؛ پارچه‌ای که از نظر کیفیت، فرم و حس پوشیدن مناسب باشه.",
+    },
+    {
+        icon: Scissors,
+        title: "فرم اختصاصی",
+        description:
+            "لباس‌ها با الگو و اندازه‌های مخصوص خودمون تولید می‌شن تا فرم نهایی، بخشی از هویت هر مدل باشه.",
     },
     {
         icon: Shirt,
-        title: "تیراژ محدود",
+        title: "طراحی متفاوت",
         description:
-            "هر مدل در تعداد مشخص و محدود تولید می‌شه. وقتی تموم شد، تموم شد؛ دیگه تکرار نمی‌کنیم.",
-    },
-    {
-        icon: Users,
-        title: "ساخته‌شده با جامعه",
-        description:
-            "ایده‌ی خیلی از مدل‌ها از پیام‌های همون آدم‌هایی اومده که استاربوی می‌پوشن. اینجا یه طرفه نیست.",
+            "بعد از آماده شدن لباس، طرح‌ها با چاپ یا دوخت روی اون اجرا می‌شن؛ درست همون‌جایی که ایده تبدیل به لباس می‌شه.",
     },
 ]
 
 const TIMELINE = [
     {
         year: "۱۴۰۵",
-        title: "شروع از اتاق خودم",
-        description: "اولین سری تیشرت‌ها بسته‌بندی شدن و مستقیم به دست مشتری رسیدن.",
+        title: "شروع استاربوی",
+        description:
+            "استاربوی با چند ایده، انتخاب پارچه و اولین لباس‌هایی که با اندازه‌های خودمون تولید کردیم شروع شد.",
     },
     {
-        year: "حالا",
-        title: "ببینیم چی میشه 😭😂",
-        // description: "استاربوی از یه پروژه‌ی جانبی به یه برند با هویت مشخص و تیم کوچیک تبدیل شد.",
+        year: "امروز",
+        title: "در حال ساختن",
+        description:
+            "هنوز در ابتدای مسیر هستیم؛ مدل‌های جدید می‌سازیم، امتحان می‌کنیم و قدم‌به‌قدم استایل استاربوی رو شکل می‌دیم.",
     },
 ]
 
@@ -67,7 +71,9 @@ export default function AboutPage() {
                         transition={{ ...fadeUp.transition, delay: 0.05 }}
                         className="max-w-3xl text-[34px] leading-[1.05] font-bold tracking-tight text-primary uppercase lg:text-[56px]"
                     >
-                        از یک اتاق کوچیک، تا لباسی که می‌پوشی
+                        لباس‌هایی که از ایده
+                        <br />
+                        تا تن، متفاوت ساخته می‌شن
                     </motion.h1>
 
                     <motion.p
@@ -75,8 +81,8 @@ export default function AboutPage() {
                         transition={{ ...fadeUp.transition, delay: 0.1 }}
                         className="max-w-lg text-[13px] leading-relaxed text-muted-foreground lg:text-sm"
                     >
-                        استاربوی از یه سوال ساده شروع شد: چرا لباس روزمره باید بی‌روح باشه؟ حالا چند
-                        ساله که هر تکه رو با همون سوال طراحی می‌کنیم.
+                        استاربوی با یک ایده ساده شروع شد: لباس‌هایی بسازیم که از انتخاب پارچه تا طرح
+                        نهایی، چیزی بیشتر از یک محصول آماده باشن.
                     </motion.p>
 
                     <motion.div
@@ -85,22 +91,26 @@ export default function AboutPage() {
                         className="mt-4 flex w-fit flex-wrap items-center gap-4 rounded-2xl border border-border/60 bg-muted/40 px-5 py-3 text-center"
                     >
                         <div>
-                            <p className="text-lg font-bold text-foreground">۱۳۹۷</p>
-                            <p className="text-[10px] tracking-wide text-muted-foreground uppercase">
-                                سال تأسیس
+                            <p className="text-lg font-bold text-foreground">۱۴۰۵</p>
+                            <p className="text-[10px] tracking-wide text-muted-foreground">
+                                شروع برند
                             </p>
                         </div>
+
                         <Separator orientation="vertical" className="h-8" />
+
                         <div>
                             <p className="text-lg font-bold text-foreground">۱۰۰٪</p>
-                            <p className="text-[10px] tracking-wide text-muted-foreground uppercase">
+                            <p className="text-[10px] tracking-wide text-muted-foreground">
                                 طراحی و تولید داخلی
                             </p>
                         </div>
+
                         <Separator orientation="vertical" className="h-8" />
+
                         <div>
                             <p className="text-lg font-bold text-foreground">محدود</p>
-                            <p className="text-[10px] tracking-wide text-muted-foreground uppercase">
+                            <p className="text-[10px] tracking-wide text-muted-foreground">
                                 تیراژ هر مدل
                             </p>
                         </div>
@@ -114,25 +124,27 @@ export default function AboutPage() {
                     <motion.div
                         {...fadeUp}
                         className="relative aspect-4/5 w-full overflow-hidden rounded-3xl border border-border/60 bg-muted"
-                    ></motion.div>
+                    />
 
                     <motion.div {...fadeUp} className="flex flex-col justify-center gap-5">
                         <h2 className="text-xl font-bold tracking-tight text-primary uppercase lg:text-2xl">
                             چطور شروع شد
                         </h2>
+
                         <p className="text-[13px] leading-7 text-muted-foreground lg:text-sm">
-                            همه‌چیز از یک اتاق ۱۲ متری شروع شد؛ چند تا طرح، یه چاپخونه‌ی محلی و یه
-                            صفحه‌ی اینستاگرام. بین بازار پر از لباس‌های تکراری، دنبال یه چیز دیگه
-                            بودیم — چیزی که حس یه شهر بزرگ رو داشته باشه، نه یه کاتالوگ.
+                            استاربوی تازه شروع شده، اما از همون اول قرار نبود فقط لباس آماده بخریم و
+                            با اسم خودمون بفروشیم. تصمیم گرفتیم مسیر تولید رو خودمون شکل بدیم.
                         </p>
+
                         <p className="text-[13px] leading-7 text-muted-foreground lg:text-sm">
-                            هنوز هم همون فلسفه رو داریم: کیفیت رو فدای سرعت نمی‌کنیم. هر مدل قبل از
-                            تولید انبوه، چند بار نمونه‌سازی و امتحان می‌شه تا مطمئن بشیم واقعاً ارزش
-                            پوشیدن داره.
+                            اول پارچه‌ای رو انتخاب می‌کنیم که کیفیت و فرم مناسبی داشته باشه. بعد
+                            لباس با الگو و اندازه‌های مخصوص خودمون دوخته می‌شه و در نهایت طرح
+                            موردنظر، با چاپ یا دوخت، روی لباس اجرا می‌شه.
                         </p>
+
                         <p className="text-[13px] leading-7 text-muted-foreground lg:text-sm">
-                            امروز استاربوی دیگه فقط یه برند لباس نیست؛ جایی‌ست که آدم‌هایی با
-                            سلیقه‌ی مشابه دور هم جمع شدن.
+                            نتیجه قرار نیست شبیه چیزی باشه که همه‌جا می‌بینی. هر مدل حاصل چند انتخاب
+                            مشخصه؛ از پارچه و فرم لباس تا آخرین جزئیات طراحی.
                         </p>
                     </motion.div>
                 </div>
@@ -145,7 +157,7 @@ export default function AboutPage() {
                         {...fadeUp}
                         className="mb-10 text-xl font-bold tracking-tight text-primary uppercase lg:text-2xl"
                     >
-                        چیزهایی که بهشون پایبندیم
+                        چیزی که برای ما مهمه
                     </motion.h2>
 
                     <div className="grid gap-5 sm:grid-cols-3">
@@ -157,7 +169,9 @@ export default function AboutPage() {
                                 className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-muted/30 p-6"
                             >
                                 <value.icon className="h-5 w-5 text-primary" strokeWidth={1.8} />
+
                                 <h3 className="text-sm font-bold text-foreground">{value.title}</h3>
+
                                 <p className="text-[12.5px] leading-6 text-muted-foreground">
                                     {value.description}
                                 </p>
@@ -186,12 +200,15 @@ export default function AboutPage() {
                                 className="relative"
                             >
                                 <span className="absolute top-1 -right-7.75 h-2.5 w-2.5 rounded-full bg-primary sm:-right-[35px]" />
+
                                 <p className="text-xs font-bold tracking-wide text-primary">
                                     {step.year}
                                 </p>
+
                                 <h3 className="mt-1 text-sm font-bold text-foreground">
                                     {step.title}
                                 </h3>
+
                                 <p className="mt-1.5 max-w-lg text-[12.5px] leading-6 text-muted-foreground">
                                     {step.description}
                                 </p>
@@ -208,16 +225,15 @@ export default function AboutPage() {
                     className="mx-auto flex max-w-295 flex-col items-center gap-4 px-4 text-center sm:px-6 xl:px-10"
                 >
                     <h2 className="text-xl font-bold tracking-tight text-primary uppercase lg:text-2xl">
-                        بخشی از این مسیر باش
+                        از همین‌جا شروع کنیم
                     </h2>
+
                     <p className="max-w-md text-[12.5px] leading-6 text-muted-foreground">
-                        آخرین کالکشن رو ببین — قبل از این‌که تیراژش تموم بشه.
+                        کالکشن فعلی استاربوی رو ببین و اولین انتخابت رو پیدا کن.
                     </p>
-                    <Link
-                        href="/p"
-                        className="mt-2 flex items-center justify-center rounded-lg border bg-primary px-6 py-2.5 text-[13px] font-bold text-primary-foreground transition active:scale-[0.98]"
-                    >
-                        مشاهده‌ی فروشگاه
+
+                    <Link href="/p">
+                        <Button>مشاهده فروشگاه</Button>
                     </Link>
                 </motion.div>
             </section>

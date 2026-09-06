@@ -1,4 +1,4 @@
-import { Clock, Mail, Rss, MapPin, MessageCircle, Phone, Send } from "lucide-react"
+import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 
@@ -11,14 +11,14 @@ const CONTACT_INFO = [
     {
         icon: Phone,
         label: "تلفن پشتیبانی",
-        value: "۰۲۱-۱۲۳۴۵۶۷۸",
-        href: "tel:+982112345678",
+        value: "۰۹۰۵۹۰۸۵۲۳۰",
+        href: "tel:+989059085230",
     },
     {
         icon: MessageCircle,
         label: "واتساپ",
-        value: "۰۹۱۲-۳۴۵۶۷۸۹",
-        href: "https://wa.me/989123456789",
+        value: "۰۹۰۵۹۰۸۵۲۳۰",
+        href: "https://wa.me/989059085230",
     },
     {
         icon: Mail,
@@ -29,8 +29,8 @@ const CONTACT_INFO = [
     {
         icon: MapPin,
         label: "آدرس",
-        value: "تهران، خیابان ولیعصر، بالاتر از میدان ونک، پلاک ۱۲۳",
-        href: "https://maps.google.com/?q=تهران خیابان ولیعصر",
+        value: "اصفهان، شاهین‌شهر، خیابان فردوسی، پلاک ۷۶",
+        href: "/contact",
     },
     {
         icon: Clock,
@@ -41,23 +41,23 @@ const CONTACT_INFO = [
 ]
 
 const SOCIAL_LINKS = [
-    {
-        icon: Rss,
-        label: "اینستاگرام",
-        handle: "@starboy",
-        href: "https://instagram.com/starboy",
-    },
-    {
-        icon: Send,
-        label: "تلگرام",
-        handle: "@starboy",
-        href: "https://t.me/starboy",
-    },
+    // {
+    //     icon: Rss,
+    //     label: "اینستاگرام",
+    //     handle: "@starboy",
+    //     href: "https://instagram.com/starboy",
+    // },
+    // {
+    //     icon: Send,
+    //     label: "تلگرام",
+    //     handle: "@starboy",
+    //     href: "https://t.me/starboy",
+    // },
     {
         icon: MessageCircle,
         label: "واتساپ",
         handle: "چت مستقیم",
-        href: "https://wa.me/989123456789",
+        href: "https://wa.me/989059085230",
     },
 ]
 
