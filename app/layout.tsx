@@ -6,7 +6,6 @@ import localFont from "next/font/local"
 import { Inter } from "next/font/google"
 import { AuthProvider } from "@/hooks/use-auth"
 import { Toaster } from "@/components/ui/toast"
-import { ViewTransitions } from "next-view-transitions"
 
 const MainFont = localFont({
     src: "./assets/fonts/YekanBakh-Bold.woff2",
@@ -44,9 +43,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
                 >
                     <AmbientGlow />
 
-                    <AuthProvider>
-                        <ViewTransitions>{children}</ViewTransitions>
-                    </AuthProvider>
+                    <AuthProvider>{children}</AuthProvider>
                     <Toaster />
                 </ThemeProvider>
             </body>

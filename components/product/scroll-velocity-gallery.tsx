@@ -401,7 +401,7 @@ function ScrollHint() {
     return (
         <div
             aria-hidden="true"
-            className="colored pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 text-[10px] tracking-wider uppercase lg:hidden"
+            className="pointer-events-none absolute right-[3vw] bottom-[3vw] z-20 flex items-center gap-2 text-[10px] tracking-wider uppercase lg:hidden"
         >
             برای مرور بکشید
         </div>
