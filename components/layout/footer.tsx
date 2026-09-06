@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import ZarinpalSeal from "@/components/utils/zarinpal-seal"
 
 // ---------------------------------------------------------------------------
 // Footer — shared by both mobile-home.tsx and desktop-home.tsx (single
@@ -15,14 +14,11 @@ import ZarinpalSeal from "@/components/utils/zarinpal-seal"
 // onSubmit to whatever the project uses for email capture.
 // ---------------------------------------------------------------------------
 
-const shopLinks = [
-    { label: "همه محصولات", href: "/p" },
-    { label: "کالکشن‌ها", href: "/collections" },
-]
+const shopLinks = [{ label: "همه محصولات", href: "/p" }]
 
 const brandLinks = [
-    { label: "داستان ما", href: "/about" },
     { label: "مجله", href: "/blog" },
+    { label: "داستان ما", href: "/about" },
     { label: "تماس با ما", href: "/contact" },
 ]
 
@@ -44,11 +40,11 @@ export default function Footer({ className = "" }: { className?: string }) {
                 {/* Bottom bar */}
                 <div className="mt-14 flex flex-col-reverse items-center gap-4 border-t border-border pt-6 sm:flex-row sm:justify-between">
                     <p className="text-xs text-muted-foreground">
-                        © {new Date().getFullYear()} استاربوی. تمام حقوق محفوظ است.
+                        © <span className="font-inter font-bold">{new Date().getFullYear()}</span>{" "}
+                        استاربوی. تمام حقوق محفوظ است.
                     </p>
                     <div className="flex items-center gap-5">
                         <EnamadSeal />
-                        <ZarinpalSeal />
                     </div>
                 </div>
             </div>
