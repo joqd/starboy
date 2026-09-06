@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import {
-    Bell,
+    // Bell,
+    // Heart,
+    // MapPin,
     Camera,
     ChevronLeft,
-    Heart,
     LogOut,
-    MapPin,
     Package,
     User as UserIcon,
 } from "lucide-react"
