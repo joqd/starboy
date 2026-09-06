@@ -11,7 +11,8 @@ import {
     HeadsetIcon,
 } from "@/components/layout/home-icons"
 import { PostCard } from "@/components/blog/post-card"
-import { cn, formatPrice } from "@/lib/utils"
+import { ProductCard } from "@/components/product/product-card"
+import { cn } from "@/lib/utils"
 import { getLatestProducts, getFeaturedProducts } from "@/lib/api/product"
 import { getLatestPosts } from "@/lib/api/post"
 import { getCollections } from "@/lib/api/collection"
@@ -345,10 +346,11 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
             <AdaptiveStrip className="lg:grid-cols-4 lg:gap-6">
                 {items.map((item, idx) => (
                     <li key={item.slug} className="w-36 shrink-0 snap-start lg:w-auto lg:shrink">
-                        <ProductTile
-                            item={item}
+                        <ProductCard
+                            product={item}
                             eager={idx < 2}
-                            badge={idx === 0 ? "پرفروش" : undefined}
+                            sizes="(max-width: 1024px) 144px, 25vw"
+                            badgeLabel={idx === 0 ? "پرفروش" : undefined}
                         />
                     </li>
                 ))}
@@ -442,7 +444,11 @@ function RecentProductsSection({ items }: { items: ProductListItem[] }) {
             >
                 {items.map((item, idx) => (
                     <li key={item.slug}>
-                        <ProductTile item={item} eager={idx < 2} />
+                        <ProductCard
+                            product={item}
+                            eager={idx < 2}
+                            sizes="(max-width: 1024px) 45vw, 25vw"
+                        />
                     </li>
                 ))}
             </ul>
@@ -474,79 +480,5 @@ function PostsSection({ items }: { items: LatestPost[] }) {
                 ))}
             </AdaptiveStrip>
         </section>
-    )
-}
-
-// ---------------------------------------------------------------------------
-// Shared product tile — used by Featured and Recent products alike, one
-// modest size that scales up slightly at `lg`. Optional `badge` puts a
-// short text label in the corner instead of ever making the card bigger.
-// ---------------------------------------------------------------------------
-function ProductTile({
-    item,
-    eager,
-    badge,
-}: {
-    item: ProductListItem
-    eager: boolean
-    badge?: string
-}) {
-    const hasStock = item.variants?.some((variant) => variant.stock > 0)
-
-    return (
-        <Link
-            href={`p/${item.slug}`}
-            className="group block overflow-hidden rounded-xl border border-border bg-card text-card-foreground"
-        >
-            <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
-                <Image
-                    src={item.images[0]?.image}
-                    alt={item.title}
-                    fill
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 180px, (max-width: 1280px) 25vw, 280px"
-                    draggable={false}
-                    className={cn(
-                        "object-cover select-none lg:transition-transform lg:duration-700 lg:ease-out lg:group-hover:scale-[1.04]",
-                        !hasStock && "brightness-90 grayscale-[0.5]"
-                    )}
-                    loading={eager ? "eager" : "lazy"}
-                    fetchPriority={eager ? "high" : "auto"}
-                />
-
-                {badge && (
-                    <span className="absolute top-2 right-2 rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-background lg:top-3 lg:right-3 lg:px-2.5 lg:py-1">
-                        {badge}
-                    </span>
-                )}
-
-                {!hasStock && (
-                    <span className="absolute top-2 left-2 rounded-full border border-border bg-background/90 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur-sm lg:top-3 lg:left-3 lg:px-2.5 lg:py-1 lg:text-[11px]">
-                        ناموجود
-                    </span>
-                )}
-            </div>
-
-            <div className="space-y-1 p-2.5 lg:space-y-1.5 lg:p-3">
-                <p className="truncate text-xs font-medium lg:text-sm">{item.title}</p>
-                {/* Always rendered, even with nothing to show: real out-of-stock
-                    products may come back with an empty `variants` array (no
-                    price at all), and conditionally skipping this line would
-                    make just those cards shorter — a grid row then looks
-                    ragged. `invisible` keeps the line's height without
-                    showing placeholder text. */}
-                <p className="text-[11px] text-muted-foreground lg:text-xs">
-                    {item.variants?.[0] ? (
-                        <>
-                            <span className="font-semibold text-foreground">
-                                {formatPrice(item.variants[0].price)}
-                            </span>{" "}
-                            تومان
-                        </>
-                    ) : (
-                        <span className="invisible">—</span>
-                    )}
-                </p>
-            </div>
-        </Link>
     )
 }

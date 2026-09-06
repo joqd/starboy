@@ -1,9 +1,7 @@
-import Image from "next/image"
 import Link from "next/link"
 import { getProducts } from "@/lib/api/product"
-import type { ProductListItem } from "@/types/product"
-import { cn, formatPrice } from "@/lib/utils"
 import { PageContainer } from "@/components/layout/page-container"
+import { ProductCard } from "@/components/product/product-card"
 
 // ---------------------------------------------------------------------------
 // Products page — plain, filter-free product listing. Width/top-spacing now
@@ -57,7 +55,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     >
                         {items.map((item, idx) => (
                             <li key={item.id}>
-                                <ProductCard item={item} eager={idx < 4} />
+                                <ProductCard
+                                    product={item}
+                                    eager={idx < 4}
+                                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                                />
                             </li>
                         ))}
                     </ul>
@@ -66,80 +68,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
             {totalPages > 1 && <Pagination page={page} totalPages={totalPages} />}
         </PageContainer>
-    )
-}
-
-// ---------------------------------------------------------------------------
-// Product card — image, title, price. Nothing else.
-//
-// `item.images?.[0]?.image` guards against products with no `images` array;
-// a product with no photo just gets a plain muted placeholder.
-// ---------------------------------------------------------------------------
-function ProductCard({ item, eager }: { item: ProductListItem; eager: boolean }) {
-    const variant = item.variants?.[0]
-    const hasStock = item.variants?.some((v) => v.stock > 0)
-    const onSale = Boolean(variant?.compare_price && variant.compare_price > variant.price)
-    const discountPct = onSale
-        ? Math.round(
-              (((variant!.compare_price as number) - variant!.price) /
-                  (variant!.compare_price as number)) *
-                  100
-          )
-        : null
-    const cover = item.images?.[0]?.image
-
-    return (
-        <Link
-            href={`/p/${item.slug}`}
-            className="block overflow-hidden rounded-xl border border-border bg-card text-card-foreground"
-        >
-            <div className="relative aspect-3/4 w-full bg-muted">
-                {cover && (
-                    <Image
-                        src={cover}
-                        alt={item.title}
-                        fill
-                        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
-                        className={cn("object-cover", !hasStock && "brightness-90 grayscale-[0.5]")}
-                        loading={eager ? "eager" : "lazy"}
-                        fetchPriority={eager ? "high" : "auto"}
-                    />
-                )}
-
-                {discountPct !== null && (
-                    <span className="absolute top-2 right-2 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold text-white">
-                        ٪{discountPct}-
-                    </span>
-                )}
-
-                {!hasStock && (
-                    <span className="absolute top-2 left-2 rounded-full border border-border bg-background/90 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        ناموجود
-                    </span>
-                )}
-            </div>
-
-            <div className="space-y-1 p-2.5">
-                <p className="truncate text-xs font-medium">{item.title}</p>
-                <p className="text-[11px] text-muted-foreground">
-                    {variant ? (
-                        <>
-                            {onSale && (
-                                <span className="ml-1 text-muted-foreground/70 line-through">
-                                    {formatPrice(variant.compare_price as number)}
-                                </span>
-                            )}
-                            <span className="font-semibold text-foreground">
-                                {formatPrice(variant.price)}
-                            </span>{" "}
-                            تومان
-                        </>
-                    ) : (
-                        <span className="invisible">—</span>
-                    )}
-                </p>
-            </div>
-        </Link>
     )
 }
 

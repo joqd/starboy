@@ -30,14 +30,39 @@ function hasRangeOfPrices(variants: ProductVariant[]) {
     return new Set(variants.map((v) => v.price)).size > 1
 }
 
+/** One entry per distinct size — available if any variant in that size is in stock. */
+function getSizeOptions(variants: ProductVariant[]) {
+    const bySize = new Map<string, { label: string; available: boolean }>()
+
+    for (const variant of variants) {
+        const key = variant.size_name
+        const available = variant.is_active && variant.stock > 0
+        const existing = bySize.get(key)
+        if (!existing || (!existing.available && available)) {
+            bySize.set(key, { label: variant.size?.label || variant.size_name, available })
+        }
+    }
+
+    return Array.from(bySize.values())
+}
+
 export function ProductCard({
     product,
     isWishlisted = false,
+    eager = false,
+    sizes = "(min-width: 1024px) 22vw, 45vw",
+    badgeLabel,
     onToggleWishlist,
     onAddToCart,
 }: {
     product: ProductListItem
     isWishlisted?: boolean
+    /** Set for above-the-fold tiles (e.g. the first row) to skip lazy-loading. */
+    eager?: boolean
+    /** Override the `sizes` attribute for the tile's actual layout width. */
+    sizes?: string
+    /** Manual badge text (e.g. "پرفروش") shown instead of the default "ویژه" tag. */
+    badgeLabel?: string
     onToggleWishlist?: (product: ProductListItem) => void
     onAddToCart?: (product: ProductListItem, variant: ProductVariant) => void
 }) {
@@ -45,6 +70,7 @@ export function ProductCard({
     const variant = getDisplayVariant(product.variants)
     const outOfStock = !variant || variant.stock === 0
     const showsFrom = hasRangeOfPrices(product.variants)
+    const sizeOptions = getSizeOptions(product.variants)
 
     const discountPercent =
         variant?.compare_price && variant.compare_price > variant.price
@@ -53,8 +79,8 @@ export function ProductCard({
 
     return (
         <Link
-            href={`/products/${product.slug}`}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-background transition-all hover:border-foreground/30 hover:shadow-md"
+            href={`/p/${product.slug}`}
+            className="group flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-background transition-colors hover:border-foreground/30"
         >
             <div className="relative aspect-4/5 w-full shrink-0 overflow-hidden bg-accent">
                 {image ? (
@@ -62,11 +88,14 @@ export function ProductCard({
                         src={image.image}
                         alt={image.alt_text || product.title}
                         fill
-                        sizes="(min-width: 1024px) 22vw, 45vw"
+                        sizes={sizes}
+                        draggable={false}
                         className={cn(
-                            "object-cover transition-transform duration-300 group-hover:scale-105",
+                            "object-cover transition-transform duration-300 select-none group-hover:scale-105",
                             outOfStock && "opacity-60 grayscale"
                         )}
+                        loading={eager ? "eager" : "lazy"}
+                        fetchPriority={eager ? "high" : "auto"}
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">
@@ -75,10 +104,10 @@ export function ProductCard({
                 )}
 
                 {/* start = right edge in this RTL layout, end = left edge */}
-                <div className="absolute inset-s-2.5 top-2.5 flex flex-col items-start gap-1.5">
-                    {product.featured && (
+                <div className="absolute start-2.5 top-2.5 flex flex-col items-start gap-1.5">
+                    {(badgeLabel || product.featured) && (
                         <Badge className="border-transparent bg-foreground text-background">
-                            ویژه
+                            {badgeLabel ?? "ویژه"}
                         </Badge>
                     )}
                     {discountPercent !== null && !outOfStock && (
@@ -96,7 +125,7 @@ export function ProductCard({
                             e.stopPropagation()
                             onToggleWishlist(product)
                         }}
-                        className="absolute inset-e-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-background/80 text-muted-foreground backdrop-blur transition-colors hover:text-destructive"
+                        className="absolute end-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-background/80 text-muted-foreground backdrop-blur transition-colors hover:text-destructive"
                         aria-label="افزودن به علاقه‌مندی‌ها"
                     >
                         <Heart
@@ -119,9 +148,34 @@ export function ProductCard({
                 <h3 className="line-clamp-1 text-sm font-medium text-foreground">
                     {product.title}
                 </h3>
-                <p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
-                    {product.short_description}
-                </p>
+
+                <div className="flex flex-wrap gap-1.5">
+                    {sizeOptions.length > 0 ? (
+                        sizeOptions.map((size) => (
+                            <span
+                                key={size.label}
+                                className={cn(
+                                    "rounded-md border px-1.5 py-0.5 text-[11px] font-medium",
+                                    size.available
+                                        ? "border-border/60 text-foreground"
+                                        : "border-border/40 text-muted-foreground line-through"
+                                )}
+                            >
+                                {size.label}
+                            </span>
+                        ))
+                    ) : (
+                        // No variants at all — an invisible placeholder chip
+                        // keeps this row's height so every card in the grid
+                        // lines up the same, sized or not.
+                        <span
+                            aria-hidden
+                            className="invisible rounded-md border px-1.5 py-0.5 text-[11px] font-medium"
+                        >
+                            —
+                        </span>
+                    )}
+                </div>
 
                 <div className="mt-auto flex items-end justify-between gap-2 pt-2">
                     <div className="flex flex-col gap-0.5">
@@ -169,7 +223,7 @@ export function ProductCardSkeleton() {
             <Skeleton className="aspect-4/5 w-full rounded-none" />
             <div className="flex flex-col gap-2 p-3.5">
                 <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-5 w-2/3" />
                 <Skeleton className="mt-2 h-5 w-1/2" />
             </div>
         </div>
