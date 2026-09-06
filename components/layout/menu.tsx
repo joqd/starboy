@@ -113,7 +113,7 @@ function ProfileMenu() {
                         alt=""
                         width={28}
                         height={28}
-                        className="size-7 rounded-full object-cover"
+                        className="size-8 rounded-full object-cover"
                     />
                 ) : initial ? (
                     <span className="flex size-7 items-center justify-center rounded-full bg-accent text-xs font-medium">
@@ -129,17 +129,23 @@ function ProfileMenu() {
                         {user.full_name || user.phone}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="gap-2" onClick={() => router.push("/profile")}>
+                    <DropdownMenuItem
+                        className="cursor-pointer gap-2"
+                        onClick={() => router.push("/profile")}
+                    >
                         <CircleUserRound className="size-4" />
                         پروفایل من
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2" onClick={() => router.push("/orders")}>
+                    <DropdownMenuItem
+                        className="cursor-pointer gap-2"
+                        onClick={() => router.push("/orders")}
+                    >
                         <Package className="size-4" />
                         سفارش‌های من
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                        className="gap-2 text-destructive focus:text-destructive"
+                        className="cursor-pointer gap-2 text-destructive focus:text-destructive"
                         onClick={() => logout()}
                     >
                         <LogOut className="size-4" />

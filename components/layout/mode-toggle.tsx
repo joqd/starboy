@@ -8,7 +8,7 @@ export function ModeToggle() {
     const { setTheme } = useTheme()
 
     return (
-        <div>
+        <div className="flex items-center justify-center">
             <Button
                 variant={"ghost"}
                 className="ghost hidden cursor-pointer dark:flex"

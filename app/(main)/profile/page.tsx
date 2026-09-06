@@ -180,7 +180,7 @@ export default function ProfilePage() {
                             />
                         </div>
 
-                        <DialogFooter>
+                        <DialogFooter dir="ltr">
                             <Button variant="ghost" onClick={() => setNameDialogOpen(false)}>
                                 انصراف
                             </Button>
