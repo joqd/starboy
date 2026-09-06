@@ -1,4 +1,4 @@
-import FloatingMenu from "@/components/layout/floating-menu"
+import Menu from "@/components/layout/menu"
 import Footer from "@/components/layout/footer"
 
 interface LayoutProps {
@@ -9,7 +9,7 @@ export default function MainLayout({ children }: LayoutProps) {
     return (
         <div className="mt-8">
             <div>
-                <FloatingMenu />
+                <Menu />
             </div>
             <div>{children}</div>
             <div>
