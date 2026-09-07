@@ -6,7 +6,7 @@ import { ProductList, ProductDetail } from "@/types/product"
 //   collections  -> comma-separated list of collection slugs
 //   featured     -> boolean
 //   ordering     -> field name for DRF-style ordering (e.g. "-created_at")
-//   page / page_size -> pagination
+//   page / page_size -> pagination (used internally for infinite loading)
 //   search       -> free-text search term
 // ---------------------------------------------------------------------------
 export interface ProductQueryParams {
@@ -17,6 +17,10 @@ export interface ProductQueryParams {
     page_size?: number
     search?: string
 }
+
+// The four sort options exposed in the UI. Adjust the DRF field names below
+// ("price" / "created_at") if your backend serializer uses different ones.
+export type ProductOrdering = "-created_at" | "created_at" | "price" | "-price"
 
 function buildProductsQuery(params: ProductQueryParams = {}): string {
     const qs = new URLSearchParams()
