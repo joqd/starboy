@@ -395,7 +395,7 @@ function CollectionCard({ item, eager }: { item: CollectionListItem; eager: bool
 
     return (
         <Link
-            href={`/collections/${item.slug}`}
+            href={`/p/?collection=${item.slug}`}
             className="group relative block aspect-4/5 overflow-hidden rounded-xl"
         >
             {item.image && (
