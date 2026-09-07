@@ -47,7 +47,7 @@ export function AddressSection({
             <button
                 type="button"
                 onClick={onAddNew}
-                className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border/60 px-6 py-10 text-center transition-colors hover:border-foreground/40"
+                className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-border/60 px-6 py-10 text-center transition-colors hover:border-foreground/40"
             >
                 <MapPin className="size-5 text-muted-foreground" />
                 <span className="text-sm font-medium text-foreground">
