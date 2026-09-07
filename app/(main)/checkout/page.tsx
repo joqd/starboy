@@ -1,11 +1,13 @@
 "use client"
 
-import { useCallback, useEffect, useState, type FormEvent } from "react"
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
+import { useRouter } from "next/navigation"
 import { PageContainer } from "@/components/layout/page-container"
 import Link from "next/link"
 import { ArrowRight, MapPin, Wallet } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/hooks/use-auth"
 import { useCart } from "@/hooks/use-cart"
 import type { CartItem } from "@/types/cart"
 import type { AddressListItem } from "@/types/address"
@@ -22,6 +24,31 @@ import { OrderSummary } from "@/components/checkout/order-summary"
 import { CheckoutSkeleton, EmptyCart, ErrorState } from "@/components/checkout/checkout-states"
 
 export default function CheckoutPage() {
+    const router = useRouter()
+    const { user, checkingSession, openLogin, isLoginOpen } = useAuth()
+
+    // Checkout requires a signed-in user. If someone lands here directly
+    // (typed URL, bookmark, refresh) without a session, pop the login
+    // dialog; if they dismiss it without logging in, send them back to the
+    // storefront instead of leaving the checkout page half-visible.
+    const hasOpenedLoginRef = useRef(false)
+
+    useEffect(() => {
+        if (checkingSession || user) return
+
+        if (!hasOpenedLoginRef.current) {
+            hasOpenedLoginRef.current = true
+            openLogin()
+            return
+        }
+
+        if (!isLoginOpen) {
+            router.replace("/")
+        }
+    }, [checkingSession, user, isLoginOpen, openLogin, router])
+
+    const isAuthorized = !checkingSession && !!user
+
     const { cart, isLoading, error, itemCount, updateQuantity, removeItem, isPending } = useCart()
     const { toasts, pushToast, dismissToast } = useToasts()
 
@@ -212,7 +239,9 @@ export default function CheckoutPage() {
                         </p>
                     </div>
 
-                    {isLoading && !cart ? (
+                    {!isAuthorized ? (
+                        <CheckoutSkeleton />
+                    ) : isLoading && !cart ? (
                         <CheckoutSkeleton />
                     ) : error && !cart ? (
                         <ErrorState message={error} />

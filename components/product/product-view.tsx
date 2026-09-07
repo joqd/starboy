@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Link } from "next-view-transitions"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import {
@@ -24,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/hooks/use-auth"
 import SizeGuide from "./size-guide"
 
 type Props = {
@@ -66,6 +68,8 @@ export default function ProductView({ product }: Props) {
             : null
 
     const { addItem, getItemQuantity, isPending, itemCount } = useCart()
+    const router = useRouter()
+    const { user, checkingSession, openLogin } = useAuth()
 
     // The cart is managed server-side, so "how many can I add" has to account
     // for whatever quantity of this exact variant is already in the cart.
@@ -103,6 +107,16 @@ export default function ProductView({ product }: Props) {
         } catch {
             setAddToCartError("افزودن به سبد خرید با خطا مواجه شد، دوباره تلاش کنید")
         }
+    }
+
+    const handleGoToCheckout = () => {
+        // Not signed in: open the login dialog and resume the navigation to
+        // checkout automatically the moment login succeeds.
+        if (!user) {
+            openLogin(() => router.push("/checkout"))
+            return
+        }
+        router.push("/checkout")
     }
 
     const primaryCollection = product.collections[0]
@@ -320,15 +334,16 @@ export default function ProductView({ product }: Props) {
                         </div>
 
                         {itemCount > 0 && (
-                            <Link href="/checkout">
-                                <Button
-                                    variant="outline"
-                                    className="flex w-full items-center justify-center gap-2 border font-bold"
-                                >
-                                    رفتن به تسویه‌حساب
-                                    <ChevronLeft className="h-3.5 w-3.5" />
-                                </Button>
-                            </Link>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={checkingSession}
+                                onClick={handleGoToCheckout}
+                                className="flex w-full items-center justify-center gap-2 border font-bold"
+                            >
+                                رفتن به تسویه‌حساب
+                                <ChevronLeft className="h-3.5 w-3.5" />
+                            </Button>
                         )}
 
                         {addToCartError && (
