@@ -3,8 +3,8 @@ import { Package } from "lucide-react"
 
 import type { Order } from "@/types/order"
 
-function formatToman(value: number) {
-    return `${value.toLocaleString("fa-IR")} تومان`
+function formatNumber(value: number) {
+    return `${value.toLocaleString("fa-IR")}`
 }
 
 export function OrderItemsList({ items }: { items: Order["items"] }) {
@@ -26,21 +26,22 @@ export function OrderItemsList({ items }: { items: Order["items"] }) {
                         )}
                     </div>
 
-                    <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="truncate text-sm font-medium text-foreground">
-                            {item.title}
-                        </span>
-                        <span className="font-inter text-xs text-muted-foreground" dir="ltr">
-                            {item.sku}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                            {item.quantity.toLocaleString("fa-IR")} × {formatToman(item.unit_price)}
-                        </span>
+                    <div className="flex w-full flex-col justify-between">
+                        <div className="flex w-full justify-between">
+                            <div>{item.title}</div>
+                            <div className="flex shrink-0 gap-3 text-sm font-bold text-foreground">
+                                <div>
+                                    {item.quantity > 1 && (
+                                        <div className="opacity-40">
+                                            {formatNumber(item.unit_price)} ×{" "}
+                                            {formatNumber(item.quantity)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>{formatNumber(item.total_price)}</div>
+                            </div>
+                        </div>
                     </div>
-
-                    <span className="shrink-0 text-sm font-bold text-foreground">
-                        {formatToman(item.total_price)}
-                    </span>
                 </li>
             ))}
         </ul>

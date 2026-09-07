@@ -22,7 +22,7 @@ import { SortFilter } from "@/components/product/sort-filter"
 // ---------------------------------------------------------------------------
 
 const PAGE_SIZE = 16
-const DEFAULT_ORDERING: ProductOrdering = "-created_at"
+const DEFAULT_ORDERING: ProductOrdering = "created_at"
 
 interface ProductFilterValues {
     collection: string | null
@@ -194,10 +194,10 @@ export default function ProductsPage() {
                         onChange={(collection) => setFilters((prev) => ({ ...prev, collection }))}
                     />
 
-                    <FeaturedFilter
+                    {/* <FeaturedFilter
                         value={filters.featured}
                         onChange={(featured) => setFilters((prev) => ({ ...prev, featured }))}
-                    />
+                    /> */}
 
                     <SortFilter
                         value={filters.ordering}
