@@ -10,7 +10,7 @@ import { PageContainer } from "@/components/layout/page-container"
 import { ProductCard } from "@/components/product/product-card"
 import { Input } from "@/components/ui/input"
 import { CollectionFilter } from "@/components/product/collection-filter"
-import { FeaturedFilter, FeaturedFilterValue } from "@/components/product/featured-filter"
+import { FeaturedFilterValue } from "@/components/product/featured-filter"
 import { SortFilter } from "@/components/product/sort-filter"
 
 // ---------------------------------------------------------------------------
@@ -195,9 +195,9 @@ export default function ProductsPage() {
                     />
 
                     {/* <FeaturedFilter
-                        value={filters.featured}
-                        onChange={(featured) => setFilters((prev) => ({ ...prev, featured }))}
-                    /> */}
+                            value={filters.featured}
+                            onChange={(featured) => setFilters((prev) => ({ ...prev, featured }))}
+                        /> */}
 
                     <SortFilter
                         value={filters.ordering}
@@ -255,10 +255,10 @@ export default function ProductsPage() {
                 )}
 
                 {/* {!hasMore && items.length > 0 && !loading && (
-                    <p className="mt-8 text-center text-xs text-muted-foreground">
-                        همه محصولات نمایش داده شد
-                    </p>
-                )} */}
+                        <p className="mt-8 text-center text-xs text-muted-foreground">
+                            همه محصولات نمایش داده شد
+                        </p>
+                    )} */}
             </section>
         </PageContainer>
     )
