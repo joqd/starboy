@@ -16,6 +16,7 @@ export interface ProductQueryParams {
     page?: number
     page_size?: number
     search?: string
+    in_stock?: boolean
 }
 
 // The four sort options exposed in the UI. Adjust the DRF field names below
@@ -42,6 +43,9 @@ function buildProductsQuery(params: ProductQueryParams = {}): string {
     }
     if (params.search && params.search.trim().length > 0) {
         qs.set("search", params.search.trim())
+    }
+    if (typeof params.in_stock === "boolean") {
+        qs.set("in_stock", String(params.in_stock))
     }
 
     const query = qs.toString()
