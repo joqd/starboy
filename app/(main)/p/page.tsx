@@ -1,7 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Search } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
 import { getProducts, ProductOrdering, ProductQueryParams } from "@/lib/api/product"
 import { getCollections } from "@/lib/api/collection"
 import type { ProductListItem } from "@/types/product"
@@ -12,35 +14,106 @@ import { Input } from "@/components/ui/input"
 import { CollectionFilter } from "@/components/product/collection-filter"
 import { FeaturedFilterValue } from "@/components/product/featured-filter"
 import { SortFilter } from "@/components/product/sort-filter"
+// import { StockToggle } from "@/components/product/stock-toggle"
 
 // ---------------------------------------------------------------------------
 // Products page — no pagination: the grid lazy-loads (infinite scroll) via
 // an IntersectionObserver sentinel. Filters (collection / featured / search
-// / sort) live in this same client component so they can drive refetching
-// directly. Each Select-based filter is its own small component styled to
-// match <StatusFilter>, the same way the orders page does it.
+// / sort / in-stock) live in this same client component so they can drive
+// refetching directly, AND are mirrored into the URL query string so:
+//   - other pages (e.g. a collection page) can deep-link straight into a
+//     filtered view, e.g. /products?collection=summer-sale
+//   - the filtered URL is shareable/bookmarkable and crawlable for SEO
+//   - back/forward navigation restores the filters that produced a URL
+// Each Select-based filter is its own small component styled to match
+// <StatusFilter>, the same way the orders page does it.
 // ---------------------------------------------------------------------------
 
 const PAGE_SIZE = 16
 const DEFAULT_ORDERING: ProductOrdering = "created_at"
+const VALID_ORDERINGS: ProductOrdering[] = ["created_at", "-created_at", "price", "-price"]
 
 interface ProductFilterValues {
     collection: string | null
     featured: FeaturedFilterValue
     search: string
     ordering: ProductOrdering
+    inStockOnly: boolean
 }
 
-const DEFAULT_FILTERS: ProductFilterValues = {
-    collection: null,
-    featured: null,
-    search: "",
-    ordering: DEFAULT_ORDERING,
+// const DEFAULT_FILTERS: ProductFilterValues = {
+//     collection: null,
+//     featured: null,
+//     search: "",
+//     ordering: DEFAULT_ORDERING,
+//     inStockOnly: false,
+// }
+
+// URL <-> filters ------------------------------------------------------------
+// Kept as pure functions (no hooks) so they're trivial to reason about and
+// reuse from both the "read on mount / on external nav" effect and the
+// "write on filter change" effect below.
+
+function parseFiltersFromParams(params: URLSearchParams): ProductFilterValues {
+    const ordering = params.get("sort")
+    const featuredRaw = params.get("featured")
+
+    return {
+        collection: params.get("collection") || null,
+        featured: featuredRaw ? (featuredRaw as FeaturedFilterValue) : null,
+        search: params.get("q") || "",
+        ordering:
+            ordering && VALID_ORDERINGS.includes(ordering as ProductOrdering)
+                ? (ordering as ProductOrdering)
+                : DEFAULT_ORDERING,
+        inStockOnly: params.get("in_stock") === "true",
+    }
+}
+
+function filtersToSearchParams(filters: ProductFilterValues): URLSearchParams {
+    const params = new URLSearchParams()
+
+    if (filters.collection) params.set("collection", filters.collection)
+    if (filters.featured) params.set("featured", filters.featured)
+    if (filters.search) params.set("q", filters.search)
+    if (filters.ordering !== DEFAULT_ORDERING) params.set("sort", filters.ordering)
+    if (filters.inStockOnly) params.set("in_stock", "true")
+
+    return params
+}
+
+function filtersEqual(a: ProductFilterValues, b: ProductFilterValues): boolean {
+    return (
+        a.collection === b.collection &&
+        a.featured === b.featured &&
+        a.search === b.search &&
+        a.ordering === b.ordering &&
+        a.inStockOnly === b.inStockOnly
+    )
 }
 
 export default function ProductsPage() {
+    // useSearchParams() needs a Suspense boundary around it in the App
+    // Router — the fallback only matters for the very first paint.
+    return (
+        <Suspense fallback={null}>
+            <ProductsPageContent />
+        </Suspense>
+    )
+}
+
+function ProductsPageContent() {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+
     const [collections, setCollections] = useState<CollectionListItem[]>([])
-    const [filters, setFilters] = useState<ProductFilterValues>(DEFAULT_FILTERS)
+    // Lazy-initialized straight from the URL so a deep link (e.g. coming
+    // from a collection page) loads pre-filtered on the very first fetch,
+    // instead of fetching once with defaults and again with real filters.
+    const [filters, setFilters] = useState<ProductFilterValues>(() =>
+        parseFiltersFromParams(searchParams)
+    )
     const [items, setItems] = useState<ProductListItem[]>([])
     const [count, setCount] = useState(0)
     const [page, setPage] = useState(1)
@@ -49,7 +122,9 @@ export default function ProductsPage() {
 
     // Local draft for the search box so typing doesn't refetch on every
     // keystroke — pushed into `filters` 350ms after the user stops typing.
-    const [searchDraft, setSearchDraft] = useState("")
+    const [searchDraft, setSearchDraft] = useState(
+        () => parseFiltersFromParams(searchParams).search
+    )
 
     const abortRef = useRef<AbortController | null>(null)
     const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -64,6 +139,7 @@ export default function ProductsPage() {
             search: filters.search || undefined,
             featured: filters.featured === null ? undefined : filters.featured === "featured",
             collections: filters.collection ? [filters.collection] : undefined,
+            in_stock: filters.inStockOnly ? true : undefined,
         }),
         [filters]
     )
@@ -89,8 +165,36 @@ export default function ProductsPage() {
         }
     }, [])
 
+    // Keep `filters` (and the search box draft) in sync with the URL when
+    // it changes from outside this component's own writes — e.g. the user
+    // hits back/forward, or lands here via a link like
+    // /products?collection=summer-sale from the collections page.
+    //
+    // This also runs right after *our own* URL writes below, but is a
+    // no-op then: the parsed filters already match current state, so
+    // setFilters bails out via filtersEqual and no extra render/fetch
+    // happens. That's what keeps the two effects from ping-ponging.
+    useEffect(() => {
+        const parsed = parseFiltersFromParams(searchParams)
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFilters((prev) => (filtersEqual(prev, parsed) ? prev : parsed))
+        setSearchDraft((prev) => (prev === parsed.search ? prev : parsed.search))
+    }, [searchParams])
+
+    // Mirror `filters` into the URL query string. `router.replace` (not
+    // `push`) is used so adjusting filters doesn't spam the browser history
+    // — only the page's own back button should navigate away from /products.
+    useEffect(() => {
+        const nextQuery = filtersToSearchParams(filters).toString()
+        const currentQuery = searchParams.toString()
+        if (nextQuery === currentQuery) return
+
+        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters, pathname])
+
     // Fetch page 1 of products whenever `filters` changes — including on
-    // mount, since `filters` starts out as DEFAULT_FILTERS. There's no
+    // mount, since `filters` starts out parsed from the URL. There's no
     // separate "initial load" effect: it would do exactly the same thing as
     // this one, and trying to skip this effect's first run with a ref is
     // fragile under Strict Mode (see note in the chat). Aborting any
@@ -203,6 +307,13 @@ export default function ProductsPage() {
                         value={filters.ordering}
                         onChange={(ordering) => setFilters((prev) => ({ ...prev, ordering }))}
                     />
+
+                    {/* <StockToggle
+                        checked={filters.inStockOnly}
+                        onCheckedChange={(inStockOnly) =>
+                            setFilters((prev) => ({ ...prev, inStockOnly }))
+                        }
+                    /> */}
                 </div>
 
                 <span className="text-xs text-muted-foreground sm:pb-0.5 sm:whitespace-nowrap">
@@ -212,29 +323,55 @@ export default function ProductsPage() {
 
             <section className="mt-8">
                 {items.length === 0 && !loading ? (
-                    <div className="py-24 text-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="py-24 text-center"
+                    >
                         <p className="text-sm font-medium text-foreground">
                             محصولی با این فیلترها پیدا نشد
                         </p>
                         <p className="mt-1.5 text-xs text-muted-foreground">
                             فیلترها رو تغییر بده یا جست‌وجوی دیگه‌ای امتحان کن.
                         </p>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <ul
+                    <motion.ul
                         role="list"
-                        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
+                        layout
+                        animate={{ opacity: loading ? 0.5 : 1 }}
+                        transition={{ opacity: { duration: 0.2 } }}
+                        className={`grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 ${
+                            loading ? "pointer-events-none" : ""
+                        }`}
                     >
-                        {items.map((item, idx) => (
-                            <li key={item.id}>
-                                <ProductCard
-                                    product={item}
-                                    eager={idx < 4}
-                                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
-                                />
-                            </li>
-                        ))}
-                    </ul>
+                        <AnimatePresence mode="popLayout" initial={false}>
+                            {items.map((item, idx) => (
+                                <motion.li
+                                    key={item.id}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.96 }}
+                                    transition={{
+                                        // Repositioning (sort/filter changes) gets a
+                                        // pronounced fast-start, slow-finish curve so the
+                                        // movement itself reads clearly to the eye.
+                                        layout: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+                                        opacity: { duration: 0.22 },
+                                        scale: { duration: 0.22 },
+                                    }}
+                                >
+                                    <ProductCard
+                                        product={item}
+                                        eager={idx < 4}
+                                        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                                    />
+                                </motion.li>
+                            ))}
+                        </AnimatePresence>
+                    </motion.ul>
                 )}
 
                 {loading && (
