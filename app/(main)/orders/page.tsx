@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { PageContainer } from "@/components/layout/page-container"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { ArrowRight } from "lucide-react"
 
 import { useAuth } from "@/hooks/use-auth"

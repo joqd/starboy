@@ -1,5 +1,5 @@
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { HeroImage } from "@/components/layout/hero-image"
 import { Reveal } from "@/components/layout/scroll-reveal"
 import type { ProductListItem } from "@/types/product"

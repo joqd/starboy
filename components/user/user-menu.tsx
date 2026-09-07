@@ -19,7 +19,7 @@ import EditableProfileName from "@/components/user/editable-profile-name"
 import AvatarUploader from "@/components/user/avatar-uploader"
 import { useLogout } from "@/hooks/use-logout"
 import { User } from "@/types/user"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 
 type Props = {
     user: User

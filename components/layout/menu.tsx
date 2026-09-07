@@ -1,15 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { ModeToggle } from "@/components/layout/mode-toggle"
 import { LoginDialog } from "@/components/user/login-dialog"
 import { Menu, Rss, Store, X, User, Package, LogOut, CircleUserRound } from "lucide-react"
 import Cart from "@/components/cart/cart"
 import StarboyLogo from "../common/starboy-logo"
+import { useTransitionRouter } from "next-view-transitions"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { Separator } from "../ui/separator"
 import {
     DropdownMenu,
@@ -79,7 +80,7 @@ function MenuRow({
 // ---------------------------------------------------------------------------
 function ProfileMenu() {
     const { user, checkingSession, openLogin, logout } = useAuth()
-    const router = useRouter()
+    const router = useTransitionRouter()
 
     if (checkingSession) {
         return <div aria-hidden className="size-9 animate-pulse rounded-full bg-accent" />

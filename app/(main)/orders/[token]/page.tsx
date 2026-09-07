@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { PageContainer } from "@/components/layout/page-container"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { ArrowRight, MapPin, Package as PackageIcon, StickyNote, Truck } from "lucide-react"
 
 import { Skeleton } from "@/components/ui/skeleton"

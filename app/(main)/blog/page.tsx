@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { getLatestPosts } from "@/lib/api/post"
 import { PostCard } from "@/components/blog/post-card"
 import { PageContainer } from "@/components/layout/page-container"

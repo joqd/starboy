@@ -1,5 +1,5 @@
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { Reveal } from "@/components/layout/scroll-reveal"
 import type { CollectionListItem } from "@/types/collection"
 import { cn } from "@/lib/utils"

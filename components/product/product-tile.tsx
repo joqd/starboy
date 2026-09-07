@@ -1,5 +1,5 @@
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import type { ProductListItem } from "@/types/product"
 import { cn, formatPrice } from "@/lib/utils"
 

@@ -1,6 +1,6 @@
 import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react"
 import type { Metadata } from "next"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 
 export const metadata: Metadata = {
     title: "ارتباط با ما",

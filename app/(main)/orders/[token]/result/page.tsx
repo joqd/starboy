@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { ArrowRight } from "lucide-react"
 
 import { PageContainer } from "@/components/layout/page-container"

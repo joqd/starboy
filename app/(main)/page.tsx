@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 
 import { HeroImage } from "@/components/layout/hero-image"
 import {

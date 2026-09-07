@@ -184,3 +184,9 @@ html {
 html::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Edge */
 }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.4s;
+    animation-timing-function: ease-in-out;
+}

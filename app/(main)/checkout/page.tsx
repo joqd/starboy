@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { PageContainer } from "@/components/layout/page-container"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { ArrowRight, MapPin, Wallet } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

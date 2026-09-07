@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { Heart, Package, ShoppingBag } from "lucide-react"
 
 import { cn } from "@/lib/utils"

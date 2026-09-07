@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { Link } from "next-view-transitions"
 import { ChevronLeft, Package, PackageX } from "lucide-react"
 
 import { Skeleton } from "@/components/ui/skeleton"
