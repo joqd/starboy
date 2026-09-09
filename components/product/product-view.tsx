@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Link } from "next-view-transitions"
-import { useRouter } from "next/navigation"
+import { useTransitionRouter } from "next-view-transitions"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
 import {
@@ -68,7 +68,7 @@ export default function ProductView({ product }: Props) {
             : null
 
     const { addItem, getItemQuantity, isPending, itemCount } = useCart()
-    const router = useRouter()
+    const router = useTransitionRouter()
     const { user, checkingSession, openLogin } = useAuth()
 
     // The cart is managed server-side, so "how many can I add" has to account

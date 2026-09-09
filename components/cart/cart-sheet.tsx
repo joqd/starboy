@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useRouter } from "next/navigation"
+import { useTransitionRouter } from "next-view-transitions"
 import { ShoppingBag, X } from "lucide-react"
 import {
     Sheet,
@@ -36,7 +36,7 @@ export default function CartSheet({
     onRemove,
     trigger,
 }: Props) {
-    const router = useRouter()
+    const router = useTransitionRouter()
     const { user, checkingSession, openLogin } = useAuth()
 
     const isEmpty = items.length === 0

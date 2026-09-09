@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useTransitionRouter } from "next-view-transitions"
 import Image from "next/image"
 import { Link } from "next-view-transitions"
 import {
@@ -43,7 +43,7 @@ const ACCOUNT_LINKS = [
 export default function ProfilePage() {
     const { user, checkingSession, setUser, logout } = useAuth()
     const { changeName, changeAvatar, isUpdating } = useUser()
-    const router = useRouter()
+    const router = useTransitionRouter()
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [nameDialogOpen, setNameDialogOpen] = useState(false)
