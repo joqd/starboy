@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useSyncExternalStore } from "react"
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react"
 import { getCart, addItemToCart, updateCartItemQuantity, removeItemFromCart } from "@/lib/api/cart"
 import type { Cart } from "@/types/cart"
 
@@ -113,6 +113,30 @@ async function removeItem(sku: string) {
     }
 }
 
+/**
+ * Patches the *known* available_stock for a set of SKUs without touching
+ * quantities. Meant to be called after the backend rejects an action
+ * (typically order creation) because someone else bought stock out from
+ * under this cart between the last fetch and now.
+ *
+ * We deliberately don't auto-clamp the quantity down - silently changing
+ * what the user asked for is more confusing than showing a clear
+ * "you asked for more than is left" state and letting them fix it. The
+ * insufficient-stock condition (quantity > available_stock) is derived
+ * below, so patching available_stock here is enough for the UI to light up
+ * correctly everywhere it's checked.
+ */
+function applyStockUpdates(updates: { sku: string; available_stock: number }[]) {
+    if (!state.cart || updates.length === 0) return
+
+    const bySku = new Map(updates.map((u) => [u.sku, u.available_stock]))
+    const items = state.cart.items.map((item) =>
+        bySku.has(item.sku) ? { ...item, available_stock: bySku.get(item.sku)! } : item
+    )
+
+    setState({ cart: { ...state.cart, items } })
+}
+
 function resetCart() {
     state = { cart: null, isLoading: false, error: null, pendingSkus: new Set() }
     inFlightFetch = null
@@ -141,6 +165,15 @@ export function useCart() {
         [snapshot.pendingSkus]
     )
 
+    // An item is "over-stock" once we know (from the initial fetch, a
+    // refetch, or a stock conflict reported by the order API) that fewer
+    // units are available than the user currently has in their cart.
+    const outOfStockItems = useMemo(
+        () => (snapshot.cart?.items ?? []).filter((item) => item.quantity > item.available_stock),
+        [snapshot.cart]
+    )
+    const hasStockIssues = outOfStockItems.length > 0
+
     return {
         cart: snapshot.cart,
         itemCount: snapshot.cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
@@ -153,5 +186,8 @@ export function useCart() {
         getItemQuantity,
         isPending,
         refetch: fetchCart,
+        applyStockUpdates,
+        outOfStockItems,
+        hasStockIssues,
     }
 }

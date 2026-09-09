@@ -7,6 +7,14 @@ import { Link } from "next-view-transitions"
 import { ArrowRight, MapPin, Wallet } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { useAuth } from "@/hooks/use-auth"
 import { useCart } from "@/hooks/use-cart"
 import type { CartItem } from "@/types/cart"
@@ -14,7 +22,7 @@ import type { AddressListItem } from "@/types/address"
 import type { Gateway } from "@/types/gateway"
 import { deleteAddress, getAddressList } from "@/lib/api/address"
 import { getGateways } from "@/lib/api/gateway"
-import { createOrder, pay } from "@/lib/api/checkout"
+import { createOrder } from "@/lib/api/checkout"
 
 import { useToasts, ToastStack } from "@/components/checkout/toast-stack"
 import { AddressSection } from "@/components/checkout/address-section"
@@ -73,6 +81,13 @@ export default function CheckoutPage() {
 
     // --- Order submission ------------------------------------------------------
     const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
+    // Order creation and payment are two separate steps now (see
+    // handleSubmitOrder): if createOrder succeeds we always navigate away to
+    // /orders/{token}, so cart-emptying and payment-link creation can never
+    // land the user on a blank checkout page again. This dialog only ever
+    // reports a createOrder failure, where the cart is still intact.
+    const [orderErrorOpen, setOrderErrorOpen] = useState(false)
+    const [orderErrorMessage, setOrderErrorMessage] = useState("")
 
     const fetchAddresses = useCallback(async (preferId?: number) => {
         setAddressesLoading(true)
@@ -176,10 +191,14 @@ export default function CheckoutPage() {
                 address_id: selectedAddressId,
                 customer_note: customerNote,
             })
-            const { redirect_url } = await pay(order.token, selectedGatewayId)
-            window.location.href = redirect_url
+            // Order creation succeeded (cart is now cleared server-side).
+            // Payment is started from the order page itself, not here - so a
+            // failure to create a payment link never leaves this page
+            // stranded with an empty cart and no way to retry.
+            router.push(`/orders/${order.token}`)
         } catch {
-            pushToast("ثبت سفارش با خطا مواجه شد. لطفاً دوباره تلاش کنید")
+            setOrderErrorMessage("ثبت سفارش با خطا مواجه شد. لطفاً دوباره تلاش کنید.")
+            setOrderErrorOpen(true)
             setIsSubmittingOrder(false)
         }
     }
@@ -323,7 +342,7 @@ export default function CheckoutPage() {
                                     className="text-md h-11"
                                 >
                                     {isSubmittingOrder
-                                        ? "در حال انتقال به درگاه پرداخت..."
+                                        ? "در حال ثبت سفارش..."
                                         : "ثبت سفارش و پرداخت"}
                                 </Button>
                             </form>
@@ -356,6 +375,18 @@ export default function CheckoutPage() {
                 />
 
                 <ToastStack toasts={toasts} onDismiss={dismissToast} />
+
+                <Dialog open={orderErrorOpen} onOpenChange={setOrderErrorOpen}>
+                    <DialogContent dir="rtl">
+                        <DialogHeader>
+                            <DialogTitle>ثبت سفارش ناموفق بود</DialogTitle>
+                            <DialogDescription>{orderErrorMessage}</DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button onClick={() => setOrderErrorOpen(false)}>متوجه شدم</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </main>
         </PageContainer>
     )
