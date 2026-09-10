@@ -33,3 +33,13 @@ export function getOrderByToken(token: string): Promise<Order> {
         { auth: true }
     )
 }
+
+export function cancelOrderByToken(token: string): Promise<Order> {
+    return request<Order>(
+        `/api/orders/${token}/cancel/`,
+        {
+            method: "POST",
+        },
+        { auth: true }
+    )
+}

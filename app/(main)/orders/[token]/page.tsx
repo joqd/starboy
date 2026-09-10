@@ -177,6 +177,7 @@ export default function OrderDetailPage() {
                                                 <OrderPaymentPanel
                                                     onSubmit={handlePay}
                                                     submitting={paying}
+                                                    orderToken={order.token}
                                                 />
                                                 {payError && (
                                                     <p className="text-xs text-destructive">

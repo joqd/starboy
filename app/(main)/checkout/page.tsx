@@ -407,17 +407,17 @@ export default function CheckoutPage() {
                                     </div>
                                 )}
 
-                                {/* <Button
+                                <Button
                                     type="submit"
                                     disabled={!canSubmit || isSubmittingOrder}
-                                    className="text-md h-11"
+                                    className="text-md hidden h-11 lg:block"
                                 >
                                     {isSubmittingOrder
                                         ? "در حال ثبت سفارش..."
                                         : hasStockIssues
                                           ? "ابتدا سبد خرید را اصلاح کنید"
                                           : "ثبت سفارش"}
-                                </Button> */}
+                                </Button>
                             </form>
 
                             {/* Order summary */}
