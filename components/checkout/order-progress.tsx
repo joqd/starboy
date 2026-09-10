@@ -1,17 +1,31 @@
-import { Check, ClipboardCheck, CreditCard, type LucideIcon } from "lucide-react"
+import {
+    Ban,
+    Check,
+    ClipboardCheck,
+    Clock,
+    CreditCard,
+    Loader2,
+    RotateCcw,
+    type LucideIcon,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /**
- * Where the user is in the checkout -> order -> payment journey.
- *  - "order":   filling in address/notes on the checkout page, order not
- *               created yet.
- *  - "payment": order created, sitting on the order page waiting to pay.
- *  - "paid":    order created and payment already completed.
- *  - "expired": order created but the payment window closed before paying.
+ * Where an order currently stands in the checkout -> payment lifecycle.
+ *  - "pending_payment": order created, waiting for the user to pay.
+ *  - "processing":      payment was submitted and is being confirmed by
+ *                        the gateway/bank.
+ *  - "paid":             payment completed successfully.
+ *  - "cancelled":        the order was cancelled before payment.
+ *  - "expired":          the payment window closed before paying.
+ *  - "refunded":         the order was paid and the amount was later
+ *                        refunded.
  */
-export type OrderFlowStatus = "order" | "payment" | "paid" | "expired"
+export type OrderStatus =
+    "pending_payment" | "processing" | "paid" | "cancelled" | "expired" | "refunded"
 
-type StepState = "done" | "active" | "upcoming" | "error"
+type StepState =
+    "done" | "active" | "processing" | "upcoming" | "cancelled" | "expired" | "refunded"
 
 interface StepDef {
     key: "order" | "payment"
@@ -35,24 +49,68 @@ const STEPS: StepDef[] = [
     },
 ]
 
-function resolveStepState(stepKey: StepDef["key"], status: OrderFlowStatus): StepState {
-    if (stepKey === "order") {
-        return status === "order" ? "active" : "done"
-    }
+function resolveStepState(stepKey: StepDef["key"], status: OrderStatus): StepState {
+    // An OrderStatus only exists once the order itself has been created,
+    // so the "order" step is always complete. Only the payment step's
+    // visual state depends on where the order currently stands - it must
+    // never read as "done" unless the status is actually "paid".
+    if (stepKey === "order") return "done"
+
     switch (status) {
-        case "order":
-            return "upcoming"
-        case "payment":
+        case "pending_payment":
             return "active"
+        case "processing":
+            return "processing"
         case "paid":
             return "done"
+        case "cancelled":
+            return "cancelled"
         case "expired":
-            return "error"
+            return "expired"
+        case "refunded":
+            return "refunded"
+    }
+}
+
+function stepDescription(step: StepDef, status: OrderStatus): string {
+    if (step.key !== "payment") return step.description
+
+    switch (status) {
+        case "processing":
+            return "در حال بررسی پرداخت"
+        case "paid":
+            return "پرداخت با موفقیت انجام شد"
+        case "cancelled":
+            return "سفارش لغو شده است"
+        case "expired":
+            return "مهلت پرداخت به پایان رسیده"
+        case "refunded":
+            return "مبلغ پرداختی بازگردانده شد"
+        default:
+            return step.description
+    }
+}
+
+function stepIcon(step: StepDef, state: StepState): LucideIcon {
+    if (state === "done") return Check
+    if (step.key !== "payment") return step.icon
+
+    switch (state) {
+        case "processing":
+            return Loader2
+        case "cancelled":
+            return Ban
+        case "expired":
+            return Clock
+        case "refunded":
+            return RotateCcw
+        default:
+            return step.icon
     }
 }
 
 interface OrderFlowProgressProps {
-    status: OrderFlowStatus
+    status: OrderStatus
     className?: string
 }
 
@@ -68,7 +126,7 @@ export function OrderFlowProgress({ status, className }: OrderFlowProgressProps)
                 {STEPS.map((step, index) => {
                     const state = resolveStepState(step.key, status)
                     const isLast = index === STEPS.length - 1
-                    const Icon = step.icon
+                    const Icon = stepIcon(step, state)
 
                     return (
                         <li key={step.key} className="flex flex-1 items-center last:flex-none">
@@ -80,35 +138,45 @@ export function OrderFlowProgress({ status, className }: OrderFlowProgressProps)
                                             "border-foreground bg-foreground text-background",
                                         state === "active" &&
                                             "border-foreground bg-background text-foreground ring-[3px] ring-foreground/10",
+                                        state === "processing" &&
+                                            "border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-950/40",
                                         state === "upcoming" &&
                                             "border-border/60 bg-background text-muted-foreground/60",
-                                        state === "error" &&
-                                            "border-destructive bg-destructive/10 text-destructive"
+                                        state === "cancelled" &&
+                                            "border-destructive bg-destructive/10 text-destructive",
+                                        state === "expired" &&
+                                            "border-amber-500 bg-amber-50 text-amber-600 dark:bg-amber-950/40",
+                                        state === "refunded" &&
+                                            "border-violet-500 bg-violet-50 text-violet-600 dark:bg-violet-950/40"
                                     )}
                                 >
-                                    {state === "done" ? (
-                                        <Check className="size-5" strokeWidth={2.5} />
-                                    ) : (
-                                        <Icon className="size-5" strokeWidth={2} />
-                                    )}
+                                    <Icon
+                                        className={cn(
+                                            "size-5",
+                                            state === "processing" && "animate-spin"
+                                        )}
+                                        strokeWidth={state === "done" ? 2.5 : 2}
+                                    />
                                 </span>
 
                                 <div className="flex flex-col">
                                     <span
                                         className={cn(
                                             "text-sm font-bold",
-                                            (state === "active" || state === "done") &&
+                                            (state === "active" ||
+                                                state === "done" ||
+                                                state === "processing") &&
                                                 "text-foreground",
                                             state === "upcoming" && "text-muted-foreground",
-                                            state === "error" && "text-destructive"
+                                            state === "cancelled" && "text-destructive",
+                                            state === "expired" && "text-amber-600",
+                                            state === "refunded" && "text-violet-600"
                                         )}
                                     >
                                         {step.label}
                                     </span>
                                     <span className="hidden text-xs text-muted-foreground sm:block">
-                                        {state === "error" && step.key === "payment"
-                                            ? "مهلت پرداخت به پایان رسیده"
-                                            : step.description}
+                                        {stepDescription(step, status)}
                                     </span>
                                 </div>
                             </div>

@@ -103,7 +103,7 @@ export function OrderPaymentPanel({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="text-destructive hover:text-destructive ghost"
+                    className="ghost text-destructive hover:text-destructive"
                     onClick={() => setCancelOpen(true)}
                     disabled={submitting}
                 >
@@ -171,7 +171,7 @@ export function OrderPaymentPanel({
                                 handleCancelOrder()
                             }}
                             disabled={cancelling}
-                            className=" bg-destructive hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90"
                         >
                             {cancelling && <Spinner className="size-3.5" />}
                             بله، لغو کن
