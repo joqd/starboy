@@ -50,18 +50,24 @@ export function PaymentSection({
             onValueChange={(value) => onSelect(Number(value))}
             className="grid gap-3 sm:grid-cols-2"
         >
-            {gateways.map((gateway) => {
+            {gateways.map((gateway, index) => {
                 const fieldId = `gateway-${gateway.id}`
                 const selected = selectedGatewayId === gateway.id
+                // When the list has an odd number of gateways, the last
+                // card would otherwise sit alone on its row with an empty
+                // slot beside it. Stretching it across both columns fills
+                // the row instead of leaving a gap.
+                const isDanglingLast = index === gateways.length - 1 && gateways.length % 2 !== 0
                 return (
                     <Label
                         key={gateway.id}
                         htmlFor={fieldId}
                         className={cn(
-                            "flex cursor-pointer items-start gap-3 rounded-xl border p-4 font-normal transition-colors",
+                            "flex cursor-pointer items-center gap-4 rounded-xl border p-4 font-normal transition-colors",
                             selected
                                 ? "border-foreground/70 bg-white/80 dark:bg-accent"
-                                : "border-border/60 hover:border-foreground/30"
+                                : "border-border/60 hover:border-foreground/30",
+                            isDanglingLast && "sm:col-span-2"
                         )}
                     >
                         <RadioGroupItem
@@ -71,19 +77,19 @@ export function PaymentSection({
                         />
 
                         {gateway.badge ? (
-                            <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-background">
+                            <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-background">
                                 <Image
                                     src={gateway.badge}
                                     alt=""
-                                    width={24}
-                                    height={24}
-                                    className="h-8 w-8 object-contain"
+                                    width={40}
+                                    height={40}
+                                    className="h-12 w-12 object-contain"
                                     unoptimized={gateway.badge.endsWith(".svg")}
                                 />
                             </span>
                         ) : (
-                            <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-background">
-                                <CreditCard className="size-[1.15rem] text-foreground" />
+                            <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-background">
+                                <CreditCard className="size-7 text-foreground" />
                             </div>
                         )}
 

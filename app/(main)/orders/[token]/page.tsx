@@ -17,6 +17,15 @@ import { OrderAddressCard } from "@/components/orders/order-address-card"
 import { OrderTotals } from "@/components/orders/order-totals"
 import { OrderPaymentPanel } from "@/components/orders/order-payment-panel"
 import { OrderListError } from "@/components/orders/order-list"
+import { OrderFlowProgress, type OrderFlowStatus } from "@/components/checkout/order-progress"
+
+function getOrderFlowStatus(order: Order): OrderFlowStatus {
+    if (order.is_expired) return "expired"
+    // Once the order is no longer payable (and hasn't simply expired), it
+    // means payment already went through.
+    if (!order.is_payable) return "paid"
+    return "payment"
+}
 
 export default function OrderDetailPage() {
     const { token } = useParams<{ token: string }>()
@@ -83,8 +92,13 @@ export default function OrderDetailPage() {
                         ) : error || !order ? (
                             <OrderListError message={error ?? "سفارش مورد نظر یافت نشد"} />
                         ) : (
-                            <div className="flex flex-col gap-8">
+                            <div className="flex flex-col gap-5">
                                 <OrderHeader order={order} />
+
+                                <OrderFlowProgress
+                                    status={getOrderFlowStatus(order)}
+                                    className="mt-6 sm:mt-8"
+                                />
 
                                 <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
                                     <div className="flex flex-col gap-8 lg:order-1">

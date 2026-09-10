@@ -27,6 +27,7 @@ import { AddressSection } from "@/components/checkout/address-section"
 import { AddressFormDialog } from "@/components/checkout/address-form-dialog"
 import { OrderSummary } from "@/components/checkout/order-summary"
 import { CheckoutSkeleton, EmptyCart, ErrorState } from "@/components/checkout/checkout-states"
+import { OrderFlowProgress } from "@/components/checkout/order-progress"
 
 // How often we quietly re-check the cart while the user is sitting on this
 // page, so a stock change made by someone else shows up before they hit
@@ -94,6 +95,7 @@ export default function CheckoutPage() {
         refetch,
         applyStockUpdates,
         hasStockIssues,
+        resetCart,
     } = useCart()
     const { toasts, pushToast, dismissToast } = useToasts()
 
@@ -228,6 +230,13 @@ export default function CheckoutPage() {
                 address_id: selectedAddressId,
                 customer_note: customerNote,
             })
+            // The backend clears the cart as part of creating the order, but
+            // the cart hook's local state doesn't know that yet - without
+            // this, the header cart badge and any other consumer of
+            // useCart() would keep showing the old items until a full page
+            // reload. resetCart() clears local state immediately and
+            // re-fetches so it lines up with the (now empty) server cart.
+            resetCart()
             // Order creation succeeded (cart is now cleared server-side).
             // Payment is started from the order page itself, not here - so a
             // failure to create a payment link never leaves this page
@@ -314,15 +323,17 @@ export default function CheckoutPage() {
                         بازگشت به فروشگاه
                     </Link>
 
-                    <div className="mt-4 mb-12 max-w-xl sm:mb-16">
+                    <div className="mt-8 mb-12 max-w-xl sm:mb-16">
                         <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                             نهایی کردن سفارش
                         </h1>
                         <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
-                            یک آدرس تحویل انتخاب کنید تا سفارش شما ثبت شود. درگاه پرداخت را در مرحله
-                            بعد، هنگام پرداخت سفارش، انتخاب می‌کنید.
+                            یک آدرس تحویل انتخاب کنید تا سفارش شما ثبت شود. پس از ثبت سفارش، به صفحه
+                            پرداخت منتقل می‌شوید و درگاه پرداخت را همان‌جا انتخاب می‌کنید.
                         </p>
                     </div>
+
+                    <OrderFlowProgress status="order" className="my-5 sm:mt-8" />
 
                     {!isAuthorized ? (
                         <CheckoutSkeleton />
@@ -396,7 +407,7 @@ export default function CheckoutPage() {
                                     </div>
                                 )}
 
-                                <Button
+                                {/* <Button
                                     type="submit"
                                     disabled={!canSubmit || isSubmittingOrder}
                                     className="text-md h-11"
@@ -406,7 +417,7 @@ export default function CheckoutPage() {
                                         : hasStockIssues
                                           ? "ابتدا سبد خرید را اصلاح کنید"
                                           : "ثبت سفارش"}
-                                </Button>
+                                </Button> */}
                             </form>
 
                             {/* Order summary */}
