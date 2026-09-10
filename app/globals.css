@@ -159,19 +159,19 @@ input:focus-visible {
 
 @font-face {
     font-family: "SiteFont";
-    src: url("./assets/fonts/YekanBakh-Bold.woff2") format("woff2");
-    font-weight: 700;
+    src: url("./assets/fonts/IranYekan-Regular.woff2") format("woff2");
+    font-weight: 600;
     font-display: swap;
-    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+    /* unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF; */
 }
 
-@font-face {
+/* @font-face {
     font-family: "SiteFont";
     src: url("./assets/fonts/Inter-Bold.woff2") format("woff2");
     font-weight: 700;
     font-display: swap;
     unicode-range: U+0000-00FF, U+0100-024F, U+1E00-1EFF;
-}
+} */
 
 body {
     font-family: "SiteFont", sans-serif;

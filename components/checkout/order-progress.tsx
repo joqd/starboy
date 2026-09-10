@@ -49,12 +49,17 @@ const STEPS: StepDef[] = [
     },
 ]
 
-function resolveStepState(stepKey: StepDef["key"], status: OrderStatus): StepState {
-    // An OrderStatus only exists once the order itself has been created,
-    // so the "order" step is always complete. Only the payment step's
-    // visual state depends on where the order currently stands - it must
-    // never read as "done" unless the status is actually "paid".
-    if (stepKey === "order") return "done"
+function resolveStepState(
+    stepKey: StepDef["key"],
+    status: OrderStatus,
+    orderStepComplete: boolean
+): StepState {
+    // The "order" step's state is controlled by the caller: on pages where
+    // the order already exists (e.g. the payment page), it's done. On the
+    // checkout page itself, the order hasn't been registered yet, so it
+    // should read as "active" instead. Only the payment step's visual state
+    // depends on where the order currently stands.
+    if (stepKey === "order") return orderStepComplete ? "done" : "active"
 
     switch (status) {
         case "pending_payment":
@@ -111,10 +116,23 @@ function stepIcon(step: StepDef, state: StepState): LucideIcon {
 
 interface OrderFlowProgressProps {
     status: OrderStatus
+    /**
+     * Whether the "order registration" step itself is complete. Defaults to
+     * `true`, since this component is normally rendered once an order (and
+     * therefore an `OrderStatus`) already exists - e.g. on the payment page.
+     * Pass `false` on the checkout page itself, where the user is still
+     * filling in order details and that first step should read as "active",
+     * not "done".
+     */
+    orderStepComplete?: boolean
     className?: string
 }
 
-export function OrderFlowProgress({ status, className }: OrderFlowProgressProps) {
+export function OrderFlowProgress({
+    status,
+    orderStepComplete = true,
+    className,
+}: OrderFlowProgressProps) {
     return (
         <div
             className={cn(
@@ -124,7 +142,7 @@ export function OrderFlowProgress({ status, className }: OrderFlowProgressProps)
         >
             <ol className="flex items-center">
                 {STEPS.map((step, index) => {
-                    const state = resolveStepState(step.key, status)
+                    const state = resolveStepState(step.key, status, orderStepComplete)
                     const isLast = index === STEPS.length - 1
                     const Icon = stepIcon(step, state)
 

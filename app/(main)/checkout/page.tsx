@@ -333,7 +333,11 @@ export default function CheckoutPage() {
                         </p>
                     </div>
 
-                    <OrderFlowProgress status={"pending_payment"} className="my-5 sm:mt-8" />
+                    <OrderFlowProgress
+                        orderStepComplete={false}
+                        status={"pending_payment"}
+                        className="my-5 sm:mt-8"
+                    />
 
                     {!isAuthorized ? (
                         <CheckoutSkeleton />
