@@ -63,7 +63,7 @@ export function PaymentSection({
                         key={gateway.id}
                         htmlFor={fieldId}
                         className={cn(
-                            "flex cursor-pointer items-center gap-4 rounded-xl border p-4 font-normal transition-colors",
+                            "flex cursor-pointer items-center gap-4 rounded-xl border p-3 font-normal transition-colors",
                             selected
                                 ? "border-foreground/70 bg-white/80 dark:bg-accent"
                                 : "border-border/60 hover:border-foreground/30",
