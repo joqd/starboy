@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Link } from "next-view-transitions"
 import { useTransitionRouter } from "next-view-transitions"
 import Image from "next/image"
 import { motion, AnimatePresence, type PanInfo } from "motion/react"
@@ -121,16 +120,30 @@ export default function ProductView({ product }: Props) {
 
     const primaryCollection = product.collections[0]
 
+    const handleBack = () => {
+        // router.back() reuses the browser's history entry for the previous
+        // page, which is what lets Next.js restore its scroll position.
+        // Pushing to a fixed URL (e.g. "/p") would always land at the top.
+        if (typeof window !== "undefined" && window.history.length > 1) {
+            router.back()
+        } else {
+            // No page to go back to (e.g. opened this product link directly) —
+            // fall back to the shop instead of leaving the site.
+            router.push("/p")
+        }
+    }
+
     return (
         <div dir="rtl" className="">
-            {/* Back to shop */}
-            <Link
-                href="/p"
+            {/* Back */}
+            <button
+                type="button"
+                onClick={handleBack}
                 className="mb-6 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground lg:mb-8"
             >
                 <ArrowRight className="size-3.5" />
-                بازگشت به فروشگاه
-            </Link>
+                برگشت
+            </button>
 
             {/* Gallery + buy box ---------------------------------------------- */}
             <div

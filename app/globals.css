@@ -179,6 +179,6 @@ html::-webkit-scrollbar {
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-    animation-duration: 0.4s;
+    animation-duration: 0.25s;
     animation-timing-function: ease-in-out;
 }
