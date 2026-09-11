@@ -218,23 +218,25 @@ function BrandValues() {
                 className="grid grid-cols-2 gap-y-5 border-y border-border py-6 lg:grid-cols-4 lg:gap-y-8 lg:py-8"
             >
                 {items.map(({ icon: Icon, title, titleDesktop, desc, descDesktop }) => (
-                    <li key={title} className="flex items-center gap-2.5 lg:gap-3">
-                        <Icon className="size-4.5 shrink-0 text-foreground lg:size-5" />
-                        <div>
-                            <p className="text-xs font-medium text-foreground lg:text-sm">
-                                {titleDesktop ? (
-                                    <>
-                                        <span className="lg:hidden">{title}</span>
-                                        <span className="hidden lg:inline">{titleDesktop}</span>
-                                    </>
-                                ) : (
-                                    title
-                                )}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground lg:text-xs">
-                                <span className="lg:hidden">{desc}</span>
-                                <span className="hidden lg:inline">{descDesktop}</span>
-                            </p>
+                    <li key={title} className="flex items-center">
+                        <div className="flex gap-2.5 lg:gap-3 mx-auto items-center">
+                            <Icon className="size-4.5 shrink-0 text-foreground lg:size-5" />
+                            <div>
+                                <p className="text-xs font-medium text-foreground lg:text-sm">
+                                    {titleDesktop ? (
+                                        <>
+                                            <span className="lg:hidden">{title}</span>
+                                            <span className="hidden lg:inline">{titleDesktop}</span>
+                                        </>
+                                    ) : (
+                                        title
+                                    )}
+                                </p>
+                                <p className="text-[11px] text-muted-foreground lg:text-xs">
+                                    <span className="lg:hidden">{desc}</span>
+                                    <span className="hidden lg:inline">{descDesktop}</span>
+                                </p>
+                            </div>
                         </div>
                     </li>
                 ))}
