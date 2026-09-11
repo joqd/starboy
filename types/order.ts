@@ -20,6 +20,7 @@ export interface OrderListItem {
     is_payable: boolean
     is_expired: boolean
     expires_at: string
+    created_at: string
 }
 
 export interface Order {
