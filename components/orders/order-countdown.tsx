@@ -77,7 +77,6 @@ export function OrderCountdown({
         }, 1000)
 
         return () => clearInterval(id)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [expiresAt])
 
     // Fires onExpire once, after render, the moment remaining reaches zero.
@@ -107,10 +106,7 @@ export function OrderCountdown({
 
     return (
         <span
-            className={cn(
-                "flex items-center gap-1.5 text-xs font-medium text-primary",
-                className
-            )}
+            className={cn("flex items-center gap-1.5 text-xs font-medium text-primary", className)}
         >
             <Clock className="size-3.5 shrink-0" />
             <span>
