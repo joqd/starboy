@@ -20,7 +20,7 @@ import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
 import type { CollectionListItem } from "@/types/collection"
 
-// export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 export default async function Home() {
     const [latestProducts, featuredProducts, latestPosts, collections] = await Promise.all([
@@ -314,53 +314,6 @@ function SpotlightTile({
                 <ArrowIcon className="size-3.5 transition-transform group-hover:-translate-x-1 lg:size-4" />
             </div>
         </Link>
-    )
-}
-
-// ---------------------------------------------------------------------------
-// Brand story — a short manifesto, pure typography. All copy matches
-// between breakpoints except one list item's title, toggled the same way
-// as BrandValues above.
-// ---------------------------------------------------------------------------
-function BrandStory() {
-    return (
-        <section className="mt-10 px-6 text-center lg:mx-auto lg:mt-28 lg:max-w-215 lg:px-8 xl:px-10">
-            <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground lg:text-[11px] lg:tracking-[0.3em]">
-                داستان ما
-            </p>
-
-            <p className="mt-4 text-xl leading-[1.6] font-bold tracking-tight text-foreground lg:mt-6 lg:text-3xl lg:leading-[1.55] xl:text-4xl">
-                از انتخاب پارچه شروع می‌کنیم؛
-                <br className="hidden lg:block" />
-                تا لباسی بسازیم که شبیه بقیه نباشد.
-            </p>
-
-            <ul
-                role="list"
-                className="mt-8 grid grid-cols-1 gap-6 lg:mt-14 lg:grid-cols-3 lg:gap-10"
-            >
-                <li>
-                    <p className="text-xs font-semibold text-foreground lg:text-sm">پارچه منتخب</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground lg:mt-2 lg:text-sm">
-                        برای هر مدل، پارچه‌ای را انتخاب می‌کنیم که کیفیت و فرم مناسبی داشته باشد.
-                    </p>
-                </li>
-
-                <li>
-                    <p className="text-xs font-semibold text-foreground lg:text-sm">فرم اختصاصی</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground lg:mt-2 lg:text-sm">
-                        لباس‌ها با الگو و اندازه‌های مخصوص خودمان تولید می‌شوند.
-                    </p>
-                </li>
-
-                <li>
-                    <p className="text-xs font-semibold text-foreground lg:text-sm">طراحی متفاوت</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground lg:mt-2 lg:text-sm">
-                        طرح‌ها با چاپ یا دوخت، آخرین جزئیات هر لباس را شکل می‌دهند.
-                    </p>
-                </li>
-            </ul>
-        </section>
     )
 }
 

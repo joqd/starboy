@@ -6,7 +6,7 @@ import { cn, formatPostDate } from "@/lib/utils"
 import { getPost } from "@/lib/api/post"
 import { CopyLinkButton } from "@/components/blog/copy-link-button"
 
-export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 interface PostPageProps {
     params: Promise<{ slug: string }>

@@ -4,7 +4,7 @@ import { getLatestPosts } from "@/lib/api/post"
 import { PostCard } from "@/components/blog/post-card"
 import { PageContainer } from "@/components/layout/page-container"
 
-// export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 interface BlogPageProps {
     searchParams: Promise<{ page?: string }>

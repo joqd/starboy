@@ -19,6 +19,8 @@ const PAGE_SIZE = 16
 const DEFAULT_ORDERING: ProductOrdering = "created_at"
 const VALID_ORDERINGS: ProductOrdering[] = ["created_at", "-created_at", "price", "-price"]
 
+export const dynamic = "force-dynamic"
+
 interface ProductFilterValues {
     collection: string | null
     featured: FeaturedFilterValue

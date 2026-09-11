@@ -4,7 +4,7 @@ import { getProduct } from "@/lib/api/product"
 import ProductView from "@/components/product/product-view"
 import { PageContainer } from "@/components/layout/page-container"
 
-// export const revalidate = 300
+export const dynamic = "force-dynamic"
 
 type Props = {
     params: Promise<{
