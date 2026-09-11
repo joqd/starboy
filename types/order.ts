@@ -17,6 +17,9 @@ export interface OrderListItem {
     order_number: string
     status: OrderStatus
     shipping_status: ShippingStatus
+    is_payable: boolean
+    is_expired: boolean
+    expires_at: string
 }
 
 export interface Order {

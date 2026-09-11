@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { getOrderByToken } from "@/lib/api/order"
 import { pay } from "@/lib/api/checkout"
 import type { Order } from "@/types/order"
+import { OrderCountdown } from "@/components/orders/order-countdown"
 
 import { OrderHeader } from "@/components/orders/order-header"
 import { OrderItemsList } from "@/components/orders/order-items-list"
@@ -165,6 +166,7 @@ export default function OrderDetailPage() {
                                             <div className="flex flex-col gap-2">
                                                 <OrderPaymentPanel
                                                     onSubmit={handlePay}
+                                                    onCancelled={fetchOrder}
                                                     submitting={paying}
                                                     orderToken={order.token}
                                                 />
@@ -185,6 +187,15 @@ export default function OrderDetailPage() {
                                             <div className="mt-5">
                                                 <OrderTotals order={order} />
                                             </div>
+
+                                            {order.is_payable && !order.is_expired && (
+                                                <div className="mt-4 flex justify-start">
+                                                    <OrderCountdown
+                                                        expiresAt={order.expires_at}
+                                                        onExpire={fetchOrder}
+                                                    />
+                                                </div>
+                                            )}
 
                                             {order.is_payable && order.is_expired && (
                                                 <p className="mt-4 text-center text-xs text-destructive">

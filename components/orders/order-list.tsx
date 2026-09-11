@@ -4,6 +4,7 @@ import { ChevronLeft, Package, PackageX } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { OrderStatusBadge, ShippingStatusBadge } from "@/components/orders/order-status-badge"
 import type { OrderListItem } from "@/types/order"
+import { OrderCountdown } from "@/components/orders/order-countdown"
 
 export function OrderListSkeleton() {
     return (
@@ -65,6 +66,10 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                                 <OrderStatusBadge status={order.status} />
                                 <ShippingStatusBadge status={order.shipping_status} />
                             </div>
+
+                            {order.is_payable && !order.is_expired && (
+                                <OrderCountdown expiresAt={order.expires_at} className="mt-0.5" />
+                            )}
                         </div>
 
                         <ChevronLeft className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-x-0.5 group-hover:text-foreground" />
