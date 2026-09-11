@@ -365,30 +365,28 @@ function FeaturedSection({ items }: { items: ProductListItem[] }) {
     )
 }
 
-// Collections show more items on mobile (up to 6, since it's a scroll
-// strip) than on the capped four-tile desktop grid — items 5 and 6 are
-// rendered but hidden at `lg` rather than duplicated per breakpoint.
+// Collections is always a horizontal carousel — mobile *and* desktop — so
+// its height never depends on how many collections exist. Adding a 5th or
+// 10th collection just makes the row a bit longer to swipe/scroll through
+// sideways; it never pushes the next section further down the page.
 function CollectionsSection({ items }: { items: CollectionListItem[] }) {
     if (items.length === 0) return null
 
-    const shown = items.slice(0, 6)
+    const shown = items.slice(0, 10)
 
     return (
         <section className="mt-14 lg:mx-auto lg:mt-28 lg:max-w-295 lg:px-8 xl:px-10">
             <SectionHeader eyebrow="دنیای استاربوی" title="کالکشن‌ها" />
-            <AdaptiveStrip className="lg:grid-cols-4 lg:gap-5">
+            <ul
+                role="list"
+                className="flex snap-x snap-mandatory scroll-px-5 scrollbar-none gap-3 overflow-x-auto overscroll-x-contain px-5 pb-1 lg:mt-8 lg:gap-4 lg:px-0 [&::-webkit-scrollbar]:hidden"
+            >
                 {shown.map((collection, idx) => (
-                    <li
-                        key={collection.slug}
-                        className={cn(
-                            "w-32 shrink-0 snap-start lg:w-auto lg:shrink",
-                            idx >= 4 && "lg:hidden"
-                        )}
-                    >
-                        <CollectionCard item={collection} eager={idx < 2} />
+                    <li key={collection.slug} className="w-28 shrink-0 snap-start lg:w-44">
+                        <CollectionCard item={collection} eager={idx < 4} />
                     </li>
                 ))}
-            </AdaptiveStrip>
+            </ul>
         </section>
     )
 }
@@ -406,9 +404,9 @@ function CollectionCard({ item, eager }: { item: CollectionListItem; eager: bool
                     src={item.image}
                     alt={item.title}
                     fill
-                    sizes="(max-width: 1024px) 150px, 280px"
+                    sizes="(max-width: 1024px) 112px, 176px"
                     className={cn(
-                        "object-cover lg:transition-transform lg:duration-700 lg:ease-out lg:group-hover:scale-105",
+                        "object-cover transition-transform duration-500 ease-out group-hover:scale-105",
                         item.image_dark && "dark:hidden"
                     )}
                     loading={eager ? "eager" : "lazy"}
@@ -419,17 +417,17 @@ function CollectionCard({ item, eager }: { item: CollectionListItem; eager: bool
                     src={item.image_dark}
                     alt={item.title}
                     fill
-                    sizes="(max-width: 1024px) 150px, 280px"
+                    sizes="(max-width: 1024px) 112px, 176px"
                     className={cn(
-                        "object-cover lg:transition-transform lg:duration-700 lg:ease-out lg:group-hover:scale-105",
+                        "object-cover transition-transform duration-500 ease-out group-hover:scale-105",
                         item.image && "hidden dark:block"
                     )}
                     loading={eager ? "eager" : "lazy"}
                 />
             )}
-            <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/5 to-transparent lg:from-black/60" />
-            <div className="absolute inset-x-0 bottom-0 p-2.5 text-neutral-50 lg:p-4">
-                <p className="text-xs font-semibold lg:text-sm">{item.title}</p>
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/5 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-2.5 text-neutral-50 lg:p-3.5">
+                <p className="text-xs font-semibold lg:text-[13px]">{item.title}</p>
             </div>
         </Link>
     )
