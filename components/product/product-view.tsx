@@ -167,6 +167,7 @@ export default function ProductView({ product }: Props) {
                             <MainImage
                                 image={images[activeImageIndex] ?? images[0]}
                                 hasStock={productHasStock}
+                                isFirst={activeImageIndex === 0}
                             />
                             <div className="absolute bottom-3 left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/85 text-foreground opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
                                 <ZoomIn className="h-4 w-4" />
@@ -214,7 +215,7 @@ export default function ProductView({ product }: Props) {
                                 {primaryCollection.title}
                             </span>
                         )}
-                        <h1 className="text-[26px] leading-[1.1] font-bold tracking-tight text-primary uppercase lg:text-[30px]">
+                        <h1 className="text-[26px] leading-[1.4] font-bold tracking-tight text-primary uppercase lg:text-[30px]">
                             {product.title}
                         </h1>
                         {product.short_description && (
@@ -355,26 +356,20 @@ export default function ProductView({ product }: Props) {
 
                     {/* Trust row */}
                     <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/25 p-4">
-                        <Link
-                            href="/shipping-returns"
-                            className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
-                        >
+                        <div className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground">
                             <Truck
                                 className="h-3.5 w-3.5 shrink-0 text-primary"
                                 strokeWidth={1.8}
                             />
                             ارسال سریع به سراسر کشور
-                        </Link>
-                        <Link
-                            href="/shipping-returns"
-                            className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground transition-colors hover:text-foreground"
-                        >
+                        </div>
+                        <div className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground">
                             <RotateCcw
                                 className="h-3.5 w-3.5 shrink-0 text-primary"
                                 strokeWidth={1.8}
                             />
                             ۷ روز مهلت مرجوعی و تعویض
-                        </Link>
+                        </div>
                         <div className="flex items-center gap-2.5 text-[11.5px] text-muted-foreground">
                             <ShieldCheck
                                 className="h-3.5 w-3.5 shrink-0 text-primary"
@@ -399,12 +394,9 @@ export default function ProductView({ product }: Props) {
                     <p className="text-[12.5px] leading-7 text-muted-foreground">
                         سفارش شما در کمتر از ۲۴ ساعت آماده و ارسال می‌شه و تا ۷ روز بعد از تحویل،
                         امکان مرجوعی یا تعویض داری.{" "}
-                        <Link
-                            href="/shipping-returns"
-                            className="text-foreground underline underline-offset-2"
-                        >
+                        <span className="text-foreground underline underline-offset-2">
                             جزئیات کامل رو اینجا بخون
-                        </Link>
+                        </span>
                         .
                     </p>
                 </AccordionSection>
@@ -466,44 +458,27 @@ function AccordionSection({
 function MainImage({
     image,
     hasStock,
+    isFirst = false,
 }: {
     image: ProductDetail["images"][number]
     hasStock: boolean
+    isFirst?: boolean
 }) {
-    const [loaded, setLoaded] = useState(false)
-
-    // A new active image starts its own loading cycle.
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLoaded(false)
-    }, [image?.id])
-
     return (
         <>
-            {!loaded && (
-                <div className="absolute inset-0 overflow-hidden bg-muted">
-                    <motion.div
-                        className="absolute inset-y-0 w-1/2 bg-linear-to-l from-transparent via-foreground/10 to-transparent"
-                        animate={{ x: ["-100%", "200%"] }}
-                        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                </div>
-            )}
-
             {image?.image && (
                 <Image
                     src={image.image}
                     alt={image.alt_text || "تصویر محصول"}
                     fill
                     sizes="(min-width: 1024px) 50vw, 100vw"
-                    quality={95}
-                    priority
+                    quality={75}
+                    priority={isFirst}
+                    loading={isFirst ? undefined : "eager"}
                     draggable={false}
-                    onLoad={() => setLoaded(true)}
                     className={cn(
-                        "object-cover transition-all duration-500 ease-out select-none",
-                        !hasStock && "blur-sm brightness-75 grayscale",
-                        loaded ? "scale-100 opacity-100" : "scale-105 opacity-0"
+                        "object-cover select-none",
+                        !hasStock && "blur-sm brightness-75 grayscale"
                     )}
                 />
             )}
@@ -526,8 +501,6 @@ function Thumbnail({
     onSelect: () => void
     className?: string
 }) {
-    const [loaded, setLoaded] = useState(false)
-
     return (
         <button
             onClick={onSelect}
@@ -539,22 +512,15 @@ function Thumbnail({
                 className
             )}
         >
-            {!loaded && <div className="absolute inset-0 animate-pulse bg-muted" />}
-
             {img.image && (
                 <Image
                     src={img.image}
                     alt={img.alt_text || `تصویر محصول ${index + 1}`}
                     fill
                     sizes="64px"
-                    quality={90}
+                    quality={60}
                     draggable={false}
-                    onLoad={() => setLoaded(true)}
-                    className={cn(
-                        "object-cover transition-opacity duration-500 select-none",
-                        !hasStock && "grayscale",
-                        loaded ? "opacity-100" : "opacity-0"
-                    )}
+                    className={cn("object-cover select-none", !hasStock && "grayscale")}
                 />
             )}
         </button>
@@ -671,7 +637,7 @@ function Lightbox({
                                         alt={current.alt_text || "نمایش کامل تصویر محصول"}
                                         fill
                                         sizes="92vw"
-                                        quality={95}
+                                        quality={80}
                                         draggable={false}
                                         className="object-contain select-none"
                                     />
