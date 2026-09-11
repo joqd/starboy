@@ -4,13 +4,7 @@ import { getLatestPosts } from "@/lib/api/post"
 import { PostCard } from "@/components/blog/post-card"
 import { PageContainer } from "@/components/layout/page-container"
 
-// ---------------------------------------------------------------------------
-// Blog index — app/blog/page.tsx. Width/top-spacing now comes from
-// PageContainer (shared with the products page and any other top-level
-// page) instead of being hand-written here.
-// ---------------------------------------------------------------------------
-
-export const revalidate = 300
+// export const revalidate = 300
 
 interface BlogPageProps {
     searchParams: Promise<{ page?: string }>

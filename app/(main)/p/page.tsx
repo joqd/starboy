@@ -14,20 +14,6 @@ import { Input } from "@/components/ui/input"
 import { CollectionFilter } from "@/components/product/collection-filter"
 import { FeaturedFilterValue } from "@/components/product/featured-filter"
 import { SortFilter } from "@/components/product/sort-filter"
-// import { StockToggle } from "@/components/product/stock-toggle"
-
-// ---------------------------------------------------------------------------
-// Products page — no pagination: the grid lazy-loads (infinite scroll) via
-// an IntersectionObserver sentinel. Filters (collection / featured / search
-// / sort / in-stock) live in this same client component so they can drive
-// refetching directly, AND are mirrored into the URL query string so:
-//   - other pages (e.g. a collection page) can deep-link straight into a
-//     filtered view, e.g. /products?collection=summer-sale
-//   - the filtered URL is shareable/bookmarkable and crawlable for SEO
-//   - back/forward navigation restores the filters that produced a URL
-// Each Select-based filter is its own small component styled to match
-// <StatusFilter>, the same way the orders page does it.
-// ---------------------------------------------------------------------------
 
 const PAGE_SIZE = 16
 const DEFAULT_ORDERING: ProductOrdering = "created_at"
@@ -40,19 +26,6 @@ interface ProductFilterValues {
     ordering: ProductOrdering
     inStockOnly: boolean
 }
-
-// const DEFAULT_FILTERS: ProductFilterValues = {
-//     collection: null,
-//     featured: null,
-//     search: "",
-//     ordering: DEFAULT_ORDERING,
-//     inStockOnly: false,
-// }
-
-// URL <-> filters ------------------------------------------------------------
-// Kept as pure functions (no hooks) so they're trivial to reason about and
-// reuse from both the "read on mount / on external nav" effect and the
-// "write on filter change" effect below.
 
 function parseFiltersFromParams(params: URLSearchParams): ProductFilterValues {
     const ordering = params.get("sort")
@@ -390,12 +363,6 @@ function ProductsPageContent() {
                         در حال بارگذاری محصولات بیشتر…
                     </p>
                 )}
-
-                {/* {!hasMore && items.length > 0 && !loading && (
-                        <p className="mt-8 text-center text-xs text-muted-foreground">
-                            همه محصولات نمایش داده شد
-                        </p>
-                    )} */}
             </section>
         </PageContainer>
     )

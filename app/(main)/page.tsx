@@ -20,31 +20,7 @@ import type { ProductListItem } from "@/types/product"
 import type { LatestPost } from "@/hooks/use-posts"
 import type { CollectionListItem } from "@/types/collection"
 
-export const revalidate = 300
-
-// ---------------------------------------------------------------------------
-// Home page — single responsive tree (was previously split into a separate
-// DesktopHome / MobileHome component pair, each rendering its own copy of
-// nearly every section and toggled with hidden/lg:hidden). The two trees
-// were ~90% identical markup with only sizing, spacing, and container type
-// (grid vs. horizontal scroll-strip) differing per breakpoint, so shipping
-// both meant every section's HTML (and, previously, the client-side
-// <Reveal> reveal-on-scroll wrapper around each one) went down the wire
-// twice on every load.
-//
-// This version renders each section once and switches its layout at the
-// `lg` breakpoint with Tailwind variants — a plain flex scroll-strip below
-// `lg`, a CSS grid at `lg` and up for Featured/Collections/Posts, just a
-// column-count change for Recent products. The only section that isn't
-// meaningfully unify-able is the hero: the mobile hero is a single
-// image panel with overlaid copy, the desktop hero is a two-column
-// split with a stats row, so those stay as two small, breakpoint-gated
-// blocks rather than forcing an artificial shared structure on them.
-//
-// No scroll-triggered reveal animations — they added an IntersectionObserver
-// client bundle and per-item wrapper components for a purely decorative
-// fade-in. Sections render immediately, which is also just faster.
-// ---------------------------------------------------------------------------
+// export const revalidate = 300
 
 export default async function Home() {
     const [latestProducts, featuredProducts, latestPosts, collections] = await Promise.all([
