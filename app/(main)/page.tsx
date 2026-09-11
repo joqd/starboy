@@ -34,9 +34,9 @@ export default async function Home() {
         <main dir="rtl" className="relative w-full overflow-x-hidden">
             <Hero />
             <BrandValues />
-            <BrandStory />
+            <CollectionSpotlight items={collections.results} />
             <FeaturedSection items={featuredProducts.results.slice(0, 4)} />
-            <CollectionsSection items={collections.results} />
+            <CollectionsSection items={collections.results.slice(2)} />
             <RecentProductsSection items={latestProducts.results.slice(0, 4)} />
             <PostsSection items={latestPosts.results.slice(0, 5)} />
         </main>
@@ -219,7 +219,7 @@ function BrandValues() {
             >
                 {items.map(({ icon: Icon, title, titleDesktop, desc, descDesktop }) => (
                     <li key={title} className="flex items-center">
-                        <div className="flex gap-2.5 lg:gap-3 mx-auto items-center">
+                        <div className="mx-auto flex items-center gap-2.5 lg:gap-3">
                             <Icon className="size-4.5 shrink-0 text-foreground lg:size-5" />
                             <div>
                                 <p className="text-xs font-medium text-foreground lg:text-sm">
@@ -242,6 +242,78 @@ function BrandValues() {
                 ))}
             </ul>
         </section>
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Collection spotlight — replaces the old brand-story copy block. Two real
+// collection photos instead of claims: one wide, one narrow, each linking
+// straight into that collection.
+// ---------------------------------------------------------------------------
+function CollectionSpotlight({ items }: { items: CollectionListItem[] }) {
+    const [primary, secondary] = items
+    if (!primary) return null
+
+    return (
+        <section className="mt-10 lg:mx-auto lg:mt-28 lg:max-w-295 lg:px-8 xl:px-10">
+            <div className="grid grid-cols-1 gap-3 px-5 lg:grid-cols-[1.6fr_1fr] lg:gap-5 lg:px-0">
+                <SpotlightTile item={primary} eager aspect="aspect-4/5 lg:aspect-16/10" />
+                {secondary && (
+                    <SpotlightTile item={secondary} aspect="aspect-4/5 lg:aspect-auto lg:h-full" />
+                )}
+            </div>
+        </section>
+    )
+}
+
+function SpotlightTile({
+    item,
+    eager,
+    aspect,
+}: {
+    item: CollectionListItem
+    eager?: boolean
+    aspect: string
+}) {
+    if (!item.image && !item.image_dark) return null
+
+    return (
+        <Link
+            href={`/p/?collection=${item.slug}`}
+            className={cn("group relative block overflow-hidden rounded-2xl", aspect)}
+        >
+            {item.image && (
+                <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className={cn(
+                        "object-cover transition-transform duration-700 ease-out group-hover:scale-105",
+                        item.image_dark && "dark:hidden"
+                    )}
+                    loading={eager ? "eager" : "lazy"}
+                />
+            )}
+            {item.image_dark && (
+                <Image
+                    src={item.image_dark}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    className={cn(
+                        "object-cover transition-transform duration-700 ease-out group-hover:scale-105",
+                        item.image && "hidden dark:block"
+                    )}
+                    loading={eager ? "eager" : "lazy"}
+                />
+            )}
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4 text-neutral-50 lg:p-6">
+                <p className="text-sm font-semibold lg:text-base">{item.title}</p>
+                <ArrowIcon className="size-3.5 transition-transform group-hover:-translate-x-1 lg:size-4" />
+            </div>
+        </Link>
     )
 }
 
