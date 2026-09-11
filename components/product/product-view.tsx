@@ -135,7 +135,7 @@ export default function ProductView({ product }: Props) {
             {/* Gallery + buy box ---------------------------------------------- */}
             <div
                 className={cn(
-                    "grid gap-6 lg:items-start lg:gap-8 xl:gap-10",
+                    "grid grid-cols-1 gap-6 lg:items-start lg:gap-8 xl:gap-10",
                     images.length > 1 ? "lg:grid-cols-[64px_1fr_400px]" : "lg:grid-cols-[1fr_400px]"
                 )}
             >
@@ -157,7 +157,7 @@ export default function ProductView({ product }: Props) {
                 )}
 
                 {/* Main image */}
-                <div className="lg:sticky lg:top-24">
+                <div className="min-w-0 lg:sticky lg:top-24">
                     <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-muted">
                         <button
                             onClick={() => setZoomedIndex(activeImageIndex)}
