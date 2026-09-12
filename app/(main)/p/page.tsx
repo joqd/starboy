@@ -2,15 +2,18 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Search } from "lucide-react"
+import { Search, SlidersHorizontal, X } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { getProducts, ProductOrdering, ProductQueryParams } from "@/lib/api/product"
 import { getCollections } from "@/lib/api/collection"
 import type { ProductListItem } from "@/types/product"
 import type { CollectionListItem } from "@/types/collection"
 import { PageContainer } from "@/components/layout/page-container"
-import { ProductCard } from "@/components/product/product-card"
+import { ProductCard, ProductCardSkeleton } from "@/components/product/product-card"
 import { Input } from "@/components/ui/input"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetTrigger } from "@/components/ui/sheet"
 import { CollectionFilter } from "@/components/product/collection-filter"
 import { FeaturedFilterValue } from "@/components/product/featured-filter"
 import { SortFilter } from "@/components/product/sort-filter"
@@ -105,6 +108,15 @@ function ProductsPageContent() {
     const sentinelRef = useRef<HTMLDivElement | null>(null)
 
     const hasMore = items.length < count
+
+    // Drives the little count badge on the mobile "فیلتر و مرتب‌سازی" button —
+    // deliberately excludes the free-text search since that already has its
+    // own always-visible input.
+    const activeFilterCount =
+        (filters.collection ? 1 : 0) +
+        (filters.featured ? 1 : 0) +
+        (filters.ordering !== DEFAULT_ORDERING ? 1 : 0) +
+        (filters.inStockOnly ? 1 : 0)
 
     const buildParams = useCallback(
         (targetPage: number): ProductQueryParams => ({
@@ -255,45 +267,148 @@ function ProductsPageContent() {
                 </h1>
             </section>
 
-            <section className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                    <div className="relative w-full sm:w-56">
-                        <Search className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <section className="mt-6">
+                {/* Tablet / desktop — unchanged inline toolbar */}
+                <div className="hidden sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="flex flex-1 flex-row flex-wrap items-center gap-3">
+                        <div className="relative w-56">
+                            <Search className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                                value={searchDraft}
+                                onChange={(e) => setSearchDraft(e.target.value)}
+                                placeholder="جست‌وجوی محصول…"
+                                className="pr-9"
+                            />
+                        </div>
+
+                        <CollectionFilter
+                            value={filters.collection}
+                            collections={collections}
+                            onChange={(collection) =>
+                                setFilters((prev) => ({ ...prev, collection }))
+                            }
+                        />
+
+                        <SortFilter
+                            value={filters.ordering}
+                            onChange={(ordering) => setFilters((prev) => ({ ...prev, ordering }))}
+                        />
+                    </div>
+
+                    <span className="pb-0.5 text-xs whitespace-nowrap text-muted-foreground">
+                        {count} محصول
+                    </span>
+                </div>
+
+                {/* Mobile — a real search field up top, and a single "فیلتر و
+                    مرتب‌سازی" trigger that opens a bottom sheet, instead of
+                    cramming a search box + two full-width selects into a
+                    column. */}
+                <div className="flex flex-col gap-3 sm:hidden">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute top-1/2 right-3.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             value={searchDraft}
                             onChange={(e) => setSearchDraft(e.target.value)}
                             placeholder="جست‌وجوی محصول…"
-                            className="pr-9"
+                            className="h-11 rounded-xl border-border/60 bg-card pr-10 pl-9 text-sm"
                         />
+                        {searchDraft && (
+                            <button
+                                type="button"
+                                onClick={() => setSearchDraft("")}
+                                aria-label="پاک کردن جست‌وجو"
+                                className="absolute top-1/2 left-3 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
 
-                    <CollectionFilter
-                        value={filters.collection}
-                        collections={collections}
-                        onChange={(collection) => setFilters((prev) => ({ ...prev, collection }))}
-                    />
+                    <div className="flex items-center justify-between">
+                        <Sheet>
+                            <SheetTrigger
+                                type="button"
+                                className={buttonVariants({
+                                    variant: "outline",
+                                    size: "lg",
+                                })}
+                            >
+                                <SlidersHorizontal className="h-3.5 w-3.5" />
+                                فیلتر و مرتب‌سازی
+                                {activeFilterCount > 0 && (
+                                    <Badge className="h-5 min-w-5 rounded-full border-transparent bg-foreground px-1 text-[10px] text-background">
+                                        {activeFilterCount.toLocaleString("fa-IR")}
+                                    </Badge>
+                                )}
+                            </SheetTrigger>
 
-                    {/* <FeaturedFilter
-                            value={filters.featured}
-                            onChange={(featured) => setFilters((prev) => ({ ...prev, featured }))}
-                        /> */}
+                            <SheetContent
+                                dir="rtl"
+                                side="bottom"
+                                className="rounded-t-3xl px-5 pt-10 pb-8"
+                            >
+                                <div className="mt-2 flex flex-col gap-5">
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            دسته‌بندی
+                                        </span>
+                                        <CollectionFilter
+                                            value={filters.collection}
+                                            collections={collections}
+                                            onChange={(collection) =>
+                                                setFilters((prev) => ({ ...prev, collection }))
+                                            }
+                                        />
+                                    </div>
 
-                    <SortFilter
-                        value={filters.ordering}
-                        onChange={(ordering) => setFilters((prev) => ({ ...prev, ordering }))}
-                    />
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            مرتب‌سازی
+                                        </span>
+                                        <SortFilter
+                                            value={filters.ordering}
+                                            onChange={(ordering) =>
+                                                setFilters((prev) => ({ ...prev, ordering }))
+                                            }
+                                        />
+                                    </div>
+                                </div>
 
-                    {/* <StockToggle
-                        checked={filters.inStockOnly}
-                        onCheckedChange={(inStockOnly) =>
-                            setFilters((prev) => ({ ...prev, inStockOnly }))
-                        }
-                    /> */}
+                                <SheetFooter
+                                    dir="ltr"
+                                    className="mt-6 flex-row gap-2 sm:justify-start"
+                                >
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="flex-1"
+                                        disabled={activeFilterCount === 0}
+                                        onClick={() =>
+                                            setFilters((prev) => ({
+                                                ...prev,
+                                                collection: null,
+                                                featured: null,
+                                                ordering: DEFAULT_ORDERING,
+                                                inStockOnly: false,
+                                            }))
+                                        }
+                                    >
+                                        پاک کردن
+                                    </Button>
+                                    <SheetClose
+                                        type="button"
+                                        className={buttonVariants({ className: "flex-1" })}
+                                    >
+                                        نمایش {count.toLocaleString("fa-IR")} محصول
+                                    </SheetClose>
+                                </SheetFooter>
+                            </SheetContent>
+                        </Sheet>
+
+                        <span className="text-xs text-muted-foreground">{count} محصول</span>
+                    </div>
                 </div>
-
-                <span className="text-xs text-muted-foreground sm:pb-0.5 sm:whitespace-nowrap">
-                    {count} محصول
-                </span>
             </section>
 
             <section className="mt-8">
@@ -317,7 +432,7 @@ function ProductsPageContent() {
                         layout
                         animate={{ opacity: loading ? 0.5 : 1 }}
                         transition={{ opacity: { duration: 0.2 } }}
-                        className={`grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 ${
+                        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${
                             loading ? "pointer-events-none" : ""
                         }`}
                     >
@@ -341,7 +456,7 @@ function ProductsPageContent() {
                                     <ProductCard
                                         product={item}
                                         eager={idx < 4}
-                                        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
+                                        sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, (max-width: 1280px) 30vw, 22vw"
                                     />
                                 </motion.li>
                             ))}
@@ -350,9 +465,9 @@ function ProductsPageContent() {
                 )}
 
                 {loading && (
-                    <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                            <div key={i} className="aspect-3/4 animate-pulse rounded-2xl bg-card" />
+                            <ProductCardSkeleton key={i} />
                         ))}
                     </div>
                 )}
@@ -361,9 +476,11 @@ function ProductsPageContent() {
                 <div ref={sentinelRef} aria-hidden className="h-px w-full" />
 
                 {loadingMore && (
-                    <p className="mt-6 text-center text-xs text-muted-foreground">
-                        در حال بارگذاری محصولات بیشتر…
-                    </p>
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <ProductCardSkeleton key={`more-${i}`} />
+                        ))}
+                    </div>
                 )}
             </section>
         </PageContainer>

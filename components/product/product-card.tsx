@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import { Link } from "next-view-transitions"
 import { Heart, Package, ShoppingBag } from "lucide-react"
@@ -50,7 +51,7 @@ export function ProductCard({
     product,
     isWishlisted = false,
     eager = false,
-    sizes = "(min-width: 1024px) 22vw, 45vw",
+    sizes = "(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 22vw",
     badgeLabel,
     onToggleWishlist,
     onAddToCart,
@@ -67,6 +68,12 @@ export function ProductCard({
     onAddToCart?: (product: ProductListItem, variant: ProductVariant) => void
 }) {
     const image = getPrimaryImage(product.images)
+    // Tracks whether the actual <Image> has finished decoding, so we can
+    // keep a Skeleton over the tile instead of showing empty/broken space
+    // while the network fetch is in flight. Starts `false` even for
+    // `eager` tiles — the browser cache may still make onLoad fire on the
+    // very next paint, but we don't want to assume that.
+    const [imgLoaded, setImgLoaded] = useState(false)
     const variant = getDisplayVariant(product.variants)
     const outOfStock = !variant || variant.stock === 0
     const showsFrom = hasRangeOfPrices(product.variants)
@@ -84,19 +91,35 @@ export function ProductCard({
         >
             <div className="relative aspect-4/5 w-full shrink-0 overflow-hidden bg-accent">
                 {image ? (
-                    <Image
-                        src={image.image}
-                        alt={image.alt_text || product.title}
-                        fill
-                        sizes={sizes}
-                        draggable={false}
-                        className={cn(
-                            "object-cover transition-transform duration-300 select-none group-hover:scale-105",
-                            outOfStock && "opacity-60 grayscale"
+                    <>
+                        {!imgLoaded && (
+                            <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
                         )}
-                        loading={eager ? "eager" : "lazy"}
-                        fetchPriority={eager ? "high" : "auto"}
-                    />
+                        <Image
+                            src={image.image}
+                            alt={image.alt_text || product.title}
+                            fill
+                            sizes={sizes}
+                            quality={70}
+                            draggable={false}
+                            className={cn(
+                                "object-cover transition-all duration-700 ease-out select-none group-hover:scale-[1.035]",
+                                outOfStock && "grayscale",
+                                !imgLoaded && "opacity-0",
+                                imgLoaded && outOfStock && "opacity-60",
+                                imgLoaded && !outOfStock && "opacity-100"
+                            )}
+                            // `priority` (not manual loading/fetchPriority) is the
+                            // Next.js-recommended way to mark above-the-fold
+                            // images: it skips lazy-loading, sets fetchPriority
+                            // "high", AND injects a <link rel="preload"> in
+                            // <head> so the browser starts the request before
+                            // it even reaches this element in the DOM.
+                            priority={eager}
+                            loading={eager ? undefined : "lazy"}
+                            onLoad={() => setImgLoaded(true)}
+                        />
+                    </>
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">
                         <Package className="size-8 text-muted-foreground" />
