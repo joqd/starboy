@@ -259,7 +259,7 @@ function ProductsPageContent() {
     return (
         <PageContainer className="pb-16">
             <section>
-                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase">
                     فروشگاه
                 </p>
                 <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">

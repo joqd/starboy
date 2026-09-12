@@ -65,7 +65,7 @@ function PageIntro({ count }: { count: number }) {
     return (
         <section className="mt-15 px-5">
             <Reveal>
-                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase">
                     فروشگاه
                 </p>
                 <div className="mt-1.5 flex items-end justify-between gap-3">
@@ -210,7 +210,7 @@ function HeroBanner() {
             </div>
             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-neutral-50">
-                <p className="text-xs tracking-[0.25em] uppercase opacity-80">کالکشن جدید</p>
+                <p className="text-xs uppercase opacity-80">کالکشن جدید</p>
                 <h2 className="mt-2 text-xl leading-tight font-bold">استایل خودت رو بساز</h2>
             </div>
         </section>
@@ -227,7 +227,7 @@ function CatalogueGrid({ items }: { items: ProductListItem[] }) {
     return (
         <section className="mt-10">
             <div className="mb-4 px-5">
-                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground uppercase">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase">
                     کاتالوگ کامل
                 </p>
                 <h2 className="mt-1.5 text-lg font-bold tracking-tight text-foreground">

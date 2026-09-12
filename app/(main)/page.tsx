@@ -61,7 +61,7 @@ function SectionHeader({
     return (
         <div className="mb-4 flex items-end justify-between px-5 lg:mb-0 lg:gap-8 lg:border-b lg:border-border lg:px-0 lg:pb-5">
             <div>
-                <p className="text-[10px] font-medium tracking-[0.25em] text-muted-foreground lg:text-[11px] lg:tracking-[0.3em]">
+                <p className="text-[10px] font-medium text-muted-foreground lg:text-[11px]">
                     {eyebrow}
                 </p>
                 <h2 className="mt-1.5 text-lg font-bold tracking-tight text-foreground lg:mt-2 lg:text-2xl">
@@ -106,7 +106,7 @@ function MobileHero() {
             </div>
             <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-neutral-50">
-                <p className="text-xs tracking-[0.25em] opacity-80">کالکشن جدید</p>
+                <p className="text-xs opacity-80">کالکشن جدید</p>
                 <h1 className="mt-2 text-[1.75rem] leading-tight font-bold">استایل خودت رو بساز</h1>
                 <p className="mt-2 max-w-[26ch] text-xs leading-relaxed text-neutral-200">
                     هر تکه، روایتی از سلیقه‌ی توست.
@@ -127,7 +127,7 @@ function DesktopHero() {
         <section className="mx-auto hidden max-w-295 px-8 pt-20 lg:block xl:px-10">
             <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
                 <div>
-                    <p className="text-xs tracking-[0.35em] text-muted-foreground">کالکشن جدید</p>
+                    <p className="text-xs text-muted-foreground">کالکشن جدید</p>
                     <h1 className="mt-5 text-5xl leading-[1.15] font-bold tracking-tight text-foreground xl:text-[3.25rem]">
                         استایل خودت رو بساز
                     </h1>

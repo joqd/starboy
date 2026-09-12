@@ -82,7 +82,7 @@ function FooterColumn({
 }) {
     return (
         <div>
-            <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+            <p className="text-xs font-medium text-muted-foreground uppercase">
                 {title}
             </p>
             <ul role="list" className="mt-4 space-y-3">
