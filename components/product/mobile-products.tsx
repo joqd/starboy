@@ -65,9 +65,7 @@ function PageIntro({ count }: { count: number }) {
     return (
         <section className="mt-15 px-5">
             <Reveal>
-                <p className="text-[10px] font-medium text-muted-foreground uppercase">
-                    فروشگاه
-                </p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase">فروشگاه</p>
                 <div className="mt-1.5 flex items-end justify-between gap-3">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
                         همه محصولات

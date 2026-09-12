@@ -67,12 +67,23 @@ export default async function Footer({ className = "" }: { className?: string })
 }
 
 function FooterBadgeItem({ badge }: { badge: FooterBadge }) {
+    const darkHtml = badge.html_2 ?? badge.html
+
     return (
-        <div
-            className="shrink-0 [&_img]:h-20 [&_img]:w-20 [&_img]:cursor-pointer"
-            title={badge.title}
-            dangerouslySetInnerHTML={{ __html: badge.html }}
-        />
+        <div className="shrink-0 [&_img]:h-25 [&_img]:w-17.5 [&_img]:cursor-pointer [&_img]:object-contain">
+            {/* Light mode variant */}
+            <div
+                className="block dark:hidden"
+                title={badge.title}
+                dangerouslySetInnerHTML={{ __html: badge.html }}
+            />
+            {/* Dark mode variant — falls back to `html` when `html_2` isn't set */}
+            <div
+                className="hidden dark:block"
+                title={badge.title}
+                dangerouslySetInnerHTML={{ __html: darkHtml }}
+            />
+        </div>
     )
 }
 

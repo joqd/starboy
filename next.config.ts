@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     images: {
         dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
         unoptimized: process.env.NODE_ENV === "development",
-        qualities: [75, 95],
+        qualities: [70, 75, 95],
         remotePatterns: [
             {
                 protocol: "https",

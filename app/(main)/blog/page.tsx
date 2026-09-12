@@ -64,9 +64,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
             <PageContainer className="pb-24">
                 <header className="max-w-xl">
-                    <p className="text-[11px] font-medium text-muted-foreground uppercase">
-                        مجله
-                    </p>
+                    <p className="text-[11px] font-medium text-muted-foreground uppercase">مجله</p>
                     <h1 className="mt-3 text-4xl font-bold tracking-tight text-foreground">
                         یادداشت‌ها و روایت‌های استاربوی
                     </h1>
