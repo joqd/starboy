@@ -95,7 +95,7 @@ function FooterColumn({
     links: { label: string; href: string }[]
 }) {
     return (
-        <div>
+        <div className="mx-auto">
             <p className="text-xs font-medium text-muted-foreground uppercase">{title}</p>
             <ul role="list" className="mt-4 space-y-3">
                 {links.map((link) => (
