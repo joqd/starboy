@@ -110,7 +110,7 @@ export function OrderSummary({
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground">
                     <span>هزینه ارسال</span>
-                    <span className="text-xs">پس از ثبت سفارش محاسبه می‌شود</span>
+                    <span className="text-xs">پسکرایه</span>
                 </div>
                 <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-3 text-base font-bold text-foreground">
                     <span>مبلغ قابل پرداخت</span>

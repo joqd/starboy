@@ -11,10 +11,10 @@ export function OrderTotals({ order }: { order: Order }) {
                 <span>جمع جزء</span>
                 <span className="text-foreground">{formatToman(order.subtotal_amount)}</span>
             </div>
-            <div className="flex items-center justify-between text-muted-foreground">
+            {/* <div className="flex items-center justify-between text-muted-foreground">
                 <span>هزینه ارسال</span>
                 <span className="text-foreground">{formatToman(order.shipping_amount)}</span>
-            </div>
+            </div> */}
             {order.discount_amount > 0 && (
                 <div className="flex items-center justify-between text-muted-foreground">
                     <span>تخفیف</span>
