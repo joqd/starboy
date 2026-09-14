@@ -11,7 +11,7 @@ import {
     Wallet,
     ShieldCheck,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+// import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 // ---------------------------------------------------------------------------
@@ -19,19 +19,19 @@ import { Button } from "@/components/ui/button"
 // placeholders; swap them for your real shipping policy.
 // ---------------------------------------------------------------------------
 const SHIPPING_STEPS = [
-    { icon: ClipboardCheck, title: "ثبت و تأیید سفارش", time: "همون روز" },
-    { icon: PackageCheck, title: "بسته‌بندی در انبار", time: "کمتر از ۲۴ ساعت" },
-    { icon: Truck, title: "تحویل به پیک/پست", time: "۱ روز کاری" },
-    { icon: Home, title: "تحویل درب منزل", time: "۱ تا ۳ روز کاری" },
+    { icon: ClipboardCheck, title: "ثبت و تأیید سفارش", time: "همان روز" },
+    { icon: PackageCheck, title: "بسته‌بندی در انبار", time: "۱ تا ۲ روز کاری" },
+    { icon: Truck, title: "تحویل به تیپاکس", time: "۱ روز کاری" },
+    { icon: Home, title: "تحویل درب منزل", time: "۲ تا ۳ روز کاری" },
 ]
 
-const DELIVERY_RATES = [
-    { zone: "تهران (اکسپرس)", time: "۱ تا ۲ روز کاری", cost: "۴۵٬۰۰۰ تومان" },
-    { zone: "کلان‌شهرها", time: "۲ تا ۳ روز کاری", cost: "۶۰٬۰۰۰ تومان" },
-    { zone: "سایر شهرها", time: "۳ تا ۵ روز کاری", cost: "۷۵٬۰۰۰ تومان" },
-]
+// const DELIVERY_RATES = [
+//     { zone: "تهران (اکسپرس)", time: "۱ تا ۲ روز کاری", cost: "۴۵٬۰۰۰ تومان" },
+//     { zone: "کلان‌شهرها", time: "۲ تا ۳ روز کاری", cost: "۶۰٬۰۰۰ تومان" },
+//     { zone: "سایر شهرها", time: "۳ تا ۵ روز کاری", cost: "۷۵٬۰۰۰ تومان" },
+// ]
 
-const FREE_SHIPPING_THRESHOLD = "۲٬۰۰۰٬۰۰۰ تومان"
+// const FREE_SHIPPING_THRESHOLD = "۲٬۰۰۰٬۰۰۰ تومان"
 
 const RETURN_CONDITIONS = [
     "حداکثر تا ۷ روز بعد از تحویل، امکان درخواست مرجوعی یا تعویض هست.",
@@ -44,7 +44,7 @@ const RETURN_STEPS = [
     "از طریق صفحه‌ی «ارتباط با ما» یا تماس با پشتیبانی، درخواست مرجوعی رو ثبت کن.",
     "کالا رو در بسته‌بندی اصلی، همراه با فاکتور، تحویل پیک یا پست بده.",
     "بعد از بررسی کالا در انبار (۱ تا ۲ روز کاری)، نتیجه برات پیامک می‌شه.",
-    "وجه ظرف ۵ تا ۷ روز کاری به همون روش پرداخت اولیه برمی‌گرده.",
+    "وجه ظرف ۵ تا ۷ روز کاری برگشت داده میشه.",
 ]
 
 const springTransition = { type: "spring" as const, stiffness: 300, damping: 30 }
@@ -109,7 +109,7 @@ export default function ShippingReturnsPage() {
             </section>
 
             {/* Delivery rates */}
-            <section className="border-b border-border/60 py-14 lg:py-20">
+            {/* <section className="border-b border-border/60 py-14 lg:py-20">
                 <div className="mx-auto max-w-295 px-4 sm:px-6 xl:px-10">
                     <motion.div
                         {...fadeUp}
@@ -152,7 +152,7 @@ export default function ShippingReturnsPage() {
                         ))}
                     </motion.div>
                 </div>
-            </section>
+            </section> */}
 
             {/* Returns */}
             <section className="border-b border-border/60 py-14 lg:py-20">
